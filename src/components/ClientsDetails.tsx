@@ -1,5 +1,5 @@
+import { Ionicons } from "@expo/vector-icons";
 import React from "react";
-
 import {
     StyleProp,
     StyleSheet,
@@ -7,7 +7,6 @@ import {
     View,
     ViewStyle,
 } from "react-native";
-
 import useResponsive from "../hooks/useResponsive";
 import { pagesStyles } from "./ScreensLayout";
 
@@ -28,63 +27,41 @@ export function ClientDetailsCard({
     data,
     style,
 }: ClientDetailsCardProps) {
-
     function getDetail(label: string) {
-        return data.find(
-            (item) => item.label === label
-        );
+        return data.find((item) => item.label === label);
     }
 
-    function renderValue(
-        detail?: ClientDetail,
-        highlight = false
-    ) {
-        if (!detail) {
-            return null;
-        }
+    function renderValue(detail?: ClientDetail, highlight = false) {
+        if (!detail) return null;
 
         const value =
-            typeof detail.value === "string" ||
-                typeof detail.value === "number"
-                ? (
-                    <Text
-                        style={[
-                            pagesStyles.text,
-                            styles.value,
-                            highlight &&
-                            styles.highlightValue,
-                        ]}
-                    >
-                        {detail.value}
-                    </Text>
-                )
-                : detail.value;
+            typeof detail.value === "string" || typeof detail.value === "number" ? (
+                <Text
+                    style={[
+                        styles.value,
+                        highlight && styles.highlightValue,
+                    ]}
+                >
+                    {detail.value}
+                </Text>
+            ) : (
+                detail.value
+            );
 
         return value;
     }
 
-    function renderDetail(
-        detail?: ClientDetail,
-        fullWidth = false
-    ) {
-        if (!detail) {
-            return null;
-        }
+    function renderDetail(detail?: ClientDetail, fullWidth = false) {
+        if (!detail) return null;
 
         return (
             <View
                 style={[
                     styles.detail,
-                    fullWidth &&
-                    styles.detailFullWidth,
+                    fullWidth && styles.detailFullWidth,
                 ]}
             >
-                <Text
-                    style={[
-                        pagesStyles.textBold,
-                        styles.label,
-                    ]}
-                >
+                <Text style={styles.label}>
                     {detail.label}
                 </Text>
 
@@ -105,38 +82,38 @@ export function ClientDetailsCard({
         <View
             style={[
                 pagesStyles.card,
+                styles.card,
                 { maxWidth: maxCardWidth },
                 style,
             ]}
         >
             {/* CABEÇALHO */}
             <View style={styles.header}>
+                <View style={styles.iconCircle}>
+                    <Ionicons name="person" size={24} color="#79553D" />
+                </View>
                 <View style={styles.headerTitle}>
-                    <Text
-                        style={pagesStyles.brand}
-                    >
-                        Cliente
+                    <Text style={pagesStyles.brand}>
+                        DADOS DO CLIENTE
                     </Text>
-
-                    <Text
-                        style={[
-                            pagesStyles.title,
-                            styles.title,
-                        ]}
-                    >
-                        {title}
+                    <Text style={styles.title}>
+                        {nome ? String(nome.value) : title}
                     </Text>
                 </View>
+                {id && (
+                    <View style={styles.idPill}>
+                        <Text style={styles.idText}>ID #{String(id.value)}</Text>
+                    </View>
+                )}
             </View>
 
             {/* IDENTIFICAÇÃO */}
             {(id || nome) && (
                 <View style={styles.section}>
-                    <Text
-                        style={styles.sectionTitle}
-                    >
-                        Identificação
-                    </Text>
+                    <View style={styles.sectionHeader}>
+                        <Ionicons name="finger-print-outline" size={17} color="#79553D" />
+                        <Text style={styles.sectionTitle}>Identificação</Text>
+                    </View>
 
                     <View style={styles.details}>
                         {renderDetail(id)}
@@ -148,11 +125,10 @@ export function ClientDetailsCard({
             {/* CONTATO */}
             {(email || telefone) && (
                 <View style={styles.section}>
-                    <Text
-                        style={styles.sectionTitle}
-                    >
-                        Contato
-                    </Text>
+                    <View style={styles.sectionHeader}>
+                        <Ionicons name="call-outline" size={17} color="#79553D" />
+                        <Text style={styles.sectionTitle}>Contato</Text>
+                    </View>
 
                     <View style={styles.details}>
                         {renderDetail(email)}
@@ -164,17 +140,13 @@ export function ClientDetailsCard({
             {/* ENDEREÇO */}
             {endereco && (
                 <View style={styles.section}>
-                    <Text
-                        style={styles.sectionTitle}
-                    >
-                        Endereço
-                    </Text>
+                    <View style={styles.sectionHeader}>
+                        <Ionicons name="location-outline" size={17} color="#79553D" />
+                        <Text style={styles.sectionTitle}>Localização</Text>
+                    </View>
 
                     <View style={styles.details}>
-                        {renderDetail(
-                            endereco,
-                            true
-                        )}
+                        {renderDetail(endereco, true)}
                     </View>
                 </View>
             )}
@@ -183,71 +155,100 @@ export function ClientDetailsCard({
 }
 
 const styles = StyleSheet.create({
-
+    card: {
+        backgroundColor: "#FFFFFF",
+        borderRadius: 22,
+        padding: 24,
+    },
     header: {
         width: "100%",
         flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "flex-start",
-        gap: 20,
+        alignItems: "center",
+        gap: 14,
         marginBottom: 8,
     },
-
+    iconCircle: {
+        width: 48,
+        height: 48,
+        borderRadius: 24,
+        backgroundColor: "#F4EFEA",
+        borderWidth: 1,
+        borderColor: "#E3D7CB",
+        alignItems: "center",
+        justifyContent: "center",
+    },
     headerTitle: {
         flex: 1,
         minWidth: 0,
     },
-
     title: {
-        marginVertical: 0,
-        marginBottom: 0,
+        fontSize: 20,
+        fontFamily: "WorksansBold",
+        color: "#2C2520",
+        marginTop: 2,
     },
-
+    idPill: {
+        backgroundColor: "#F5EEE8",
+        paddingHorizontal: 10,
+        paddingVertical: 5,
+        borderRadius: 8,
+    },
+    idText: {
+        fontSize: 12,
+        fontFamily: "WorksansBold",
+        color: "#79553D",
+    },
     section: {
         width: "100%",
-        marginTop: 24,
-        paddingTop: 20,
+        marginTop: 18,
+        paddingTop: 16,
         borderTopWidth: 1,
-        borderTopColor: "#DDD5CC",
+        borderTopColor: "#EFEAE2",
     },
-
+    sectionHeader: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 7,
+        marginBottom: 12,
+    },
     sectionTitle: {
-        fontSize: 16,
-        fontWeight: "700",
-        color: "#65442F",
-        marginBottom: 14,
+        fontSize: 14,
+        fontFamily: "WorksansBold",
+        color: "#79553D",
     },
-
     details: {
         width: "100%",
         flexDirection: "row",
         flexWrap: "wrap",
-        gap: 16,
+        gap: 12,
     },
-
     detail: {
         flexGrow: 1,
         flexBasis: "45%",
-        minWidth: 180,
-        gap: 5,
+        minWidth: 170,
+        backgroundColor: "#FAF8F5",
+        borderWidth: 1,
+        borderColor: "#EAE3D8",
+        borderRadius: 12,
+        padding: 12,
+        gap: 4,
     },
-
     detailFullWidth: {
         flexBasis: "100%",
     },
-
     label: {
-        opacity: 0.75,
-        fontSize: 14,
+        color: "#8C8276",
+        fontSize: 12,
+        fontFamily: "WorksansMedium",
     },
-
     value: {
-        fontSize: 16,
-        lineHeight: 22,
+        fontSize: 14,
+        lineHeight: 20,
+        color: "#2C2520",
+        fontFamily: "WorksansRegular",
     },
-
     highlightValue: {
-        fontWeight: "700",
-        color: "#65442F",
+        fontFamily: "WorksansBold",
+        color: "#79553D",
     },
 });

@@ -35,7 +35,7 @@ export function PagesLayout({ children, scroll, scrollContent, noScrollContent }
 export const pagesStyles = StyleSheet.create({
     safeArea: {
         flex: 1,
-        backgroundColor: "#F7F4EE",
+        backgroundColor: "#F6F3ED",
     },
     flex: {
         flex: 1,
@@ -44,111 +44,121 @@ export const pagesStyles = StyleSheet.create({
         flexGrow: 1,
         alignItems: "stretch",
         justifyContent: "flex-start",
-        padding: 24,
+        padding: 20,
     },
     container: {
         flex: 1,
         alignItems: "stretch",
         justifyContent: "flex-start",
-        padding: 24,
+        padding: 20,
     },
     card: {
         width: "100%",
-        backgroundColor: "#FFFDF9",
+        backgroundColor: "#FFFFFF",
         borderWidth: 1,
-        borderColor: "#E9E2D7",
-        borderRadius: 24,
-        padding: 28,
-        boxShadow: "0px 12px 22px #5A5146",
-        elevation: 3,
+        borderColor: "#E8E2D8",
+        borderRadius: 20,
+        padding: 24,
+        shadowColor: "#30241A",
+        shadowOffset: { width: 0, height: 6 },
+        shadowOpacity: 0.07,
+        shadowRadius: 16,
+        elevation: 2,
     },
     brand: {
         color: "#9A6540",
-        fontSize: 13,
+        fontSize: 12,
         fontFamily: "WorksansSemiBold",
-        letterSpacing: 1.2,
+        letterSpacing: 1.4,
         textTransform: "uppercase"
     },
     title: {
-        marginVertical: 10,
-        color: "#302B26",
-        fontSize: 30,
-        lineHeight: 36,
+        marginVertical: 6,
+        color: "#2C2520",
+        fontSize: 26,
+        lineHeight: 32,
         fontFamily: "WorksansBold"
     },
     graphTitle: {
-        color: "#302B26",
-        fontSize: 30,
-        lineHeight: 36,
-        marginBottom: 15,
+        color: "#2C2520",
+        fontSize: 20,
+        lineHeight: 26,
+        marginBottom: 14,
         fontFamily: "WorksansBold"
     },
     description: {
-        marginTop: 10,
-        color: "#766E64",
-        fontSize: 15,
-        lineHeight: 22,
+        marginTop: 6,
+        color: "#6E655B",
+        fontSize: 14,
+        lineHeight: 20,
         fontFamily: "WorksansRegular"
     },
     form: {
-        marginTop: 28,
-        gap: 18
+        marginTop: 20,
+        gap: 16
     },
     field: {
-        gap: 8
+        gap: 6
     },
     label: {
-        color: "#4D463E",
+        color: "#463E36",
         fontSize: 12,
-        fontFamily: "WorksansSemiBold"
+        fontFamily: "WorksansSemiBold",
+        letterSpacing: 0.2,
     },
     input: {
-        minHeight: 52,
+        minHeight: 48,
         borderWidth: 1,
-        borderColor: "#DED6CA",
+        borderColor: "#DCD4C7",
         borderRadius: 12,
-        backgroundColor: "#FFFEFC",
+        backgroundColor: "#FAF8F5",
         paddingHorizontal: 15,
-        color: "#302B26",
-        fontSize: 16,
+        color: "#2C2520",
+        fontSize: 15,
         fontFamily: "WorksansRegular",
     },
     primaryButton: {
-        minHeight: 52,
-        paddingHorizontal: 10,
+        minHeight: 48,
+        paddingHorizontal: 16,
         alignItems: "center",
         justifyContent: "center",
         borderRadius: 12,
         backgroundColor: "#79553D",
-        boxShadow: "0px 2px 5px #5A5146",
+        shadowColor: "#79553D",
+        shadowOffset: { width: 0, height: 3 },
+        shadowOpacity: 0.2,
+        shadowRadius: 6,
+        elevation: 2,
     },
     primaryButtonPressed: {
-        backgroundColor: "#65442F"
+        backgroundColor: "#63422C",
+        transform: [{ scale: 0.99 }]
     },
     primaryButtonText: {
         color: "#FFFDF9",
-        fontSize: 16,
-        fontFamily: "WorksansSemiBold"
+        fontSize: 15,
+        fontFamily: "WorksansSemiBold",
+        letterSpacing: 0.3,
     },
     link: {
         color: "#8D5C3B",
-        fontSize: 14,
+        fontSize: 13,
         fontFamily: "WorksansSemiBold"
     },
     text: {
-        color: "#252525",
-        fontSize: 16,
-        lineHeight: 22,
+        color: "#38312B",
+        fontSize: 15,
+        lineHeight: 21,
         fontFamily: "WorksansRegular"
     },
     textBold: {
-        color: "#252525",
-        fontSize: 16,
-        lineHeight: 22,
+        color: "#2C2520",
+        fontSize: 15,
+        lineHeight: 21,
         fontFamily: "WorksansBold"
     },
     footer: {
-        marginTop: 22,
+        marginTop: 20,
         alignItems: "center",
         flexDirection: "row",
         justifyContent: "center",
@@ -157,42 +167,44 @@ export const pagesStyles = StyleSheet.create({
     },
     footerText: {
         color: "#766E64",
-        fontSize: 14,
+        fontSize: 13,
         fontFamily: "WorksansRegular"
     },
     error: {
         borderWidth: 1,
-        borderColor: "#E9C6BD",
+        borderColor: "#F0CBC2",
         borderRadius: 12,
-        backgroundColor: "#FDF0EC",
+        backgroundColor: "#FDF2EF",
         paddingHorizontal: 14,
         paddingVertical: 11
     },
     errorText: {
         color: "#A74E3C",
-        fontSize: 16,
+        fontSize: 14,
         fontFamily: "WorksansMedium"
     },
     warning: {
         borderWidth: 1,
-        borderColor: "#e9d6bd",
+        borderColor: "#EADDC6",
         borderRadius: 12,
-        backgroundColor: "#fdf5ec",
+        backgroundColor: "#FDF8F0",
         paddingHorizontal: 14,
         paddingVertical: 11
     },
     warningText: {
-        color: "#a57834",
+        color: "#9A6B24",
         fontSize: 14,
         fontFamily: "WorksansMedium"
     },
     secondaryButton: {
-        minHeight: 44,
+        minHeight: 48,
+        paddingHorizontal: 16,
         alignItems: "center",
         justifyContent: "center",
         borderRadius: 12,
-        borderWidth: 1,
-        borderColor: "#D8CFC3"
+        borderWidth: 1.5,
+        borderColor: "#D8CFC3",
+        backgroundColor: "#FFFFFF",
     },
     secondaryButtonText: {
         color: "#5C5248",

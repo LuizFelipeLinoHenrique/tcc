@@ -415,18 +415,19 @@ export function EditClientCard({
                     title={
                         saving ? (
                             <ActivityIndicator
-                                color="#65442F"
+                                color="#FFFDF9"
                             />
                         ) : (
                             "Salvar Alterações"
                         )
                     }
                     stylesPressable={[
-                        pagesStyles.secondaryButton,
-                        {paddingVertical: 10, paddingHorizontal: 16}
+                        pagesStyles.primaryButton,
+                        styles.saveButton,
                     ]}
+                    stylesPressablePressed={pagesStyles.primaryButtonPressed}
                     stylesText={
-                        pagesStyles.secondaryButtonText
+                        pagesStyles.primaryButtonText
                     }
                     onPress={salvar}
                 />

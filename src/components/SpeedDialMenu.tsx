@@ -52,102 +52,138 @@ export default function SpeedDial({ actions }: SpeedDialProps) {
     };
 
     return (
-        <View style={styles.container}>
+        <>
+            {/* Backdrop quando aberto */}
+            {open && (
+                <Pressable
+                    style={styles.backdrop}
+                    onPress={toggleSpeedDial}
+                />
+            )}
 
-            {/* Ações */}
-            {actions.map((action, index) => {
+            <View style={styles.container} pointerEvents="box-none">
+                {/* Ações */}
+                {actions.map((action, index) => {
+                    const isDestructive = action.label.toLowerCase().includes("sair");
 
-                const translateY = animation.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [0, -(70 * (index + 1))],
-                });
+                    const translateY = animation.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [0, -(64 * (index + 1))],
+                    });
 
-                const scale = animation.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [0.5, 1],
-                });
+                    const scaleAction = animation.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [0.5, 1],
+                    });
 
-                const opacity = animation.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [0, 1],
-                });
+                    const opacity = animation.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [0, 1],
+                    });
 
-                return (
-                    <Animated.View
-                        key={action.label}
-                        pointerEvents={open ? "auto" : "none"}
-                        style={[
-                            styles.actionContainer,
-                            {
-                                opacity,
-                                transform: [
-                                    { translateY },
-                                    { scale },
-                                ],
-                            },
-                        ]}
-                    >
-                        <Pressable
-                            style={styles.action}
-                            onPress={() => {
-                                action.onPress();
-                                toggleSpeedDial();
-                            }}
-                            onPressIn={pressionar}
-                            onPressOut={soltar}
+                    return (
+                        <Animated.View
+                            key={action.label}
+                            pointerEvents={open ? "auto" : "none"}
+                            style={[
+                                styles.actionContainer,
+                                {
+                                    opacity,
+                                    transform: [
+                                        { translateY },
+                                        { scale: scaleAction },
+                                    ],
+                                },
+                            ]}
                         >
-                            <Text style={styles.label}>
-                                {action.label}
-                            </Text>
+                            <Pressable
+                                style={styles.action}
+                                onPress={() => {
+                                    toggleSpeedDial();
+                                    action.onPress();
+                                }}
+                                onPressIn={pressionar}
+                                onPressOut={soltar}
+                            >
+                                <View
+                                    style={[
+                                        styles.actionButton,
+                                        isDestructive && styles.destructiveActionButton,
+                                    ]}
+                                >
+                                    <Ionicons
+                                        name={action.icon}
+                                        size={20}
+                                        color="#FFFDF9"
+                                    />
+                                </View>
 
-                            <View style={styles.actionButton}>
-                                <Ionicons
-                                    name={action.icon}
-                                    size={22}
-                                    color="white"
-                                />
-                            </View>
-                        </Pressable>
-                    </Animated.View>
-                );
-            })}
+                                <View style={styles.labelContainer}>
+                                    <Text
+                                        style={[
+                                            styles.label,
+                                            isDestructive && styles.destructiveLabel,
+                                        ]}
+                                    >
+                                        {action.label}
+                                    </Text>
+                                </View>
+                            </Pressable>
+                        </Animated.View>
+                    );
+                })}
 
-            {/* Botão principal */}
-            <Pressable
-                onPress={toggleSpeedDial}
-                style={styles.mainButton}
-            >
-                <Animated.View
-                    style={{
-                        transform: [
-                            {
-                                rotate: animation.interpolate({
-                                    inputRange: [0, 1],
-                                    outputRange: ["0deg", "45deg"],
-                                }),
-                            },
-                        ],
-                    }}
+                {/* Botão principal */}
+                <Pressable
+                    onPress={toggleSpeedDial}
+                    style={({ pressed }) => [
+                        styles.mainButton,
+                        pressed && styles.mainButtonPressed,
+                        open && styles.mainButtonOpen,
+                    ]}
                 >
-                    <Ionicons
-                        name="add"
-                        size={30}
-                        color="white"
-                    />
-                </Animated.View>
-            </Pressable>
-
-        </View>
+                    <Animated.View
+                        style={{
+                            transform: [
+                                {
+                                    rotate: animation.interpolate({
+                                        inputRange: [0, 1],
+                                        outputRange: ["0deg", "45deg"],
+                                    }),
+                                },
+                            ],
+                        }}
+                    >
+                        <Ionicons
+                            name="add"
+                            size={28}
+                            color="#FFFDF9"
+                        />
+                    </Animated.View>
+                </Pressable>
+            </View>
+        </>
     );
 }
 
 const styles = StyleSheet.create({
+    backdrop: {
+        position: "absolute",
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: "rgba(35, 27, 20, 0.35)",
+        zIndex: 998,
+    },
+
     container: {
         position: "absolute",
         left: 20,
-        bottom: 20,
+        bottom: 24,
         alignItems: "flex-start",
         justifyContent: "flex-end",
+        zIndex: 999,
     },
 
     actionContainer: {
@@ -159,39 +195,73 @@ const styles = StyleSheet.create({
     action: {
         flexDirection: "row",
         alignItems: "center",
-        gap: 10,
+        gap: 12,
+    },
+
+    labelContainer: {
+        backgroundColor: "#FFFFFF",
+        paddingHorizontal: 12,
+        paddingVertical: 7,
+        borderRadius: 10,
+        borderWidth: 1,
+        borderColor: "#E8E2D8",
+        shadowColor: "#2C2016",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.12,
+        shadowRadius: 6,
+        elevation: 3,
     },
 
     label: {
-        backgroundColor: "white",
-        paddingHorizontal: 12,
-        paddingVertical: 7,
-        borderRadius: 8,
-        fontSize: 14,
-        fontWeight: "600",
+        fontSize: 13,
+        color: "#302B26",
+        fontFamily: "WorksansSemiBold",
+    },
 
-        boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.15)",
+    destructiveLabel: {
+        color: "#A74E3C",
     },
 
     actionButton: {
-        width: 48,
-        height: 48,
-        borderRadius: 24,
-        backgroundColor: "#9c775d",
+        width: 44,
+        height: 44,
+        borderRadius: 22,
+        backgroundColor: "#8C684E",
         alignItems: "center",
         justifyContent: "center",
+        shadowColor: "#302016",
+        shadowOffset: { width: 0, height: 3 },
+        shadowOpacity: 0.22,
+        shadowRadius: 6,
+        elevation: 3,
+    },
 
-        boxShadow: "0px 3px 5px rgba(0, 0, 0, 0.2)",
+    destructiveActionButton: {
+        backgroundColor: "#A74E3C",
     },
 
     mainButton: {
-        width: 60,
-        height: 60,
-        borderRadius: 30,
+        width: 56,
+        height: 56,
+        borderRadius: 28,
         backgroundColor: "#79553D",
         alignItems: "center",
         justifyContent: "center",
+        shadowColor: "#4E3626",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.28,
+        shadowRadius: 10,
+        elevation: 5,
+        borderWidth: 1.5,
+        borderColor: "rgba(255, 255, 255, 0.2)",
+    },
 
-        boxShadow: "0px 3px 5px rgba(0, 0, 0, 0.25)",
+    mainButtonPressed: {
+        backgroundColor: "#63422C",
+        transform: [{ scale: 0.96 }],
+    },
+
+    mainButtonOpen: {
+        backgroundColor: "#553823",
     },
 });

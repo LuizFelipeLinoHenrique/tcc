@@ -327,36 +327,43 @@ export function ClientsFilters({
 
 const styles = StyleSheet.create({
     container: {
-        marginBottom: 16,
-        padding: 10,
-        backgroundColor: "#FFFDF9",
+        marginBottom: 14,
+        padding: 6,
+        backgroundColor: "#FFFFFF",
         borderWidth: 1,
-        borderColor: "#E9E2D7",
-        borderRadius: 16,
+        borderColor: "#E8E2D8",
+        borderRadius: 18,
+        shadowColor: "#30241A",
+        shadowOffset: { width: 0, height: 3 },
+        shadowOpacity: 0.05,
+        shadowRadius: 10,
+        elevation: 2,
     },
 
     header: {
-        minHeight: 54,
+        minHeight: 50,
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "space-between",
-        paddingHorizontal: 18,
+        paddingHorizontal: 16,
+        borderRadius: 12,
     },
 
     headerPressed: {
-        backgroundColor: "#F7F1E9",
+        backgroundColor: "#F7F3EE",
     },
 
     headerConteudoGroup: {
         width: "100%",
         flexDirection: "row",
         justifyContent: "space-between",
+        alignItems: "center",
     },
 
     headerConteudo: {
         flexDirection: "row",
         alignItems: "center",
-        gap: 9,
+        gap: 8,
     },
 
     conteudoAnimado: {
@@ -364,14 +371,16 @@ const styles = StyleSheet.create({
     },
 
     conteudo: {
-        gap: 18,
-        paddingHorizontal: 18,
-        paddingTop: 4,
-        paddingBottom: 18,
+        gap: 16,
+        paddingHorizontal: 16,
+        paddingTop: 6,
+        paddingBottom: 16,
+        borderTopWidth: 1,
+        borderTopColor: "#F2ECE3",
     },
 
     filtroGrupo: {
-        gap: 9,
+        gap: 8,
     },
 
     opcoesContainer: {
@@ -381,13 +390,13 @@ const styles = StyleSheet.create({
     },
 
     filtroBotao: {
-        minHeight: 40,
+        minHeight: 36,
         paddingHorizontal: 14,
-        paddingVertical: 8,
+        paddingVertical: 6,
         borderRadius: 10,
         borderWidth: 1,
-        borderColor: "#D8CFC3",
-        backgroundColor: "#FFFEFC",
+        borderColor: "#DCD4C7",
+        backgroundColor: "#FAF8F5",
         alignItems: "center",
         justifyContent: "center",
     },
@@ -395,6 +404,11 @@ const styles = StyleSheet.create({
     filtroSelecionado: {
         backgroundColor: "#79553D",
         borderColor: "#79553D",
+        shadowColor: "#79553D",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.15,
+        shadowRadius: 4,
+        elevation: 2,
     },
 
     filtroBotaoPressed: {
@@ -402,7 +416,9 @@ const styles = StyleSheet.create({
     },
 
     filtroTexto: {
-        fontSize: 14,
+        fontSize: 13,
+        color: "#6E665E",
+        fontFamily: "WorksansMedium",
     },
 
     filtroTextoSelecionado: {
@@ -413,31 +429,33 @@ const styles = StyleSheet.create({
     pesquisaContainer: {
         flexDirection: "row",
         alignItems: "center",
-        gap: 10,
+        gap: 8,
     },
 
     input: {
-        minHeight: 45,
+        minHeight: 44,
+        flex: 1,
+        fontSize: 14,
     },
 
     botaoPesquisar: {
-        minHeight: 45,
-        paddingHorizontal: 17,
-        borderRadius: 10,
+        minHeight: 44,
+        paddingHorizontal: 16,
+        borderRadius: 12,
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "center",
-        gap: 7,
+        gap: 6,
+        backgroundColor: "#79553D",
     },
 
     botaoPesquisarPressed: {
-        opacity: 0.92,
+        opacity: 0.88,
     },
 
     botaoLimpar: {
         alignSelf: "flex-start",
-        paddingHorizontal: 3,
-        paddingVertical: 5,
+        paddingVertical: 4,
         flexDirection: "row",
         alignItems: "center",
         gap: 6,
@@ -448,9 +466,7 @@ const styles = StyleSheet.create({
     },
 
     fecharFiltros: {
-        height: 20,
         flexDirection: "row",
-        justifyContent: "flex-start",
         alignItems: "center",
         gap: 6,
     },
