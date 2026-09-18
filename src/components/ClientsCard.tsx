@@ -1,15 +1,11 @@
 import { Ionicons } from "@expo/vector-icons";
-
 import {
     Pressable,
     StyleSheet,
     Text,
     View,
 } from "react-native";
-
 import useResponsive from "../hooks/useResponsive";
-
-import { pagesStyles } from "./ScreensLayout";
 
 export type Cliente = {
     id: number;
@@ -26,6 +22,24 @@ type ClientCardProps = {
     iconDelete?: () => void;
 };
 
+function getInitials(name: string): string {
+    if (!name) return "CL";
+    const parts = name.trim().split(/\s+/);
+    if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+}
+
+function formatPhone(phone: number | string): string {
+    const s = String(phone || "").replace(/\D/g, "");
+    if (s.length === 11) {
+        return `(${s.substring(0, 2)}) ${s.substring(2, 7)}-${s.substring(7)}`;
+    }
+    if (s.length === 10) {
+        return `(${s.substring(0, 2)}) ${s.substring(2, 6)}-${s.substring(6)}`;
+    }
+    return String(phone);
+}
+
 export function ClientCard({
     cliente,
     iconDetails,
@@ -38,88 +52,98 @@ export function ClientCard({
         <View
             style={[
                 styles.container,
-                isMobile
-                    ? { width: "100%" }
-                    : { width: "50%" },
+                isMobile ? { width: "100%" } : { width: "50%" },
             ]}
         >
-            <View
-                style={[
-                    pagesStyles.card,
-                    styles.containerCard,
-                ]}
-            >
-                <View style={styles.info}>
-                    <Text
-                        style={[
-                            pagesStyles.textBold,
-                            { fontSize: 20 },
-                        ]}
-                        numberOfLines={1}
-                    >
-                        Cliente #{cliente.id}
-                    </Text>
+            <View style={styles.card}>
+                {/* Header do Card */}
+                <View style={styles.header}>
+                    <View style={styles.avatar}>
+                        <Text style={styles.avatarText}>
+                            {getInitials(cliente.nome)}
+                        </Text>
+                    </View>
 
-                    <Text
-                        style={pagesStyles.text}
-                        numberOfLines={1}
-                    >
-                        Nome: {cliente.nome}
-                    </Text>
-
-                    <Text
-                        style={pagesStyles.text}
-                        numberOfLines={1}
-                    >
-                        E-mail: {cliente.email}
-                    </Text>
-
-                    <Text
-                        style={pagesStyles.text}
-                        numberOfLines={1}
-                    >
-                        Telefone: {cliente.telefone}
-                    </Text>
-
-                    <Text
-                        style={pagesStyles.text}
-                        numberOfLines={2}
-                    >
-                        Endereço: {cliente.endereco}
-                    </Text>
+                    <View style={styles.headerInfo}>
+                        <View style={styles.nameRow}>
+                            <Text style={styles.name} numberOfLines={1}>
+                                {cliente.nome}
+                            </Text>
+                            <View style={styles.idBadge}>
+                                <Text style={styles.idBadgeText}>#{cliente.id}</Text>
+                            </View>
+                        </View>
+                        <Text style={styles.subtext}>Cliente cadastrado</Text>
+                    </View>
                 </View>
 
-                <View style={styles.actions}>
-                    <View style={styles.icon}>
-                        <Pressable onPress={iconDetails}>
-                            <Ionicons
-                                name="ellipsis-horizontal-outline"
-                                size={25}
-                                color="#79553D"
-                            />
-                        </Pressable>
+                {/* Linha Divisória */}
+                <View style={styles.divider} />
+
+                {/* Detalhes de Contato */}
+                <View style={styles.detailsList}>
+                    <View style={styles.detailRow}>
+                        <Ionicons name="mail-outline" size={15} color="#8C8276" style={styles.detailIcon} />
+                        <Text style={styles.detailText} numberOfLines={1}>
+                            {cliente.email}
+                        </Text>
                     </View>
 
-                    <View style={styles.icon}>
-                        <Pressable onPress={iconEdit}>
-                            <Ionicons
-                                name="pencil-outline"
-                                size={25}
-                                color="#79553D"
-                            />
-                        </Pressable>
+                    <View style={styles.detailRow}>
+                        <Ionicons name="call-outline" size={15} color="#8C8276" style={styles.detailIcon} />
+                        <Text style={styles.detailText} numberOfLines={1}>
+                            {formatPhone(cliente.telefone)}
+                        </Text>
                     </View>
+
+                    <View style={styles.detailRow}>
+                        <Ionicons name="location-outline" size={15} color="#8C8276" style={styles.detailIcon} />
+                        <Text style={styles.detailText} numberOfLines={2}>
+                            {cliente.endereco}
+                        </Text>
+                    </View>
+                </View>
+
+                {/* Barra de Ações Inferior */}
+                <View style={styles.actionsBar}>
+                    <Pressable
+                        onPress={iconDetails}
+                        style={({ pressed }) => [
+                            styles.actionBtn,
+                            styles.detailsBtn,
+                            pressed && styles.actionBtnPressed,
+                        ]}
+                        hitSlop={4}
+                    >
+                        <Ionicons name="eye-outline" size={16} color="#79553D" />
+                        <Text style={styles.detailsBtnText}>Detalhes</Text>
+                    </Pressable>
+
+                    <Pressable
+                        onPress={iconEdit}
+                        style={({ pressed }) => [
+                            styles.actionBtn,
+                            styles.editBtn,
+                            pressed && styles.actionBtnPressed,
+                        ]}
+                        hitSlop={4}
+                    >
+                        <Ionicons name="pencil-outline" size={16} color="#79553D" />
+                        <Text style={styles.editBtnText}>Editar</Text>
+                    </Pressable>
 
                     {iconDelete ? (
-                        <View style={styles.icon}>
-                            <Pressable onPress={iconDelete}>
-                                <Ionicons
-                                    name="trash-outline"
-                                    size={25}
-                                    color="#79553D"
-                                />
-                            </Pressable>
-                        </View>
+                        <Pressable
+                            onPress={iconDelete}
+                            style={({ pressed }) => [
+                                styles.actionBtn,
+                                styles.deleteBtn,
+                                pressed && styles.actionBtnPressed,
+                            ]}
+                            hitSlop={4}
+                        >
+                            <Ionicons name="trash-outline" size={16} color="#A74E3C" />
+                        </Pressable>
                     ) : null}
                 </View>
             </View>
@@ -129,29 +153,137 @@ export function ClientCard({
 
 const styles = StyleSheet.create({
     container: {
-        padding: 10,
+        padding: 8,
     },
-
-    containerCard: {
-        boxShadow: "0px 8px 12px #5A5146",
+    card: {
+        backgroundColor: "#FFFFFF",
+        borderRadius: 18,
+        borderWidth: 1,
+        borderColor: "#E8E2D8",
+        padding: 18,
+        shadowColor: "#30241A",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.06,
+        shadowRadius: 12,
+        elevation: 2,
+    },
+    header: {
         flexDirection: "row",
-        justifyContent: "space-between",
-        height: "auto",
+        alignItems: "center",
+        gap: 12,
     },
-
-    info: {
+    avatar: {
+        width: 44,
+        height: 44,
+        borderRadius: 22,
+        backgroundColor: "#F4EFEA",
+        borderWidth: 1.5,
+        borderColor: "#E3D7CB",
+        alignItems: "center",
+        justifyContent: "center",
+    },
+    avatarText: {
+        fontSize: 15,
+        fontFamily: "WorksansBold",
+        color: "#79553D",
+    },
+    headerInfo: {
         flex: 1,
         minWidth: 0,
     },
-
-    actions: {
-        marginLeft: 10,
+    nameRow: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 8,
     },
-
-    icon: {
-        width: "100%",
-        height: "auto",
+    name: {
+        fontSize: 16,
+        fontFamily: "WorksansBold",
+        color: "#2C2520",
+        flex: 1,
+    },
+    idBadge: {
+        backgroundColor: "#F5EEE8",
+        paddingHorizontal: 7,
+        paddingVertical: 2,
+        borderRadius: 6,
+    },
+    idBadgeText: {
+        fontSize: 11,
+        fontFamily: "WorksansSemiBold",
+        color: "#79553D",
+    },
+    subtext: {
+        fontSize: 12,
+        fontFamily: "WorksansRegular",
+        color: "#8C8276",
+        marginTop: 1,
+    },
+    divider: {
+        height: 1,
+        backgroundColor: "#F0EBE2",
+        marginVertical: 14,
+    },
+    detailsList: {
+        gap: 8,
+        marginBottom: 16,
+    },
+    detailRow: {
+        flexDirection: "row",
+        alignItems: "flex-start",
+        gap: 8,
+    },
+    detailIcon: {
+        marginTop: 2,
+    },
+    detailText: {
+        fontSize: 13,
+        fontFamily: "WorksansRegular",
+        color: "#463E36",
+        flex: 1,
+        lineHeight: 18,
+    },
+    actionsBar: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 8,
+        paddingTop: 12,
+        borderTopWidth: 1,
+        borderTopColor: "#F4EFEA",
+    },
+    actionBtn: {
+        flexDirection: "row",
         alignItems: "center",
         justifyContent: "center",
+        paddingVertical: 8,
+        paddingHorizontal: 12,
+        borderRadius: 9,
+        gap: 6,
+    },
+    actionBtnPressed: {
+        opacity: 0.75,
+        transform: [{ scale: 0.98 }],
+    },
+    detailsBtn: {
+        flex: 1,
+        backgroundColor: "#F7F3EE",
+    },
+    detailsBtnText: {
+        fontSize: 12,
+        fontFamily: "WorksansSemiBold",
+        color: "#79553D",
+    },
+    editBtn: {
+        flex: 1,
+        backgroundColor: "#F0EBE3",
+    },
+    editBtnText: {
+        fontSize: 12,
+        fontFamily: "WorksansSemiBold",
+        color: "#79553D",
+    },
+    deleteBtn: {
+        backgroundColor: "#FDF2EF",
+        paddingHorizontal: 10,
     },
 });

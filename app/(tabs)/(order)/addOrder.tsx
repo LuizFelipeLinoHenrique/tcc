@@ -1,5 +1,4 @@
 import { useState } from "react";
-
 import {
     ActivityIndicator,
     StyleSheet,
@@ -7,7 +6,6 @@ import {
     TextInput,
     View,
 } from "react-native";
-
 import { Ionicons } from "@expo/vector-icons";
 
 import { AnimatedButton } from "@/src/components/AnimatedButton";
@@ -27,11 +25,8 @@ export default function ordersManager() {
     const [nomeCliente, setNomeCliente] = useState<string | null>(null);
     const [nomeProduto, setNomeProduto] = useState<string | null>(null);
 
-    const [clienteStatus, setClienteStatus] =
-        useState<ValidationState>("idle");
-
-    const [produtoStatus, setProdutoStatus] =
-        useState<ValidationState>("idle");
+    const [clienteStatus, setClienteStatus] = useState<ValidationState>("idle");
+    const [produtoStatus, setProdutoStatus] = useState<ValidationState>("idle");
 
     const [clienteErro, setClienteErro] = useState<string | null>(null);
     const [produtoErro, setProdutoErro] = useState<string | null>(null);
@@ -42,11 +37,9 @@ export default function ordersManager() {
 
     function obterDataAtual() {
         const hoje = new Date();
-
         const ano = hoje.getFullYear();
         const mes = String(hoje.getMonth() + 1).padStart(2, "0");
         const dia = String(hoje.getDate()).padStart(2, "0");
-
         return `${ano}-${mes}-${dia}`;
     }
 
@@ -86,27 +79,19 @@ export default function ordersManager() {
 
         if (error) {
             console.log("Erro ao consultar cliente:", error);
-
             setClienteStatus("error");
-            setClienteErro(
-                "Não foi possível consultar o cliente."
-            );
-
+            setClienteErro("Não foi possível consultar o cliente.");
             return false;
         }
 
         if (!data) {
             setClienteStatus("error");
-            setClienteErro(
-                "Nenhum cliente encontrado com esse ID."
-            );
-
+            setClienteErro("Nenhum cliente encontrado com esse ID.");
             return false;
         }
 
         setNomeCliente(data.nome);
         setClienteStatus("success");
-
         return true;
     }
 
@@ -140,27 +125,19 @@ export default function ordersManager() {
 
         if (error) {
             console.log("Erro ao consultar material:", error);
-
             setProdutoStatus("error");
-            setProdutoErro(
-                "Não foi possível consultar o material."
-            );
-
+            setProdutoErro("Não foi possível consultar o material.");
             return false;
         }
 
         if (!data) {
             setProdutoStatus("error");
-            setProdutoErro(
-                "Nenhum material encontrado com esse ID."
-            );
-
+            setProdutoErro("Nenhum material encontrado com esse ID.");
             return false;
         }
 
         setNomeProduto(data.nome);
         setProdutoStatus("success");
-
         return true;
     }
 
@@ -175,21 +152,16 @@ export default function ordersManager() {
         const quantidadeNumerica = Number(valor);
 
         if (!Number.isFinite(quantidadeNumerica)) {
-            setQuantidadeErro(
-                "Informe uma quantidade válida."
-            );
+            setQuantidadeErro("Informe uma quantidade válida.");
             return false;
         }
 
         if (quantidadeNumerica <= 0) {
-            setQuantidadeErro(
-                "A quantidade deve ser maior que zero."
-            );
+            setQuantidadeErro("A quantidade deve ser maior que zero.");
             return false;
         }
 
         setQuantidadeErro(null);
-
         return true;
     }
 
@@ -200,19 +172,13 @@ export default function ordersManager() {
         const produtoValido = await verificarProduto();
         const quantidadeValida = validarQuantidade();
 
-        if (
-            !clienteValido ||
-            !produtoValido ||
-            !quantidadeValida
-        ) {
+        if (!clienteValido || !produtoValido || !quantidadeValida) {
             return;
         }
 
         const idClienteNumerico = Number(idCliente);
         const idProdutoNumerico = Number(idProduto);
-        const quantidadeNumerica = Number(
-            qtde.trim().replace(",", ".")
-        );
+        const quantidadeNumerica = Number(qtde.trim().replace(",", "."));
 
         setLoading(true);
 
@@ -232,27 +198,19 @@ export default function ordersManager() {
 
         if (error) {
             console.log("Erro ao adicionar pedido:", error);
-
             setMensagemSucesso(null);
-
             return;
         }
 
         if (data) {
-            setMensagemSucesso(
-                `Pedido #${data.id} adicionado com sucesso.`
-            );
-
+            setMensagemSucesso(`Pedido #${data.id} cadastrado com sucesso!`);
             setIdCliente("");
             setIdProduto("");
             setQtde("");
-
             setNomeCliente("");
             setNomeProduto("");
-
             setClienteStatus("idle");
             setProdutoStatus("idle");
-
             setClienteErro(null);
             setProdutoErro(null);
             setQuantidadeErro(null);
@@ -261,7 +219,6 @@ export default function ordersManager() {
 
     function alterarCliente(valor: string) {
         const somenteNumeros = valor.replace(/\D/g, "");
-
         setIdCliente(somenteNumeros);
         setNomeCliente("");
         setClienteErro(null);
@@ -271,7 +228,6 @@ export default function ordersManager() {
 
     function alterarProduto(valor: string) {
         const somenteNumeros = valor.replace(/\D/g, "");
-
         setIdProduto(somenteNumeros);
         setNomeProduto("");
         setProdutoErro(null);
@@ -281,7 +237,6 @@ export default function ordersManager() {
 
     function alterarQuantidade(valor: string) {
         const valorFormatado = valor.replace(/[^0-9.,]/g, "");
-
         setQtde(valorFormatado);
         setQuantidadeErro(null);
         limparMensagemSucesso();
@@ -297,313 +252,217 @@ export default function ordersManager() {
         !loading;
 
     return (
-        <PagesLayout
-            scroll={true}
-            scrollContent={{ paddingVertical: 20 }}
-        >
+        <PagesLayout scroll={true} scrollContent={{ paddingVertical: 20 }}>
             <View style={styles.container}>
                 <View style={[pagesStyles.card, { maxWidth: maxCardWidth }]}>
+                    {/* CABEÇALHO */}
                     <View style={styles.header}>
                         <View style={styles.headerIcon}>
-                            <Ionicons
-                                name="add-circle-outline"
-                                size={30}
-                                color="#79553D"
-                            />
+                            <Ionicons name="add-circle" size={26} color="#79553D" />
                         </View>
-
-                        <View style={pagesStyles.title}>
-                            <Text style={pagesStyles.brand}>
-                                Cadastre um novo pedido.
+                        <View style={styles.headerTextContainer}>
+                            <Text style={pagesStyles.brand}>NOVO REGISTRO</Text>
+                            <Text style={[pagesStyles.title, styles.titleText]}>
+                                Adicionar Pedido
                             </Text>
-                            <Text style={pagesStyles.title}>
-                                Adicionar pedido
+                            <Text style={pagesStyles.description}>
+                                Vincule o cliente, material e quantidade para criar o pedido
                             </Text>
                         </View>
                     </View>
 
                     <View style={styles.divider} />
 
-                    <View style={{ gap: 20 }}>
+                    <View style={styles.formContainer}>
+                        {/* CLIENTE */}
                         <View style={pagesStyles.field}>
-                            <Text style={pagesStyles.label}>
-                                Cliente
-                            </Text>
-
-                            <TextInput
-                                value={idCliente}
-                                onChangeText={alterarCliente}
-                                onBlur={() =>
-                                    verificarCliente()
-                                }
-                                placeholder="Digite o ID do cliente..."
-                                placeholderTextColor="#A69D92"
-                                keyboardType="number-pad"
-                                returnKeyType="next"
-                                editable={!loading}
+                            <Text style={pagesStyles.label}>ID DO CLIENTE</Text>
+                            <View
                                 style={[
-                                    pagesStyles.input,
-                                    clienteStatus === "error" &&
-                                    styles.inputError,
-                                    clienteStatus === "success" &&
-                                    styles.inputSuccess,
+                                    styles.inputWrapper,
+                                    clienteStatus === "error" && styles.inputWrapperError,
+                                    clienteStatus === "success" && styles.inputWrapperSuccess,
                                 ]}
-                            />
-
-                            {clienteStatus === "loading" && (
-                                <View style={styles.feedback}>
-                                    <ActivityIndicator
-                                        size="small"
-                                        color="#79553D"
-                                    />
-
-                                    <Text
-                                        style={pagesStyles.text}
-                                    >
-                                        Consultando cliente...
-                                    </Text>
-                                </View>
-                            )}
-
-                            {clienteStatus === "success" && (
-                                <View
-                                    style={[
-                                        styles.feedback,
-                                        styles.successFeedback,
-                                    ]}
-                                >
-                                    <Ionicons
-                                        name="checkmark-circle"
-                                        size={18}
-                                        color="#547A55"
-                                    />
-
-                                    <Text
-                                        style={
-                                            pagesStyles.text
-                                        }
-                                    >
-                                        {nomeCliente}
-                                    </Text>
-                                </View>
-                            )}
-
-                            {clienteStatus === "error" && (
-                                <View style={styles.feedback}>
-                                    <Ionicons
-                                        name="alert-circle"
-                                        size={18}
-                                        color="#A34E42"
-                                    />
-
-                                    <Text
-                                        style={pagesStyles.errorText}
-                                    >
-                                        {clienteErro}
-                                    </Text>
-                                </View>
-                            )}
-                        </View>
-
-                        <View style={pagesStyles.field}>
-                            <Text style={pagesStyles.label}>
-                                Material
-                            </Text>
-
-                            <TextInput
-                                value={idProduto}
-                                onChangeText={alterarProduto}
-                                onBlur={() =>
-                                    verificarProduto()
-                                }
-                                placeholder="Digite o ID do material..."
-                                placeholderTextColor="#A69D92"
-                                keyboardType="number-pad"
-                                returnKeyType="next"
-                                editable={!loading}
-                                style={[
-                                    pagesStyles.input,
-                                    produtoStatus === "error" &&
-                                    styles.inputError,
-                                    produtoStatus === "success" &&
-                                    styles.inputSuccess,
-                                ]}
-                            />
-
-                            {produtoStatus === "loading" && (
-                                <View style={styles.feedback}>
-                                    <ActivityIndicator
-                                        size="small"
-                                        color="#79553D"
-                                    />
-
-                                    <Text
-                                        style={pagesStyles.text}
-                                    >
-                                        Consultando material...
-                                    </Text>
-                                </View>
-                            )}
-
-                            {produtoStatus === "success" && (
-                                <View
-                                    style={[
-                                        styles.feedback,
-                                        styles.successFeedback,
-                                    ]}
-                                >
-                                    <Ionicons
-                                        name="checkmark-circle"
-                                        size={18}
-                                        color="#547A55"
-                                    />
-
-                                    <Text
-                                        style={
-                                            pagesStyles.text
-                                        }
-                                    >
-                                        {nomeProduto}
-                                    </Text>
-                                </View>
-                            )}
-
-                            {produtoStatus === "error" && (
-                                <View style={styles.feedback}>
-                                    <Ionicons
-                                        name="alert-circle"
-                                        size={18}
-                                        color="#A34E42"
-                                    />
-
-                                    <Text
-                                        style={pagesStyles.errorText}
-                                    >
-                                        {produtoErro}
-                                    </Text>
-                                </View>
-                            )}
-                        </View>
-
-                        <View style={pagesStyles.field}>
-                            <Text style={pagesStyles.label}>
-                                Quantidade
-                            </Text>
-
-                            <TextInput
-                                value={qtde}
-                                onChangeText={alterarQuantidade}
-                                onBlur={validarQuantidade}
-                                placeholder="Digite a quantidade..."
-                                placeholderTextColor="#A69D92"
-                                keyboardType="decimal-pad"
-                                returnKeyType="done"
-                                editable={!loading}
-                                style={[
-                                    pagesStyles.input,
-                                    quantidadeErro &&
-                                    styles.inputError,
-                                ]}
-                            />
-
-                            {quantidadeErro && (
-                                <View style={styles.feedback}>
-                                    <Ionicons
-                                        name="alert-circle"
-                                        size={18}
-                                        color="#A34E42"
-                                    />
-
-                                    <Text
-                                        style={pagesStyles.errorText}
-                                    >
-                                        {quantidadeErro}
-                                    </Text>
-                                </View>
-                            )}
-                        </View>
-
-                        <View style={styles.statusContainer}>
-                            <View style={styles.statusIcon}>
+                            >
                                 <Ionicons
-                                    name="information-circle-outline"
-                                    size={19}
-                                    color="#79553D"
+                                    name="person-outline"
+                                    size={18}
+                                    color={
+                                        clienteStatus === "success"
+                                            ? "#166534"
+                                            : clienteStatus === "error"
+                                            ? "#B91C1C"
+                                            : "#8A8178"
+                                    }
+                                    style={styles.inputIcon}
+                                />
+                                <TextInput
+                                    value={idCliente}
+                                    onChangeText={alterarCliente}
+                                    onBlur={() => verificarCliente()}
+                                    placeholder="Ex: 1"
+                                    placeholderTextColor="#A59D94"
+                                    keyboardType="number-pad"
+                                    returnKeyType="next"
+                                    editable={!loading}
+                                    style={styles.input}
+                                />
+                                {clienteStatus === "loading" && (
+                                    <ActivityIndicator size="small" color="#79553D" />
+                                )}
+                            </View>
+
+                            {clienteStatus === "success" && nomeCliente && (
+                                <View style={styles.verifiedBox}>
+                                    <Ionicons name="checkmark-circle" size={16} color="#166534" />
+                                    <Text style={styles.verifiedText}>Cliente: {nomeCliente}</Text>
+                                </View>
+                            )}
+
+                            {clienteStatus === "error" && clienteErro && (
+                                <View style={styles.errorBox}>
+                                    <Ionicons name="alert-circle" size={16} color="#B91C1C" />
+                                    <Text style={styles.errorBoxText}>{clienteErro}</Text>
+                                </View>
+                            )}
+                        </View>
+
+                        {/* MATERIAL */}
+                        <View style={pagesStyles.field}>
+                            <Text style={pagesStyles.label}>ID DO MATERIAL</Text>
+                            <View
+                                style={[
+                                    styles.inputWrapper,
+                                    produtoStatus === "error" && styles.inputWrapperError,
+                                    produtoStatus === "success" && styles.inputWrapperSuccess,
+                                ]}
+                            >
+                                <Ionicons
+                                    name="cube-outline"
+                                    size={18}
+                                    color={
+                                        produtoStatus === "success"
+                                            ? "#166534"
+                                            : produtoStatus === "error"
+                                            ? "#B91C1C"
+                                            : "#8A8178"
+                                    }
+                                    style={styles.inputIcon}
+                                />
+                                <TextInput
+                                    value={idProduto}
+                                    onChangeText={alterarProduto}
+                                    onBlur={() => verificarProduto()}
+                                    placeholder="Ex: 10"
+                                    placeholderTextColor="#A59D94"
+                                    keyboardType="number-pad"
+                                    returnKeyType="next"
+                                    editable={!loading}
+                                    style={styles.input}
+                                />
+                                {produtoStatus === "loading" && (
+                                    <ActivityIndicator size="small" color="#79553D" />
+                                )}
+                            </View>
+
+                            {produtoStatus === "success" && nomeProduto && (
+                                <View style={styles.verifiedBox}>
+                                    <Ionicons name="checkmark-circle" size={16} color="#166534" />
+                                    <Text style={styles.verifiedText}>Material: {nomeProduto}</Text>
+                                </View>
+                            )}
+
+                            {produtoStatus === "error" && produtoErro && (
+                                <View style={styles.errorBox}>
+                                    <Ionicons name="alert-circle" size={16} color="#B91C1C" />
+                                    <Text style={styles.errorBoxText}>{produtoErro}</Text>
+                                </View>
+                            )}
+                        </View>
+
+                        {/* QUANTIDADE */}
+                        <View style={pagesStyles.field}>
+                            <Text style={pagesStyles.label}>QUANTIDADE</Text>
+                            <View
+                                style={[
+                                    styles.inputWrapper,
+                                    quantidadeErro ? styles.inputWrapperError : null,
+                                ]}
+                            >
+                                <Ionicons
+                                    name="layers-outline"
+                                    size={18}
+                                    color={quantidadeErro ? "#B91C1C" : "#8A8178"}
+                                    style={styles.inputIcon}
+                                />
+                                <TextInput
+                                    value={qtde}
+                                    onChangeText={alterarQuantidade}
+                                    onBlur={validarQuantidade}
+                                    placeholder="Ex: 10"
+                                    placeholderTextColor="#A59D94"
+                                    keyboardType="decimal-pad"
+                                    returnKeyType="done"
+                                    editable={!loading}
+                                    style={styles.input}
                                 />
                             </View>
 
-                            <View style={styles.statusTextContainer}>
-                                <Text
-                                    style={pagesStyles.brand}
-                                >
-                                    Status inicial
-                                </Text>
+                            {quantidadeErro && (
+                                <View style={styles.errorBox}>
+                                    <Ionicons name="alert-circle" size={16} color="#B91C1C" />
+                                    <Text style={styles.errorBoxText}>{quantidadeErro}</Text>
+                                </View>
+                            )}
+                        </View>
 
-                                <Text
-                                    style={[pagesStyles.text, { fontSize: 14 }]}
-                                >
-                                    O pedido será criado com
-                                    status "Pendente".
+                        {/* STATUS INICIAL INFORMATIVO */}
+                        <View style={styles.statusContainer}>
+                            <View style={styles.statusIcon}>
+                                <Ionicons name="time-outline" size={20} color="#92400E" />
+                            </View>
+
+                            <View style={styles.statusTextContainer}>
+                                <Text style={styles.statusTitle}>STATUS PADRÃO</Text>
+                                <Text style={styles.statusDescription}>
+                                    O pedido será registrado com status inicial como Pendente.
                                 </Text>
                             </View>
 
                             <View style={styles.statusBadge}>
-                                <Text
-                                    style={[pagesStyles.textBold, { color: "#F7F4EE" }]}
-                                >
-                                    P
-                                </Text>
+                                <Text style={styles.statusBadgeText}>Pendente</Text>
                             </View>
                         </View>
 
+                        {/* MENSAGEM DE SUCESSO */}
                         {mensagemSucesso !== null && (
-                            <View
-                                style={[
-                                    styles.message,
-                                    styles.successMessage,
-                                ]}
-                            >
-                                <Ionicons
-                                    name="checkmark-circle"
-                                    size={21}
-                                    color="#547A55"
-                                />
-
-                                <Text
-                                    style={
-                                        pagesStyles.text
-                                    }
-                                >
-                                    {mensagemSucesso}
-                                </Text>
+                            <View style={styles.successMessage}>
+                                <Ionicons name="checkmark-circle" size={22} color="#166534" />
+                                <Text style={styles.successMessageText}>{mensagemSucesso}</Text>
                             </View>
                         )}
 
+                        {/* BOTÃO CADASTRAR */}
                         <AnimatedButton
                             stylesPressable={[
                                 pagesStyles.primaryButton,
-                                !formularioValido &&
-                                styles.buttonDisabled,
+                                !formularioValido && styles.buttonDisabled,
                             ]}
-                            stylesText={
-                                pagesStyles.primaryButtonText
-                            }
+                            stylesText={pagesStyles.primaryButtonText}
                             onPress={addOrders}
                             disabled={!formularioValido}
                             title={
-                                loading
-                                    ? <ActivityIndicator
-                                        size="small"
-                                        color="#F7F4EE"
-                                    />
-                                    :
-                                    "Adicionar pedido"
+                                loading ? (
+                                    <ActivityIndicator size="small" color="#FFFDF9" />
+                                ) : (
+                                    "Adicionar Pedido"
+                                )
                             }
                         />
                     </View>
                 </View>
             </View>
-        </PagesLayout >
+        </PagesLayout>
     );
 }
 
@@ -615,84 +474,157 @@ const styles = StyleSheet.create({
     },
     header: {
         flexDirection: "row",
-        alignItems: "center",
-        gap: 13,
+        alignItems: "flex-start",
+        gap: 14,
     },
     headerIcon: {
-        width: 46,
-        height: 46,
+        width: 48,
+        height: 48,
         borderRadius: 12,
-        backgroundColor: "#F7F4EE",
+        backgroundColor: "#F4EDE6",
         alignItems: "center",
         justifyContent: "center",
+        marginTop: 2,
+    },
+    headerTextContainer: {
+        flex: 1,
+    },
+    titleText: {
+        marginVertical: 2,
+        marginBottom: 2,
     },
     divider: {
         height: 1,
-        backgroundColor: "#9A6540",
-        marginVertical: 22,
+        backgroundColor: "#EAE4DC",
+        marginVertical: 20,
     },
-    inputError: {
-        borderColor: "#E9C6BD",
+    formContainer: {
+        gap: 18,
     },
-    inputSuccess: {
-        borderColor: "#789B78",
-    },
-    feedback: {
+    inputWrapper: {
         flexDirection: "row",
         alignItems: "center",
-        gap: 7,
-        minHeight: 20,
+        backgroundColor: "#FAF8F5",
+        borderWidth: 1,
+        borderColor: "#DCD4C7",
+        borderRadius: 12,
+        paddingHorizontal: 12,
     },
-    successFeedback: {
+    inputWrapperError: {
+        borderColor: "#FCA5A5",
+        backgroundColor: "#FEF2F2",
+    },
+    inputWrapperSuccess: {
+        borderColor: "#BBF7D0",
+        backgroundColor: "#F0FDF4",
+    },
+    inputIcon: {
+        marginRight: 8,
+    },
+    input: {
+        flex: 1,
+        minHeight: 46,
+        fontSize: 15,
+        fontFamily: "WorksansRegular",
+        color: "#2C2520",
+    },
+    verifiedBox: {
+        flexDirection: "row",
         alignItems: "center",
+        gap: 6,
+        backgroundColor: "#F0FDF4",
+        borderWidth: 1,
+        borderColor: "#BBF7D0",
+        paddingHorizontal: 10,
+        paddingVertical: 6,
+        borderRadius: 8,
+        marginTop: 4,
+    },
+    verifiedText: {
+        fontSize: 13,
+        fontFamily: "WorksansMedium",
+        color: "#166534",
+    },
+    errorBox: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 6,
+        backgroundColor: "#FEF2F2",
+        borderWidth: 1,
+        borderColor: "#FECACA",
+        paddingHorizontal: 10,
+        paddingVertical: 6,
+        borderRadius: 8,
+        marginTop: 4,
+    },
+    errorBoxText: {
+        fontSize: 13,
+        fontFamily: "WorksansMedium",
+        color: "#B91C1C",
     },
     statusContainer: {
-        minHeight: 65,
         flexDirection: "row",
         alignItems: "center",
-        gap: 11,
+        gap: 12,
         paddingHorizontal: 14,
-        paddingVertical: 11,
+        paddingVertical: 12,
         borderWidth: 1,
-        borderColor: "#9A6540",
+        borderColor: "#FDE68A",
         borderRadius: 12,
-        backgroundColor: "#E9E2D7",
+        backgroundColor: "#FEF3C7",
     },
     statusIcon: {
-        width: 34,
-        height: 34,
-        borderRadius: 9,
+        width: 36,
+        height: 36,
+        borderRadius: 10,
         alignItems: "center",
         justifyContent: "center",
-        backgroundColor: "#E9E2D7",
+        backgroundColor: "#FDE68A",
     },
     statusTextContainer: {
         flex: 1,
-        gap: 2,
+    },
+    statusTitle: {
+        fontSize: 11,
+        fontFamily: "WorksansSemiBold",
+        color: "#92400E",
+        letterSpacing: 0.5,
+    },
+    statusDescription: {
+        fontSize: 13,
+        fontFamily: "WorksansRegular",
+        color: "#78350F",
+        marginTop: 1,
     },
     statusBadge: {
-        width: 34,
-        height: 34,
-        borderRadius: 9,
-        alignItems: "center",
-        justifyContent: "center",
-        backgroundColor: "#79553D",
+        paddingHorizontal: 10,
+        paddingVertical: 5,
+        borderRadius: 8,
+        backgroundColor: "#92400E",
     },
-    message: {
-        minHeight: 48,
-        flexDirection: "row",
-        alignItems: "center",
-        gap: 9,
-        paddingHorizontal: 13,
-        paddingVertical: 10,
-        borderRadius: 10,
+    statusBadgeText: {
+        color: "#FFFDF9",
+        fontSize: 12,
+        fontFamily: "WorksansSemiBold",
     },
     successMessage: {
-        backgroundColor: "#EEF5EE",
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 10,
+        paddingHorizontal: 14,
+        paddingVertical: 12,
+        borderRadius: 12,
+        backgroundColor: "#F0FDF4",
         borderWidth: 1,
-        borderColor: "#C8DCC8",
+        borderColor: "#BBF7D0",
+    },
+    successMessageText: {
+        fontSize: 14,
+        fontFamily: "WorksansMedium",
+        color: "#166534",
+        flex: 1,
     },
     buttonDisabled: {
-        opacity: 0.6,
+        opacity: 0.5,
     },
 });

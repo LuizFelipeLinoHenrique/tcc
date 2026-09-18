@@ -2,6 +2,10 @@ import { isSigningUp } from "@/src/lib/authFlow";
 import { supabase } from "@/src/lib/supabase";
 
 import {
+    FugazOne_400Regular
+} from "@expo-google-fonts/fugaz-one";
+
+import {
     Prompt_300Light,
     Prompt_400Regular,
     Prompt_700Bold
@@ -12,6 +16,17 @@ import {
     Ubuntu_400Regular,
     Ubuntu_700Bold
 } from "@expo-google-fonts/ubuntu";
+
+import {
+    WorkSans_100Thin,
+    WorkSans_200ExtraLight,
+    WorkSans_300Light,
+    WorkSans_400Regular,
+    WorkSans_500Medium,
+    WorkSans_600SemiBold,
+    WorkSans_700Bold,
+    WorkSans_900Black
+} from "@expo-google-fonts/work-sans";
 
 import { Session } from "@supabase/supabase-js";
 import { useFonts } from "expo-font";
@@ -33,7 +48,18 @@ export default function MainLayout() {
 
         PromptLight: Prompt_300Light,
         PromptRegular: Prompt_400Regular,
-        PromptBold: Prompt_700Bold
+        PromptBold: Prompt_700Bold,
+
+        FugazOne: FugazOne_400Regular,
+
+        WorksansThin: WorkSans_100Thin,
+        WorksansExtraLight: WorkSans_200ExtraLight,
+        WorksansLight: WorkSans_300Light,
+        WorksansRegular: WorkSans_400Regular,
+        WorksansMedium: WorkSans_500Medium,
+        WorksansSemiBold: WorkSans_600SemiBold,
+        WorksansBold: WorkSans_700Bold,
+        WorksansExtraBold: WorkSans_900Black
     });
 
     useEffect(() => {

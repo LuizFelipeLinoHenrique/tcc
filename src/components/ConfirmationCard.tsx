@@ -1,38 +1,42 @@
+import { Ionicons } from "@expo/vector-icons";
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
-import useResponsive from "../hooks/useResponsive";
 import { AnimatedButton } from "./AnimatedButton";
 import { PagesLayout, pagesStyles } from "./ScreensLayout";
 
 type ConfirmationCardProps = {
     setCardConfirmation: React.Dispatch<React.SetStateAction<boolean>>;
-    action: () => void
+    action: () => void;
 }
 
 export default function ConfirmationCard({ action, setCardConfirmation }: ConfirmationCardProps) {
-
-    const { maxCardWidth } = useResponsive();
-
     return (
         <PagesLayout scroll={false}>
-            <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-                <View style={[pagesStyles.card, { maxWidth: maxCardWidth }]}>
-                    <View>
-                        <Text style={[pagesStyles.textBold, { fontSize: 18 }]}>
-                            Realmente deseja sair?
-                        </Text>
+            <View style={styles.overlay}>
+                <View style={[pagesStyles.card, styles.card]}>
+                    <View style={styles.iconContainer}>
+                        <Ionicons name="log-out-outline" size={28} color="#A74E3C" />
                     </View>
+
+                    <Text style={styles.title}>
+                        Encerrar Sessão
+                    </Text>
+
+                    <Text style={styles.description}>
+                        Tem certeza de que deseja sair do sistema? Seus dados sincronizados foram salvos.
+                    </Text>
+
                     <View style={styles.containerButtons}>
                         <AnimatedButton
-                            title={"Confirmar"}
-                            stylesPressable={[styles.confirmButton, { paddingHorizontal: 10 }]}
-                            stylesPressablePressed={pagesStyles.primaryButtonPressed}
-                            stylesText={pagesStyles.primaryButtonText}
+                            title="Sim, sair do sistema"
+                            stylesPressable={[styles.confirmButton]}
+                            stylesPressablePressed={styles.confirmButtonPressed}
+                            stylesText={styles.confirmButtonText}
                             onPress={action}
                         />
                         <AnimatedButton
-                            title={"Cancelar"}
-                            stylesPressable={[styles.cancelButton, { paddingHorizontal: 10 }]}
+                            title="Continuar conectado"
+                            stylesPressable={[pagesStyles.secondaryButton, styles.cancelButton]}
                             stylesText={pagesStyles.secondaryButtonText}
                             onPress={() => setCardConfirmation(false)}
                         />
@@ -42,30 +46,73 @@ export default function ConfirmationCard({ action, setCardConfirmation }: Confir
         </PagesLayout>
     );
 };
+
 const styles = StyleSheet.create({
-    text: {
-        marginBottom: 20
+    overlay: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        padding: 20,
+    },
+    card: {
+        maxWidth: 420,
+        alignItems: "center",
+        textAlign: "center",
+        paddingVertical: 32,
+        paddingHorizontal: 26,
+    },
+    iconContainer: {
+        width: 60,
+        height: 60,
+        borderRadius: 30,
+        backgroundColor: "#FDF2EF",
+        borderWidth: 1,
+        borderColor: "#F0CBC2",
+        alignItems: "center",
+        justifyContent: "center",
+        marginBottom: 16,
+    },
+    title: {
+        fontSize: 22,
+        fontFamily: "WorksansBold",
+        color: "#2C2520",
+        marginBottom: 8,
+        textAlign: "center",
+    },
+    description: {
+        fontSize: 14,
+        fontFamily: "WorksansRegular",
+        color: "#6E655B",
+        textAlign: "center",
+        lineHeight: 20,
+        marginBottom: 24,
     },
     containerButtons: {
-        flexDirection: "row",
-        alignItems: "center",
         width: "100%",
-        gap: 8,
-        marginTop: 6
+        gap: 10,
     },
     confirmButton: {
-        minHeight: 52,
+        minHeight: 48,
         alignItems: "center",
         justifyContent: "center",
         borderRadius: 12,
-        backgroundColor: "#79553D",
+        backgroundColor: "#A74E3C",
+        shadowColor: "#A74E3C",
+        shadowOffset: { width: 0, height: 3 },
+        shadowOpacity: 0.22,
+        shadowRadius: 6,
+        elevation: 2,
+    },
+    confirmButtonPressed: {
+        backgroundColor: "#8E3D2D",
+        transform: [{ scale: 0.99 }],
+    },
+    confirmButtonText: {
+        color: "#FFFDF9",
+        fontSize: 15,
+        fontFamily: "WorksansSemiBold",
     },
     cancelButton: {
-        minHeight: 52,
-        alignItems: "center",
-        justifyContent: "center",
-        borderRadius: 12,
-        borderWidth: 1,
-        borderColor: "#D8CFC3",
-    }
-})
+        width: "100%",
+    },
+});

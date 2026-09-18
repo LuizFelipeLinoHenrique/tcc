@@ -43,7 +43,7 @@ export function AnimatedBackground({ children }: AnimatedBackgroundProps) {
     return (
         <Animated.View
             style={[
-                StyleSheet.absoluteFillObject,
+                StyleSheet.absoluteFill,
                 { backgroundColor },
                 {
                     alignItems: "center",
