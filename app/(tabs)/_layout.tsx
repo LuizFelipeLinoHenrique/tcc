@@ -87,6 +87,16 @@ export default function clients() {
                                 onPress: () => router.replace("/(tabs)/(client)/clients"),
                             },
                             {
+                                icon: "business-outline",
+                                label: "Fornecedores",
+                                onPress: () => router.replace("/(tabs)/(supplier)/suppliers"),
+                            },
+                            {
+                                icon: "layers-outline",
+                                label: "Materiais",
+                                onPress: () => router.replace("/(tabs)/(material)/materials"),
+                            },
+                            {
                                 icon: "exit-outline",
                                 label: "Sair",
                                 onPress: () => setConfirmationCard(true),

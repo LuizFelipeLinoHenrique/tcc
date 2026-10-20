@@ -17,6 +17,9 @@ function getTabIcon(value: string, active: boolean): keyof typeof Ionicons.glyph
     if (value === "clients") return active ? "people" : "people-outline";
     if (value === "add" && value.includes("client")) return active ? "person-add" : "person-add-outline";
     if (value === "orders") return active ? "cube" : "cube-outline";
+    if (value === "materials") return active ? "layers" : "layers-outline";
+    if (value === "suppliers") return active ? "business" : "business-outline";
+    if (value === "editSupplier" || value === "edit") return active ? "create" : "create-outline";
     if (value === "add") return active ? "add-circle" : "add-circle-outline";
     return active ? "layers" : "layers-outline";
 }

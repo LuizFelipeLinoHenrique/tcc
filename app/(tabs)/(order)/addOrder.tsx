@@ -118,7 +118,7 @@ export default function ordersManager() {
         setProdutoStatus("loading");
 
         const { data, error } = await supabase
-            .from("materiais")
+            .from("produtos")
             .select("id, nome")
             .eq("id", idNumerico)
             .maybeSingle();
@@ -185,11 +185,11 @@ export default function ordersManager() {
         const { data, error } = await supabase
             .from("pedidos")
             .insert({
-                data_pedido: obterDataAtual(),
                 id_cliente: idClienteNumerico,
                 qtde: quantidadeNumerica,
                 id_produto: idProdutoNumerico,
                 status: "P",
+                data_pedido: obterDataAtual(),
             })
             .select()
             .single();
