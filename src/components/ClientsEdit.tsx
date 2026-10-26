@@ -292,7 +292,7 @@ export function EditClientCard({
                             value={nome}
                             onChangeText={setNome}
                             placeholder="Nome do cliente"
-                            placeholderTextColor="#8A8178"
+                            placeholderTextColor="#64748B"
                             style={pagesStyles.input}
                         />
                     </View>
@@ -318,7 +318,7 @@ export function EditClientCard({
                             value={email}
                             onChangeText={setEmail}
                             placeholder="E-mail do cliente"
-                            placeholderTextColor="#8A8178"
+                            placeholderTextColor="#64748B"
                             keyboardType="email-address"
                             autoCapitalize="none"
                             style={pagesStyles.input}
@@ -344,7 +344,7 @@ export function EditClientCard({
                             value={telefone}
                             onChangeText={setTelefone}
                             placeholder="Telefone do cliente"
-                            placeholderTextColor="#8A8178"
+                            placeholderTextColor="#64748B"
                             keyboardType="numeric"
                             style={pagesStyles.input}
                         />
@@ -370,7 +370,7 @@ export function EditClientCard({
                             value={endereco}
                             onChangeText={setEndereco}
                             placeholder="Endereço do cliente"
-                            placeholderTextColor="#8A8178"
+                            placeholderTextColor="#64748B"
                             multiline
                             numberOfLines={4}
                             style={[
@@ -470,7 +470,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 14,
         paddingVertical: 10,
         borderRadius: 10,
-        backgroundColor: "#EFE9E2",
+        backgroundColor: "#E0EAF0",
     },
 
     idBoxMobile: {
@@ -487,7 +487,7 @@ const styles = StyleSheet.create({
     readOnlyValue: {
         paddingVertical: 2,
         fontSize: 16,
-        color: "#65442F",
+        color: "#0B4F6C",
         fontWeight: "600",
     },
 
@@ -496,13 +496,13 @@ const styles = StyleSheet.create({
         marginTop: 24,
         paddingTop: 20,
         borderTopWidth: 1,
-        borderTopColor: "#DDD5CC",
+        borderTopColor: "#CFDDE6",
     },
 
     sectionTitle: {
         fontSize: 16,
         fontWeight: "700",
-        color: "#65442F",
+        color: "#0B4F6C",
         marginBottom: 14,
     },
 
@@ -532,13 +532,13 @@ const styles = StyleSheet.create({
     input: {
         width: "100%",
         borderWidth: 1,
-        borderColor: "#CFC6BC",
+        borderColor: "#B8C9D5",
         borderRadius: 8,
         paddingHorizontal: 12,
         paddingVertical: 11,
         fontSize: 16,
-        backgroundColor: "#FAF8F5",
-        color: "#2F2924",
+        backgroundColor: "#F8FAFC",
+        color: "#0F172A",
     },
 
     textArea: {

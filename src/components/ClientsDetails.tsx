@@ -90,7 +90,7 @@ export function ClientDetailsCard({
             {/* CABEÇALHO */}
             <View style={styles.header}>
                 <View style={styles.iconCircle}>
-                    <Ionicons name="person" size={24} color="#79553D" />
+                    <Ionicons name="person" size={24} color="#0B4F6C" />
                 </View>
                 <View style={styles.headerTitle}>
                     <Text style={pagesStyles.brand}>
@@ -111,7 +111,7 @@ export function ClientDetailsCard({
             {(id || nome) && (
                 <View style={styles.section}>
                     <View style={styles.sectionHeader}>
-                        <Ionicons name="finger-print-outline" size={17} color="#79553D" />
+                        <Ionicons name="finger-print-outline" size={17} color="#0B4F6C" />
                         <Text style={styles.sectionTitle}>Identificação</Text>
                     </View>
 
@@ -126,7 +126,7 @@ export function ClientDetailsCard({
             {(email || telefone) && (
                 <View style={styles.section}>
                     <View style={styles.sectionHeader}>
-                        <Ionicons name="call-outline" size={17} color="#79553D" />
+                        <Ionicons name="call-outline" size={17} color="#0B4F6C" />
                         <Text style={styles.sectionTitle}>Contato</Text>
                     </View>
 
@@ -141,7 +141,7 @@ export function ClientDetailsCard({
             {endereco && (
                 <View style={styles.section}>
                     <View style={styles.sectionHeader}>
-                        <Ionicons name="location-outline" size={17} color="#79553D" />
+                        <Ionicons name="location-outline" size={17} color="#0B4F6C" />
                         <Text style={styles.sectionTitle}>Localização</Text>
                     </View>
 
@@ -171,9 +171,9 @@ const styles = StyleSheet.create({
         width: 48,
         height: 48,
         borderRadius: 24,
-        backgroundColor: "#F4EFEA",
+        backgroundColor: "#EDF3F7",
         borderWidth: 1,
-        borderColor: "#E3D7CB",
+        borderColor: "#D4E1E9",
         alignItems: "center",
         justifyContent: "center",
     },
@@ -184,11 +184,11 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 20,
         fontFamily: "WorksansBold",
-        color: "#2C2520",
+        color: "#0F172A",
         marginTop: 2,
     },
     idPill: {
-        backgroundColor: "#F5EEE8",
+        backgroundColor: "#E0EDF4",
         paddingHorizontal: 10,
         paddingVertical: 5,
         borderRadius: 8,
@@ -196,14 +196,14 @@ const styles = StyleSheet.create({
     idText: {
         fontSize: 12,
         fontFamily: "WorksansBold",
-        color: "#79553D",
+        color: "#0B4F6C",
     },
     section: {
         width: "100%",
         marginTop: 18,
         paddingTop: 16,
         borderTopWidth: 1,
-        borderTopColor: "#EFEAE2",
+        borderTopColor: "#E2EBF0",
     },
     sectionHeader: {
         flexDirection: "row",
@@ -214,7 +214,7 @@ const styles = StyleSheet.create({
     sectionTitle: {
         fontSize: 14,
         fontFamily: "WorksansBold",
-        color: "#79553D",
+        color: "#0B4F6C",
     },
     details: {
         width: "100%",
@@ -226,9 +226,9 @@ const styles = StyleSheet.create({
         flexGrow: 1,
         flexBasis: "45%",
         minWidth: 170,
-        backgroundColor: "#FAF8F5",
+        backgroundColor: "#F8FAFC",
         borderWidth: 1,
-        borderColor: "#EAE3D8",
+        borderColor: "#D9E5EC",
         borderRadius: 12,
         padding: 12,
         gap: 4,
@@ -237,18 +237,18 @@ const styles = StyleSheet.create({
         flexBasis: "100%",
     },
     label: {
-        color: "#8C8276",
+        color: "#64748B",
         fontSize: 12,
         fontFamily: "WorksansMedium",
     },
     value: {
         fontSize: 14,
         lineHeight: 20,
-        color: "#2C2520",
+        color: "#0F172A",
         fontFamily: "WorksansRegular",
     },
     highlightValue: {
         fontFamily: "WorksansBold",
-        color: "#79553D",
+        color: "#0B4F6C",
     },
 });

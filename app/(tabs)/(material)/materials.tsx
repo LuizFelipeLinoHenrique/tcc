@@ -481,7 +481,7 @@ const styles = StyleSheet.create({
 
     loadingText: {
         fontSize: 16,
-        color: "#79553D",
+        color: "#0B4F6C",
     },
 
     moreContainer: {
@@ -491,7 +491,7 @@ const styles = StyleSheet.create({
     },
 
     moreButton: {
-        backgroundColor: "#79553D",
+        backgroundColor: "#0B4F6C",
         paddingHorizontal: 25,
         paddingVertical: 12,
         borderRadius: 8,
@@ -512,6 +512,6 @@ const styles = StyleSheet.create({
 
     emptyText: {
         fontSize: 17,
-        color: "#79553D",
+        color: "#0B4F6C",
     },
 });

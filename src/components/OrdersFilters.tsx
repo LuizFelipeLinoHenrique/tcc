@@ -115,7 +115,7 @@ export function OrdersFilters({
                         <Ionicons
                             name="options-outline"
                             size={20}
-                            color="#79553D"
+                            color="#0B4F6C"
                         />
 
                         <Text
@@ -132,7 +132,7 @@ export function OrdersFilters({
                         <Ionicons
                             name="chevron-down"
                             size={20}
-                            color="#79553D"
+                            color="#0B4F6C"
                         />
                     </Animated.View>
                 </View>
@@ -242,7 +242,7 @@ export function OrdersFilters({
                             value={pesquisa}
                             onChangeText={setPesquisa}
                             placeholder={getPlaceholder()}
-                            placeholderTextColor="#A69D92"
+                            placeholderTextColor="#94A3B8"
                             style={[
                                 pagesStyles.input,
                                 styles.input
@@ -459,7 +459,7 @@ export function OrdersFilters({
                             <Ionicons
                                 name="close-circle-outline"
                                 size={17}
-                                color="#8D5C3B"
+                                color="#0E7490"
                             />
 
                             <Text
@@ -481,9 +481,9 @@ const styles = StyleSheet.create({
         padding: 6,
         backgroundColor: "#FFFFFF",
         borderWidth: 1,
-        borderColor: "#E8E2D8",
+        borderColor: "#DCE7EE",
         borderRadius: 18,
-        shadowColor: "#30241A",
+        shadowColor: "#082F42",
         shadowOffset: { width: 0, height: 3 },
         shadowOpacity: 0.05,
         shadowRadius: 10,
@@ -498,7 +498,7 @@ const styles = StyleSheet.create({
         borderRadius: 12,
     },
     headerPressed: {
-        backgroundColor: "#F7F3EE",
+        backgroundColor: "#F0F5F8",
     },
     headerConteudoGroup: {
         width: "100%",
@@ -520,7 +520,7 @@ const styles = StyleSheet.create({
         paddingTop: 6,
         paddingBottom: 16,
         borderTopWidth: 1,
-        borderTopColor: "#F2ECE3",
+        borderTopColor: "#E5EEF3",
     },
     filtroGrupo: {
         gap: 8,
@@ -536,15 +536,15 @@ const styles = StyleSheet.create({
         paddingVertical: 6,
         borderRadius: 10,
         borderWidth: 1,
-        borderColor: "#DCD4C7",
-        backgroundColor: "#FAF8F5",
+        borderColor: "#CFDDE6",
+        backgroundColor: "#F8FAFC",
         alignItems: "center",
         justifyContent: "center",
     },
     filtroSelecionado: {
-        backgroundColor: "#79553D",
-        borderColor: "#79553D",
-        shadowColor: "#79553D",
+        backgroundColor: "#0B4F6C",
+        borderColor: "#0B4F6C",
+        shadowColor: "#0B4F6C",
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.15,
         shadowRadius: 4,
@@ -555,7 +555,7 @@ const styles = StyleSheet.create({
     },
     filtroTexto: {
         fontSize: 13,
-        color: "#6E665E",
+        color: "#475569",
         fontFamily: "WorksansMedium",
     },
     filtroTextoSelecionado: {
@@ -580,7 +580,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "center",
         gap: 6,
-        backgroundColor: "#79553D",
+        backgroundColor: "#0B4F6C",
     },
     botaoPesquisarPressed: {
         opacity: 0.88,

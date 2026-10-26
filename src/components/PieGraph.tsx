@@ -39,7 +39,7 @@ export function PieGraph({
                     </View>
                 </View>
                 <View style={styles.emptyContainer}>
-                    <Ionicons name="pie-chart-outline" size={32} color="#C2B8AD" />
+                    <Ionicons name="pie-chart-outline" size={32} color="#94A3B8" />
                     <Text style={styles.emptyText}>Nenhum pedido registrado para o gráfico</Text>
                 </View>
             </View>
@@ -47,7 +47,7 @@ export function PieGraph({
     }
 
     const activePieData = data.filter((item) => item.value > 0);
-    const pieData = (activePieData.length > 0 ? activePieData : [{ value: 1, color: "#E0D7CB", text: "" }]).map((item) => ({
+    const pieData = (activePieData.length > 0 ? activePieData : [{ value: 1, color: "#CBD8E2", text: "" }]).map((item) => ({
         value: item.value,
         color: item.color,
         text: item.value > 0 && total > 0 ? `${Math.round((item.value / total) * 100)}%` : "",
@@ -63,7 +63,7 @@ export function PieGraph({
                     {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
                 </View>
                 <View style={styles.badge}>
-                    <Ionicons name="pie-chart" size={14} color="#79553D" />
+                    <Ionicons name="pie-chart" size={14} color="#0B4F6C" />
                     <Text style={styles.badgeText}>Status</Text>
                 </View>
             </View>
@@ -131,19 +131,19 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 18,
         fontFamily: "WorksansBold",
-        color: "#2C2520",
+        color: "#0F172A",
     },
     subtitle: {
         fontSize: 12,
         fontFamily: "WorksansRegular",
-        color: "#766E64",
+        color: "#475569",
         marginTop: 2,
     },
     badge: {
         flexDirection: "row",
         alignItems: "center",
         gap: 4,
-        backgroundColor: "#F4EDE6",
+        backgroundColor: "#E8F1F5",
         paddingHorizontal: 8,
         paddingVertical: 4,
         borderRadius: 8,
@@ -151,7 +151,7 @@ const styles = StyleSheet.create({
     badgeText: {
         fontSize: 11,
         fontFamily: "WorksansSemiBold",
-        color: "#79553D",
+        color: "#0B4F6C",
     },
     contentRow: {
         flexDirection: "row",
@@ -172,12 +172,12 @@ const styles = StyleSheet.create({
     centerValue: {
         fontSize: 18,
         fontFamily: "WorksansBold",
-        color: "#2C2520",
+        color: "#0F172A",
     },
     centerSubText: {
         fontSize: 10,
         fontFamily: "WorksansRegular",
-        color: "#8C8276",
+        color: "#64748B",
     },
     legendContainer: {
         flex: 1,
@@ -204,7 +204,7 @@ const styles = StyleSheet.create({
     legendLabel: {
         fontSize: 13,
         fontFamily: "WorksansMedium",
-        color: "#463E36",
+        color: "#1E293B",
     },
     legendValues: {
         flexDirection: "row",
@@ -214,12 +214,12 @@ const styles = StyleSheet.create({
     legendCount: {
         fontSize: 13,
         fontFamily: "WorksansBold",
-        color: "#2C2520",
+        color: "#0F172A",
     },
     legendPct: {
         fontSize: 11,
         fontFamily: "WorksansRegular",
-        color: "#8C8276",
+        color: "#64748B",
     },
     emptyContainer: {
         paddingVertical: 40,
@@ -230,6 +230,6 @@ const styles = StyleSheet.create({
     emptyText: {
         fontSize: 13,
         fontFamily: "WorksansRegular",
-        color: "#9C948A",
+        color: "#64748B",
     },
 });

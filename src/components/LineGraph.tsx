@@ -32,7 +32,7 @@ export function LineGraph({
                     </View>
                 </View>
                 <View style={styles.emptyContainer}>
-                    <Ionicons name="analytics-outline" size={32} color="#C2B8AD" />
+                    <Ionicons name="analytics-outline" size={32} color="#94A3B8" />
                     <Text style={styles.emptyText}>Nenhum pedido registrado no período selecionado</Text>
                 </View>
             </View>
@@ -55,7 +55,7 @@ export function LineGraph({
                     {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
                 </View>
                 <View style={styles.badge}>
-                    <Ionicons name="trending-up" size={14} color="#79553D" />
+                    <Ionicons name="trending-up" size={14} color="#0B4F6C" />
                     <Text style={styles.badgeText}>Métricas</Text>
                 </View>
             </View>
@@ -69,10 +69,10 @@ export function LineGraph({
                     width={width}
                     data={data}
                     maxValue={maxValue || 10}
-                    color="#79553D"
+                    color="#0B4F6C"
                     thickness={3}
-                    startFillColor="#79553D"
-                    endFillColor="#FAF7F2"
+                    startFillColor="#0B4F6C"
+                    endFillColor="#F8FAFC"
                     startOpacity={0.28}
                     endOpacity={0.02}
                     noOfSections={noOfSections}
@@ -80,7 +80,7 @@ export function LineGraph({
                     animationDuration={1000}
                     onDataChangeAnimationDuration={400}
                     yAxisTextStyle={styles.axisText}
-                    dataPointsColor="#79553D"
+                    dataPointsColor="#0B4F6C"
                     dataPointsRadius={4}
                     dataPointsWidth={8}
                     dataPointsHeight={8}
@@ -88,13 +88,13 @@ export function LineGraph({
                     disableForeignObject={true}
                     focusEnabled={false}
                     spacing={safeSpacing}
-                    rulesColor="#ECE6DC"
+                    rulesColor="#E2EBF0"
                     rulesType="dashed"
                     initialSpacing={safeInitialSpacing}
                     yAxisThickness={0}
                     yAxisLabelWidth={24}
                     xAxisThickness={1}
-                    xAxisColor="#E0D7CB"
+                    xAxisColor="#CBD8E2"
                     xAxisLabelTextStyle={styles.axisText}
                     xAxisLabelsHeight={24}
                 />
@@ -119,19 +119,19 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 18,
         fontFamily: "WorksansBold",
-        color: "#2C2520",
+        color: "#0F172A",
     },
     subtitle: {
         fontSize: 12,
         fontFamily: "WorksansRegular",
-        color: "#766E64",
+        color: "#475569",
         marginTop: 2,
     },
     badge: {
         flexDirection: "row",
         alignItems: "center",
         gap: 4,
-        backgroundColor: "#F4EDE6",
+        backgroundColor: "#E8F1F5",
         paddingHorizontal: 8,
         paddingVertical: 4,
         borderRadius: 8,
@@ -139,14 +139,14 @@ const styles = StyleSheet.create({
     badgeText: {
         fontSize: 11,
         fontFamily: "WorksansSemiBold",
-        color: "#79553D",
+        color: "#0B4F6C",
     },
     chartWrapper: {
         width: "100%",
         paddingTop: 8,
     },
     axisText: {
-        color: "#8C8276",
+        color: "#64748B",
         fontSize: 11,
         fontFamily: "WorksansRegular",
     },
@@ -159,16 +159,16 @@ const styles = StyleSheet.create({
     emptyText: {
         fontSize: 13,
         fontFamily: "WorksansRegular",
-        color: "#9C948A",
+        color: "#64748B",
     },
     customPoint: {
         width: 8,
         height: 8,
         borderRadius: 4,
-        backgroundColor: "#79553D",
+        backgroundColor: "#0B4F6C",
         borderWidth: 1.5,
         borderColor: "#FFFFFF",
-        shadowColor: "#30241A",
+        shadowColor: "#082F42",
         shadowOffset: { width: 0, height: 1 },
         shadowOpacity: 0.15,
         shadowRadius: 2,

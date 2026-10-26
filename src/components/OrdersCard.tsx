@@ -60,12 +60,12 @@ export function OrderCard({ pedido, iconDetails, iconEdit, iconDelete }: OrderCa
                 <View style={styles.header}>
                     <View style={styles.headerLeft}>
                         <View style={styles.orderIconBox}>
-                            <Ionicons name="cube" size={20} color="#79553D" />
+                            <Ionicons name="cube" size={20} color="#0B4F6C" />
                         </View>
                         <View>
                             <Text style={styles.orderTitle}>Pedido #{pedido.id}</Text>
                             <View style={styles.dateRow}>
-                                <Ionicons name="calendar-outline" size={12} color="#8C8276" />
+                                <Ionicons name="calendar-outline" size={12} color="#64748B" />
                                 <Text style={styles.dateText}>{pedido.data_pedido}</Text>
                             </View>
                         </View>
@@ -81,7 +81,7 @@ export function OrderCard({ pedido, iconDetails, iconEdit, iconDelete }: OrderCa
                 <View style={styles.metaGrid}>
                     <View style={styles.metaItem}>
                         <View style={styles.metaLabelRow}>
-                            <Ionicons name="person-outline" size={14} color="#8C8276" />
+                            <Ionicons name="person-outline" size={14} color="#64748B" />
                             <Text style={styles.metaLabel}>Cliente</Text>
                         </View>
                         <Text style={styles.metaValue}>ID #{pedido.id_cliente}</Text>
@@ -89,7 +89,7 @@ export function OrderCard({ pedido, iconDetails, iconEdit, iconDelete }: OrderCa
 
                     <View style={styles.metaItem}>
                         <View style={styles.metaLabelRow}>
-                            <Ionicons name="cube-outline" size={14} color="#8C8276" />
+                            <Ionicons name="cube-outline" size={14} color="#64748B" />
                             <Text style={styles.metaLabel}>Produto</Text>
                         </View>
                         <Text style={styles.metaValue}>ID #{pedido.id_produto}</Text>
@@ -97,7 +97,7 @@ export function OrderCard({ pedido, iconDetails, iconEdit, iconDelete }: OrderCa
 
                     <View style={styles.metaItem}>
                         <View style={styles.metaLabelRow}>
-                            <Ionicons name="layers-outline" size={14} color="#8C8276" />
+                            <Ionicons name="layers-outline" size={14} color="#64748B" />
                             <Text style={styles.metaLabel}>Quantidade</Text>
                         </View>
                         <Text style={styles.metaValue}>{pedido.qtde} un.</Text>
@@ -115,7 +115,7 @@ export function OrderCard({ pedido, iconDetails, iconEdit, iconDelete }: OrderCa
                         ]}
                         hitSlop={4}
                     >
-                        <Ionicons name="eye-outline" size={16} color="#79553D" />
+                        <Ionicons name="eye-outline" size={16} color="#0B4F6C" />
                         <Text style={styles.detailsBtnText}>Detalhes</Text>
                     </Pressable>
 
@@ -128,7 +128,7 @@ export function OrderCard({ pedido, iconDetails, iconEdit, iconDelete }: OrderCa
                         ]}
                         hitSlop={4}
                     >
-                        <Ionicons name="pencil-outline" size={16} color="#79553D" />
+                        <Ionicons name="pencil-outline" size={16} color="#0B4F6C" />
                         <Text style={styles.editBtnText}>Editar</Text>
                     </Pressable>
 
@@ -159,9 +159,9 @@ const styles = StyleSheet.create({
         backgroundColor: "#FFFFFF",
         borderRadius: 18,
         borderWidth: 1,
-        borderColor: "#E8E2D8",
+        borderColor: "#DCE7EE",
         padding: 18,
-        shadowColor: "#30241A",
+        shadowColor: "#082F42",
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.06,
         shadowRadius: 12,
@@ -181,16 +181,16 @@ const styles = StyleSheet.create({
         width: 42,
         height: 42,
         borderRadius: 12,
-        backgroundColor: "#F5EEE8",
+        backgroundColor: "#E0EDF4",
         borderWidth: 1,
-        borderColor: "#EAE0D4",
+        borderColor: "#D9E5EC",
         alignItems: "center",
         justifyContent: "center",
     },
     orderTitle: {
         fontSize: 16,
         fontFamily: "WorksansBold",
-        color: "#2C2520",
+        color: "#0F172A",
     },
     dateRow: {
         flexDirection: "row",
@@ -201,7 +201,7 @@ const styles = StyleSheet.create({
     dateText: {
         fontSize: 12,
         fontFamily: "WorksansRegular",
-        color: "#8C8276",
+        color: "#64748B",
     },
     statusBadge: {
         flexDirection: "row",
@@ -210,9 +210,9 @@ const styles = StyleSheet.create({
         paddingHorizontal: 9,
         paddingVertical: 4,
         borderRadius: 8,
-        backgroundColor: "#FAF7F2",
+        backgroundColor: "#F8FAFC",
         borderWidth: 1,
-        borderColor: "#E5DDD1",
+        borderColor: "#D4E1E9",
     },
     statusPending: {
         backgroundColor: "#FDF7ED",
@@ -244,11 +244,11 @@ const styles = StyleSheet.create({
     statusDefaultText: {
         fontSize: 12,
         fontFamily: "WorksansSemiBold",
-        color: "#5C5248",
+        color: "#334155",
     },
     divider: {
         height: 1,
-        backgroundColor: "#F0EBE2",
+        backgroundColor: "#E2EBF0",
         marginVertical: 14,
     },
     metaGrid: {
@@ -260,11 +260,11 @@ const styles = StyleSheet.create({
     metaItem: {
         flex: 1,
         minWidth: 90,
-        backgroundColor: "#FAF8F5",
+        backgroundColor: "#F8FAFC",
         borderRadius: 10,
         padding: 10,
         borderWidth: 1,
-        borderColor: "#ECE5DC",
+        borderColor: "#DDE8EF",
     },
     metaLabelRow: {
         flexDirection: "row",
@@ -275,12 +275,12 @@ const styles = StyleSheet.create({
     metaLabel: {
         fontSize: 11,
         fontFamily: "WorksansRegular",
-        color: "#8C8276",
+        color: "#64748B",
     },
     metaValue: {
         fontSize: 13,
         fontFamily: "WorksansBold",
-        color: "#2C2520",
+        color: "#0F172A",
     },
     actionsBar: {
         flexDirection: "row",
@@ -288,7 +288,7 @@ const styles = StyleSheet.create({
         gap: 8,
         paddingTop: 12,
         borderTopWidth: 1,
-        borderTopColor: "#F4EFEA",
+        borderTopColor: "#EDF3F7",
     },
     actionBtn: {
         flexDirection: "row",
@@ -305,21 +305,21 @@ const styles = StyleSheet.create({
     },
     detailsBtn: {
         flex: 1,
-        backgroundColor: "#F7F3EE",
+        backgroundColor: "#F0F5F8",
     },
     detailsBtnText: {
         fontSize: 12,
         fontFamily: "WorksansSemiBold",
-        color: "#79553D",
+        color: "#0B4F6C",
     },
     editBtn: {
         flex: 1,
-        backgroundColor: "#F0EBE3",
+        backgroundColor: "#E2EBF0",
     },
     editBtnText: {
         fontSize: 12,
         fontFamily: "WorksansSemiBold",
-        color: "#79553D",
+        color: "#0B4F6C",
     },
     deleteBtn: {
         backgroundColor: "#FDF2EF",

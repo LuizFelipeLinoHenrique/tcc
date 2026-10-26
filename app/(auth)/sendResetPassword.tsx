@@ -39,7 +39,7 @@ export default function sendResetPassword() {
       if (!error) {
         setMessage("Se o e-mail estiver cadastrado, enviaremos as instruções em instantes."); // não é um erro, apenas um aviso
         setTimeout(() => {
-          setErrorMessage("");
+          setMessage("");
         }, 3000);
       };
 
@@ -58,14 +58,14 @@ export default function sendResetPassword() {
         <View style={authStyles.field}>
           <Text style={authStyles.label}>E-mail</Text>
           <View style={localStyles.inputWrapper}>
-            <Ionicons name="mail-outline" size={20} color="#9C9286" style={localStyles.inputIcon} />
+            <Ionicons name="mail-outline" size={20} color="#64748B" style={localStyles.inputIcon} />
             <TextInput
               autoCapitalize="none"
               autoComplete="email"
               keyboardType="email-address"
               onChangeText={setEmail}
               placeholder="voce@exemplo.com"
-              placeholderTextColor="#A79E92"
+              placeholderTextColor="#94A3B8"
               style={[authStyles.input, localStyles.inputWithIcon]}
               value={email}
             />
@@ -99,7 +99,7 @@ export default function sendResetPassword() {
         <AnimatedButton
           title={
             <View style={localStyles.backButtonContent}>
-              <Ionicons name="arrow-back-outline" size={16} color="#5C5248" />
+              <Ionicons name="arrow-back-outline" size={16} color="#334155" />
               <Text style={authStyles.secondaryButtonText}>Voltar para o login</Text>
             </View>
           }

@@ -588,7 +588,7 @@ export default function Orders() {
                             }}
                         >
                             <ActivityIndicator
-                                color="#65442F"
+                                color="#0B4F6C"
                             />
                         </View>
                     </View>
@@ -621,7 +621,7 @@ export default function Orders() {
                         >
                             <ActivityIndicator
                                 size="large"
-                                color="#65442F"
+                                color="#0B4F6C"
                             />
                         </View>
                     </View>
@@ -664,7 +664,7 @@ export default function Orders() {
                             >
                                 <ActivityIndicator
                                     size="large"
-                                    color="#65442F"
+                                    color="#0B4F6C"
                                 />
                             </View>
                         ) : pedidoSelecionado ? (

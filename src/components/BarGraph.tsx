@@ -40,7 +40,7 @@ export function BarGraph({
                     </View>
                 </View>
                 <View style={styles.emptyContainer}>
-                    <Ionicons name="stats-chart-outline" size={32} color="#C2B8AD" />
+                    <Ionicons name="stats-chart-outline" size={32} color="#94A3B8" />
                     <Text style={styles.emptyText}>Sem dados suficientes para o gráfico</Text>
                 </View>
             </View>
@@ -59,7 +59,7 @@ export function BarGraph({
                     {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
                 </View>
                 <View style={styles.badge}>
-                    <Ionicons name={badgeIcon} size={14} color="#79553D" />
+                    <Ionicons name={badgeIcon} size={14} color="#0B4F6C" />
                     <Text style={styles.badgeText}>{badgeText}</Text>
                 </View>
             </View>
@@ -73,20 +73,20 @@ export function BarGraph({
                     height={190}
                     barWidth={26}
                     barBorderRadius={6}
-                    frontColor="#79553D"
+                    frontColor="#0B4F6C"
                     maxValue={calculatedMax}
                     noOfSections={noOfSections}
                     yAxisTextStyle={styles.axisText}
                     xAxisLabelTextStyle={styles.axisText}
                     spacing={spacing}
                     initialSpacing={initialSpacing}
-                    rulesColor="#ECE6DC"
+                    rulesColor="#E2EBF0"
                     rulesType="dashed"
                     yAxisThickness={0}
                     xAxisThickness={1}
-                    xAxisColor="#E0D7CB"
+                    xAxisColor="#CBD8E2"
                     yAxisLabelWidth={28}
-                    showValuesAsTopText
+                    showValuesAsTopLabel
                     topLabelTextStyle={styles.topValueText}
                 />
             </View>
@@ -110,19 +110,19 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 18,
         fontFamily: "WorksansBold",
-        color: "#2C2520",
+        color: "#0F172A",
     },
     subtitle: {
         fontSize: 12,
         fontFamily: "WorksansRegular",
-        color: "#766E64",
+        color: "#475569",
         marginTop: 2,
     },
     badge: {
         flexDirection: "row",
         alignItems: "center",
         gap: 4,
-        backgroundColor: "#F4EDE6",
+        backgroundColor: "#E8F1F5",
         paddingHorizontal: 8,
         paddingVertical: 4,
         borderRadius: 8,
@@ -130,7 +130,7 @@ const styles = StyleSheet.create({
     badgeText: {
         fontSize: 11,
         fontFamily: "WorksansSemiBold",
-        color: "#79553D",
+        color: "#0B4F6C",
     },
     chartWrapper: {
         alignItems: "center",
@@ -139,12 +139,12 @@ const styles = StyleSheet.create({
         paddingTop: 10,
     },
     axisText: {
-        color: "#8C8276",
+        color: "#64748B",
         fontSize: 11,
         fontFamily: "WorksansRegular",
     },
     topValueText: {
-        color: "#65442F",
+        color: "#0B4F6C",
         fontSize: 10,
         fontFamily: "WorksansSemiBold",
         marginBottom: 2,
@@ -158,6 +158,6 @@ const styles = StyleSheet.create({
     emptyText: {
         fontSize: 13,
         fontFamily: "WorksansRegular",
-        color: "#9C948A",
+        color: "#64748B",
     },
 });

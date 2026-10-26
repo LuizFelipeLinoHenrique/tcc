@@ -204,8 +204,8 @@ const styles = StyleSheet.create({
         paddingVertical: 7,
         borderRadius: 10,
         borderWidth: 1,
-        borderColor: "#E8E2D8",
-        shadowColor: "#2C2016",
+        borderColor: "#DCE7EE",
+        shadowColor: "#062534",
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.12,
         shadowRadius: 6,
@@ -214,7 +214,7 @@ const styles = StyleSheet.create({
 
     label: {
         fontSize: 13,
-        color: "#302B26",
+        color: "#0F172A",
         fontFamily: "WorksansSemiBold",
     },
 
@@ -226,7 +226,7 @@ const styles = StyleSheet.create({
         width: 44,
         height: 44,
         borderRadius: 22,
-        backgroundColor: "#8C684E",
+        backgroundColor: "#145D7E",
         alignItems: "center",
         justifyContent: "center",
         shadowColor: "#302016",
@@ -244,10 +244,10 @@ const styles = StyleSheet.create({
         width: 56,
         height: 56,
         borderRadius: 28,
-        backgroundColor: "#79553D",
+        backgroundColor: "#0B4F6C",
         alignItems: "center",
         justifyContent: "center",
-        shadowColor: "#4E3626",
+        shadowColor: "#052635",
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.28,
         shadowRadius: 10,
@@ -257,11 +257,11 @@ const styles = StyleSheet.create({
     },
 
     mainButtonPressed: {
-        backgroundColor: "#63422C",
+        backgroundColor: "#083A50",
         transform: [{ scale: 0.96 }],
     },
 
     mainButtonOpen: {
-        backgroundColor: "#553823",
+        backgroundColor: "#062E40",
     },
 });

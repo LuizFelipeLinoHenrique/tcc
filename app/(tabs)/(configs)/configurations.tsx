@@ -37,7 +37,7 @@ export default function Configurations() {
         try {
             const { data, error } = await supabase.auth.getUser();
             if (data?.user) {
-                setUserEmail(data.user.email ?? "Usuário Nexus");
+                setUserEmail(data.user.email ?? "Usuário PalletCore");
                 setUserId(data.user.id);
                 if (data.user.created_at) {
                     const date = new Date(data.user.created_at);
@@ -82,9 +82,9 @@ export default function Configurations() {
     }
 
     function getInitials(email?: string | null) {
-        if (!email) return "NX";
+        if (!email) return "PC";
         const clean = email.split("@")[0].replace(/[^a-zA-Z]/g, "");
-        return (clean.slice(0, 2) || "NX").toUpperCase();
+        return (clean.slice(0, 2) || "PC").toUpperCase();
     }
 
     return (
@@ -94,7 +94,7 @@ export default function Configurations() {
                     {/* CABEÇALHO */}
                     <View style={styles.header}>
                         <View style={styles.headerIcon}>
-                            <Ionicons name="settings" size={24} color="#79553D" />
+                            <Ionicons name="settings" size={24} color="#0B4F6C" />
                         </View>
                         <View style={styles.headerTextContainer}>
                             <Text style={pagesStyles.brand}>SISTEMA E PREFERÊNCIAS</Text>
@@ -117,7 +117,7 @@ export default function Configurations() {
                         <View style={styles.profileInfo}>
                             <View style={styles.profileNameRow}>
                                 <Text style={styles.profileName}>
-                                    {loadingUser ? "Carregando..." : userEmail || "Usuário Nexus"}
+                                    {loadingUser ? "Carregando..." : userEmail || "Usuário PalletCore"}
                                 </Text>
                                 <View style={styles.badgeAdmin}>
                                     <Ionicons name="shield-checkmark" size={12} color="#166534" />
@@ -140,7 +140,7 @@ export default function Configurations() {
                     {/* PREFERÊNCIAS */}
                     <View style={styles.section}>
                         <View style={styles.sectionHeader}>
-                            <Ionicons name="options-outline" size={17} color="#79553D" />
+                            <Ionicons name="options-outline" size={17} color="#0B4F6C" />
                             <Text style={styles.sectionTitle}>Preferências do Aplicativo</Text>
                         </View>
 
@@ -155,8 +155,8 @@ export default function Configurations() {
                                 <Switch
                                     value={notificacoes}
                                     onValueChange={setNotificacoes}
-                                    thumbColor={notificacoes ? "#79553D" : "#E2DCD5"}
-                                    trackColor={{ false: "#E2DCD5", true: "#EADCCF" }}
+                                    thumbColor={notificacoes ? "#0B4F6C" : "#D9E3EA"}
+                                    trackColor={{ false: "#D9E3EA", true: "#BAE6FD" }}
                                 />
                             </View>
 
@@ -172,8 +172,8 @@ export default function Configurations() {
                                 <Switch
                                     value={atualizacoesAuto}
                                     onValueChange={setAtualizacoesAuto}
-                                    thumbColor={atualizacoesAuto ? "#79553D" : "#E2DCD5"}
-                                    trackColor={{ false: "#E2DCD5", true: "#EADCCF" }}
+                                    thumbColor={atualizacoesAuto ? "#0B4F6C" : "#D9E3EA"}
+                                    trackColor={{ false: "#D9E3EA", true: "#BAE6FD" }}
                                 />
                             </View>
                         </View>
@@ -182,14 +182,14 @@ export default function Configurations() {
                     {/* DADOS DO PROJETO DE TCC */}
                     <View style={styles.section}>
                         <View style={styles.sectionHeader}>
-                            <Ionicons name="school-outline" size={17} color="#79553D" />
+                            <Ionicons name="school-outline" size={17} color="#0B4F6C" />
                             <Text style={styles.sectionTitle}>Informações do Projeto (TCC)</Text>
                         </View>
 
                         <View style={styles.tccGrid}>
                             <View style={styles.tccItem}>
                                 <Text style={styles.tccLabel}>PROJETO</Text>
-                                <Text style={styles.tccValue}>Nexus Gestão de Pedidos e Clientes</Text>
+                                <Text style={styles.tccValue}>PalletCore - Gestão de Pedidos e Clientes</Text>
                             </View>
 
                             <View style={styles.tccItem}>
@@ -220,7 +220,7 @@ export default function Configurations() {
                     {/* AÇÕES DE CONTA */}
                     <View style={styles.section}>
                         <View style={styles.sectionHeader}>
-                            <Ionicons name="key-outline" size={17} color="#79553D" />
+                            <Ionicons name="key-outline" size={17} color="#0B4F6C" />
                             <Text style={styles.sectionTitle}>Ações da Conta</Text>
                         </View>
 
@@ -233,7 +233,7 @@ export default function Configurations() {
                                 ]}
                             >
                                 <View style={styles.actionIconContainer}>
-                                    <Ionicons name="lock-closed-outline" size={18} color="#79553D" />
+                                    <Ionicons name="lock-closed-outline" size={18} color="#0B4F6C" />
                                 </View>
                                 <View style={styles.actionTextContainer}>
                                     <Text style={styles.actionTitle}>Alterar Senha de Acesso</Text>
@@ -241,7 +241,7 @@ export default function Configurations() {
                                         Receba um link de redefinição no seu e-mail
                                     </Text>
                                 </View>
-                                <Ionicons name="chevron-forward" size={18} color="#A59D94" />
+                                <Ionicons name="chevron-forward" size={18} color="#94A3B8" />
                             </Pressable>
 
                             <Pressable
@@ -295,7 +295,7 @@ const styles = StyleSheet.create({
         width: 48,
         height: 48,
         borderRadius: 12,
-        backgroundColor: "#F4EDE6",
+        backgroundColor: "#E8F1F5",
         alignItems: "center",
         justifyContent: "center",
         marginTop: 2,
@@ -309,7 +309,7 @@ const styles = StyleSheet.create({
     },
     divider: {
         height: 1,
-        backgroundColor: "#EAE4DC",
+        backgroundColor: "#DDE8EF",
         marginVertical: 20,
     },
     profileSection: {
@@ -317,19 +317,19 @@ const styles = StyleSheet.create({
         alignItems: "center",
         gap: 16,
         padding: 16,
-        backgroundColor: "#FAF8F5",
+        backgroundColor: "#F8FAFC",
         borderRadius: 16,
         borderWidth: 1,
-        borderColor: "#EAE4DC",
+        borderColor: "#DDE8EF",
     },
     avatar: {
         width: 54,
         height: 54,
         borderRadius: 27,
-        backgroundColor: "#79553D",
+        backgroundColor: "#0B4F6C",
         alignItems: "center",
         justifyContent: "center",
-        shadowColor: "#79553D",
+        shadowColor: "#0B4F6C",
         shadowOffset: { width: 0, height: 3 },
         shadowOpacity: 0.25,
         shadowRadius: 6,
@@ -353,7 +353,7 @@ const styles = StyleSheet.create({
     profileName: {
         fontSize: 16,
         fontFamily: "WorksansBold",
-        color: "#2C2520",
+        color: "#0F172A",
     },
     badgeAdmin: {
         flexDirection: "row",
@@ -374,12 +374,12 @@ const styles = StyleSheet.create({
     profileSubtext: {
         fontSize: 13,
         fontFamily: "WorksansRegular",
-        color: "#6E655B",
+        color: "#475569",
     },
     profileId: {
         fontSize: 11,
         fontFamily: "WorksansRegular",
-        color: "#A59D94",
+        color: "#94A3B8",
     },
     section: {
         marginTop: 22,
@@ -393,15 +393,15 @@ const styles = StyleSheet.create({
     sectionTitle: {
         fontSize: 14,
         fontFamily: "WorksansSemiBold",
-        color: "#2C2520",
+        color: "#0F172A",
         textTransform: "uppercase",
         letterSpacing: 0.5,
     },
     prefList: {
-        backgroundColor: "#FAF8F5",
+        backgroundColor: "#F8FAFC",
         borderRadius: 14,
         borderWidth: 1,
-        borderColor: "#EAE4DC",
+        borderColor: "#DDE8EF",
         paddingHorizontal: 16,
     },
     prefItem: {
@@ -413,7 +413,7 @@ const styles = StyleSheet.create({
     },
     prefDivider: {
         height: 1,
-        backgroundColor: "#EDE7E0",
+        backgroundColor: "#E2ECF2",
     },
     prefTextContainer: {
         flex: 1,
@@ -422,18 +422,18 @@ const styles = StyleSheet.create({
     prefTitle: {
         fontSize: 14,
         fontFamily: "WorksansSemiBold",
-        color: "#2C2520",
+        color: "#0F172A",
     },
     prefDescription: {
         fontSize: 12,
         fontFamily: "WorksansRegular",
-        color: "#6E655B",
+        color: "#475569",
     },
     tccGrid: {
-        backgroundColor: "#FAF8F5",
+        backgroundColor: "#F8FAFC",
         borderRadius: 14,
         borderWidth: 1,
-        borderColor: "#EAE4DC",
+        borderColor: "#DDE8EF",
         padding: 16,
         gap: 12,
     },
@@ -443,13 +443,13 @@ const styles = StyleSheet.create({
     tccLabel: {
         fontSize: 10,
         fontFamily: "WorksansSemiBold",
-        color: "#9A6540",
+        color: "#0891B2",
         letterSpacing: 0.6,
     },
     tccValue: {
         fontSize: 13,
         fontFamily: "WorksansMedium",
-        color: "#2C2520",
+        color: "#0F172A",
     },
     tccRow: {
         flexDirection: "row",
@@ -469,20 +469,20 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         gap: 12,
-        backgroundColor: "#FAF8F5",
+        backgroundColor: "#F8FAFC",
         borderRadius: 14,
         borderWidth: 1,
-        borderColor: "#EAE4DC",
+        borderColor: "#DDE8EF",
         padding: 14,
     },
     actionButtonPressed: {
-        backgroundColor: "#F2ECE3",
+        backgroundColor: "#E5EEF3",
     },
     actionIconContainer: {
         width: 36,
         height: 36,
         borderRadius: 10,
-        backgroundColor: "#F4EDE6",
+        backgroundColor: "#E8F1F5",
         alignItems: "center",
         justifyContent: "center",
     },
@@ -493,12 +493,12 @@ const styles = StyleSheet.create({
     actionTitle: {
         fontSize: 14,
         fontFamily: "WorksansSemiBold",
-        color: "#2C2520",
+        color: "#0F172A",
     },
     actionSubtitle: {
         fontSize: 12,
         fontFamily: "WorksansRegular",
-        color: "#6E655B",
+        color: "#475569",
     },
     actionButtonDestructive: {
         flexDirection: "row",

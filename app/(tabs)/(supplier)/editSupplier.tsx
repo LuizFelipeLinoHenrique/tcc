@@ -79,7 +79,7 @@
 //                             <AnimatedButton
 //                                 title={
 //                                     <View style={styles.switchButtonContent}>
-//                                         <Ionicons name="search-outline" size={16} color="#79553D" />
+//                                         <Ionicons name="search-outline" size={16} color="#0B4F6C" />
 //                                         <Text style={styles.switchButtonText}>Editar outro fornecedor</Text>
 //                                     </View>
 //                                 }
@@ -104,7 +104,7 @@
 //                         {/* CABEÇALHO */}
 //                         <View style={styles.header}>
 //                             <View style={styles.headerIcon}>
-//                                 <Ionicons name="create" size={24} color="#79553D" />
+//                                 <Ionicons name="create" size={24} color="#0B4F6C" />
 //                             </View>
 //                             <View style={styles.headerTextContainer}>
 //                                 <Text style={pagesStyles.brand}>GESTÃO DE FORNECEDORES</Text>
@@ -126,7 +126,7 @@
 //                                     <Ionicons
 //                                         name="finger-print-outline"
 //                                         size={18}
-//                                         color="#8A8178"
+//                                         color="#64748B"
 //                                         style={styles.inputIcon}
 //                                     />
 //                                     <TextInput
@@ -136,7 +136,7 @@
 //                                             setErroBusca(null);
 //                                         }}
 //                                         placeholder="Ex: 1"
-//                                         placeholderTextColor="#A59D94"
+//                                         placeholderTextColor="#94A3B8"
 //                                         keyboardType="numeric"
 //                                         returnKeyType="search"
 //                                         onSubmitEditing={buscarFornecedor}
@@ -192,7 +192,7 @@
 //         width: 48,
 //         height: 48,
 //         borderRadius: 12,
-//         backgroundColor: "#F4EDE6",
+//         backgroundColor: "#E8F1F5",
 //         alignItems: "center",
 //         justifyContent: "center",
 //         marginTop: 2,
@@ -206,7 +206,7 @@
 //     },
 //     divider: {
 //         height: 1,
-//         backgroundColor: "#EAE4DC",
+//         backgroundColor: "#DDE8EF",
 //         marginVertical: 20,
 //     },
 //     searchSection: {
@@ -215,9 +215,9 @@
 //     inputWrapper: {
 //         flexDirection: "row",
 //         alignItems: "center",
-//         backgroundColor: "#FAF8F5",
+//         backgroundColor: "#F8FAFC",
 //         borderWidth: 1,
-//         borderColor: "#DCD4C7",
+//         borderColor: "#CFDDE6",
 //         borderRadius: 12,
 //         paddingHorizontal: 12,
 //     },
@@ -229,7 +229,7 @@
 //         minHeight: 46,
 //         fontSize: 15,
 //         fontFamily: "WorksansRegular",
-//         color: "#2C2520",
+//         color: "#0F172A",
 //     },
 //     errorBox: {
 //         flexDirection: "row",
@@ -252,9 +252,9 @@
 //         opacity: 0.5,
 //     },
 //     switchButton: {
-//         backgroundColor: "#FAF8F5",
+//         backgroundColor: "#F8FAFC",
 //         borderWidth: 1,
-//         borderColor: "#DCD4C7",
+//         borderColor: "#CFDDE6",
 //         paddingHorizontal: 14,
 //         paddingVertical: 8,
 //         borderRadius: 10,
@@ -267,6 +267,6 @@
 //     switchButtonText: {
 //         fontSize: 13,
 //         fontFamily: "WorksansSemiBold",
-//         color: "#79553D",
+//         color: "#0B4F6C",
 //     },
 // });

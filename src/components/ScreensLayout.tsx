@@ -35,7 +35,7 @@ export function PagesLayout({ children, scroll, scrollContent, noScrollContent }
 export const pagesStyles = StyleSheet.create({
     safeArea: {
         flex: 1,
-        backgroundColor: "#F6F3ED",
+        backgroundColor: "#F4F7F9",
     },
     flex: {
         flex: 1,
@@ -56,17 +56,17 @@ export const pagesStyles = StyleSheet.create({
         width: "100%",
         backgroundColor: "#FFFFFF",
         borderWidth: 1,
-        borderColor: "#E8E2D8",
+        borderColor: "#DCE7EE",
         borderRadius: 20,
         padding: 24,
-        shadowColor: "#30241A",
+        shadowColor: "#082F42",
         shadowOffset: { width: 0, height: 6 },
         shadowOpacity: 0.07,
         shadowRadius: 16,
         elevation: 2,
     },
     brand: {
-        color: "#9A6540",
+        color: "#0891B2",
         fontSize: 12,
         fontFamily: "WorksansSemiBold",
         letterSpacing: 1.4,
@@ -74,13 +74,13 @@ export const pagesStyles = StyleSheet.create({
     },
     title: {
         marginVertical: 6,
-        color: "#2C2520",
+        color: "#0F172A",
         fontSize: 26,
         lineHeight: 32,
         fontFamily: "WorksansBold"
     },
     graphTitle: {
-        color: "#2C2520",
+        color: "#0F172A",
         fontSize: 20,
         lineHeight: 26,
         marginBottom: 14,
@@ -88,7 +88,7 @@ export const pagesStyles = StyleSheet.create({
     },
     description: {
         marginTop: 6,
-        color: "#6E655B",
+        color: "#475569",
         fontSize: 14,
         lineHeight: 20,
         fontFamily: "WorksansRegular"
@@ -101,7 +101,7 @@ export const pagesStyles = StyleSheet.create({
         gap: 6
     },
     label: {
-        color: "#463E36",
+        color: "#1E293B",
         fontSize: 12,
         fontFamily: "WorksansSemiBold",
         letterSpacing: 0.2,
@@ -109,11 +109,11 @@ export const pagesStyles = StyleSheet.create({
     input: {
         minHeight: 48,
         borderWidth: 1,
-        borderColor: "#DCD4C7",
+        borderColor: "#CFDDE6",
         borderRadius: 12,
-        backgroundColor: "#FAF8F5",
+        backgroundColor: "#F8FAFC",
         paddingHorizontal: 15,
-        color: "#2C2520",
+        color: "#0F172A",
         fontSize: 15,
         fontFamily: "WorksansRegular",
     },
@@ -123,15 +123,15 @@ export const pagesStyles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "center",
         borderRadius: 12,
-        backgroundColor: "#79553D",
-        shadowColor: "#79553D",
+        backgroundColor: "#0B4F6C",
+        shadowColor: "#0B4F6C",
         shadowOffset: { width: 0, height: 3 },
         shadowOpacity: 0.2,
         shadowRadius: 6,
         elevation: 2,
     },
     primaryButtonPressed: {
-        backgroundColor: "#63422C",
+        backgroundColor: "#083A50",
         transform: [{ scale: 0.99 }]
     },
     primaryButtonText: {
@@ -141,18 +141,18 @@ export const pagesStyles = StyleSheet.create({
         letterSpacing: 0.3,
     },
     link: {
-        color: "#8D5C3B",
+        color: "#0E7490",
         fontSize: 13,
         fontFamily: "WorksansSemiBold"
     },
     text: {
-        color: "#38312B",
+        color: "#1E293B",
         fontSize: 15,
         lineHeight: 21,
         fontFamily: "WorksansRegular"
     },
     textBold: {
-        color: "#2C2520",
+        color: "#0F172A",
         fontSize: 15,
         lineHeight: 21,
         fontFamily: "WorksansBold"
@@ -166,7 +166,7 @@ export const pagesStyles = StyleSheet.create({
         gap: 4
     },
     footerText: {
-        color: "#766E64",
+        color: "#475569",
         fontSize: 13,
         fontFamily: "WorksansRegular"
     },
@@ -203,11 +203,11 @@ export const pagesStyles = StyleSheet.create({
         justifyContent: "center",
         borderRadius: 12,
         borderWidth: 1.5,
-        borderColor: "#D8CFC3",
+        borderColor: "#CBD8E2",
         backgroundColor: "#FFFFFF",
     },
     secondaryButtonText: {
-        color: "#5C5248",
+        color: "#334155",
         fontSize: 14,
         fontFamily: "WorksansSemiBold"
     },

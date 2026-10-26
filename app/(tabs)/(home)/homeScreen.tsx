@@ -128,8 +128,8 @@ export default function HomeScreen() {
                     const precoUnit = prodInfo
                         ? prodInfo.preco
                         : listaProdutos.length > 0
-                        ? Number(listaProdutos[0].preco ?? listaProdutos[0]["preço"] ?? 0)
-                        : 0;
+                            ? Number(listaProdutos[0].preco ?? listaProdutos[0]["preço"] ?? 0)
+                            : 0;
 
                     somaFaturamento += qtde * precoUnit;
 
@@ -154,7 +154,7 @@ export default function HomeScreen() {
                 ]);
 
                 // Gráfico de Barras: Top Materiais com Demanda
-                const coresBarras = ["#79553D", "#9C6E2E", "#A06B56", "#B88D6F"];
+                const coresBarras = ["#0B4F6C", "#0E7490", "#145D7E", "#38BDF8"];
                 const topBars: BarGraphItem[] = [];
 
                 if (listaProdutos.length > 0) {
@@ -181,7 +181,7 @@ export default function HomeScreen() {
                     topBars.push({
                         value: somaQtde > 0 ? somaQtde : 1,
                         label: "Pedido #1",
-                        frontColor: "#79553D",
+                        frontColor: "#0B4F6C",
                     });
                 }
 
@@ -192,7 +192,7 @@ export default function HomeScreen() {
                 const timelinePoints = buildTimelineData(listaPedidos, active);
                 setOrdersNum(timelinePoints);
 
-                const maiorValor = Math.max(...timelinePoints.map((p) => p.value), 0);
+                const maiorValor = Math.max(...timelinePoints.map((p) => p.value ?? 0), 0);
                 setMaxValue(Math.max(Math.ceil((maiorValor + 2) / 2) * 2, 5));
             } catch (err) {
                 console.error("Erro geral ao processar métricas do dashboard:", err);
@@ -316,8 +316,8 @@ export default function HomeScreen() {
                     <View style={styles.kpiContainer}>
                         {/* Faturamento Estimado */}
                         <View style={[styles.kpiCard, styles.kpiCardHighlight, isMobile && styles.kpiCardMobile]}>
-                            <View style={[styles.kpiIconWrapper, { backgroundColor: "#F5EEE8" }]}>
-                                <Ionicons name="cash" size={22} color="#79553D" />
+                            <View style={[styles.kpiIconWrapper, { backgroundColor: "#E0EDF4" }]}>
+                                <Ionicons name="cash" size={22} color="#0B4F6C" />
                             </View>
                             <View style={styles.kpiContent}>
                                 <Text style={styles.kpiLabel}>Faturamento dos Pedidos</Text>
@@ -418,12 +418,56 @@ export default function HomeScreen() {
                     </View>
 
                     {/* Gráfico 1: Evolução Temporal com Seletor de Período */}
+
+                    {/* Visão de Suporte Operacional (Clientes, Materiais e Fornecedores) */}
+                    <View style={[pagesStyles.card, styles.supportCard, { width: "100%" }]}>
+                        <View style={styles.supportHeader}>
+                            <View style={styles.supportIcon}>
+                                <Ionicons name="business" size={20} color="#0B4F6C" />
+                            </View>
+                            <View>
+                                <Text style={styles.supportTitle}>Infraestrutura & Parceiros</Text>
+                                <Text style={styles.supportSubtitle}>
+                                    Base ativa de clientes, catálogo e fornecedores da cadeia
+                                </Text>
+                            </View>
+                        </View>
+                        <View style={styles.supportMetricsRow}>
+                            <View style={styles.supportMetricItem}>
+                                <Text style={styles.supportMetricNum}>{totalClientes}</Text>
+                                <Text style={styles.supportMetricLabel}>Clientes Ativos</Text>
+                            </View>
+
+                            <View style={styles.supportDivider} />
+
+                            <View style={styles.supportMetricItem}>
+                                <Text style={styles.supportMetricNum}>{totalMateriais}</Text>
+                                <Text style={styles.supportMetricLabel}>Materiais Cadastrados</Text>
+                            </View>
+
+                            <View style={styles.supportDivider} />
+
+                            <View style={styles.supportMetricItem}>
+                                <Text style={styles.supportMetricNum}>{totalFornecedores}</Text>
+                                <Text style={styles.supportMetricLabel}>Fornecedores</Text>
+                            </View>
+
+                            <View style={styles.supportDivider} />
+
+                            <View style={styles.supportMetricItem}>
+                                <Text style={styles.supportMetricNum} numberOfLines={1}>
+                                    {formatCurrency(precoMedioMateriais)}
+                                </Text>
+                                <Text style={styles.supportMetricLabel}>Preço Médio Catálogo</Text>
+                            </View>
+                        </View>
+                    </View>
+
                     <View style={styles.sectionMargin}>
                         <View style={styles.periodHeader}>
-                            <Ionicons name="calendar-outline" size={16} color="#766E64" />
+                            <Ionicons name="calendar-outline" size={16} color="#475569" />
                             <Text style={styles.periodSectionLabel}>Filtrar Período do Histórico:</Text>
                         </View>
-
                         <View style={styles.buttonContainer}>
                             <AnimatedButton
                                 stylesAnimatedView={pagesStyles.animatedView}
@@ -466,31 +510,30 @@ export default function HomeScreen() {
                             />
                         </View>
 
-                        <View style={[pagesStyles.card, styles.graphCard, { maxWidth: maxCardWidth }]}>
-                            <LineGraph
-                                title="Evolução Temporal dos Pedidos"
-                                subtitle={`Histórico mensal de pedidos registrados nos últimos ${active} meses`}
-                                data={ordersNum}
-                                width={graphWidth}
-                                maxValue={maxValue}
-                                spacing={spacing}
-                                noOfSections={5}
-                            />
-                        </View>
-                    </View>
-
-                    {/* Seção Gráfica 2: Distribuição por Status (Donut) & Top Materiais (Barras) */}
-                    <View style={[styles.dualGrid, isMobile && styles.dualGridMobile]}>
-                        {/* Donut Chart - Status dos Pedidos */}
-                        <View style={[pagesStyles.card, styles.dualCard, isMobile && styles.dualCardMobile]}>
-                            <PieGraph
-                                title="Status dos Pedidos"
-                                subtitle="Proporção e taxa de conclusão da operação"
-                                data={statusPieData}
-                                totalCount={totalPedidos}
-                                centerLabelTitle={String(totalPedidos)}
-                                centerLabelSub="Pedidos"
-                            />
+                        {/* Seção Gráfica 2: Distribuição por Status (Donut) & Top Materiais (Barras) */}
+                        <View style={[styles.dualGrid, isMobile && styles.dualGridMobile]}>
+                            <View style={[pagesStyles.card, styles.graphCard, { maxWidth: maxCardWidth }]}>
+                                <LineGraph
+                                    title="Evolução Temporal dos Pedidos"
+                                    subtitle={`Histórico mensal de pedidos registrados nos últimos ${active} meses`}
+                                    data={ordersNum}
+                                    width={graphWidth}
+                                    maxValue={maxValue}
+                                    spacing={spacing}
+                                    noOfSections={5}
+                                />
+                            </View>
+                            {/* Donut Chart - Status dos Pedidos */}
+                            <View style={[pagesStyles.card, styles.dualCard, isMobile && styles.dualCardMobile]}>
+                                <PieGraph
+                                    title="Status dos Pedidos"
+                                    subtitle="Proporção e taxa de conclusão da operação"
+                                    data={statusPieData}
+                                    totalCount={totalPedidos}
+                                    centerLabelTitle={String(totalPedidos)}
+                                    centerLabelSub="Pedidos"
+                                />
+                            </View>
                         </View>
 
                         {/* Bar Chart - Top Materiais Solicitados */}
@@ -505,59 +548,15 @@ export default function HomeScreen() {
                             />
                         </View>
                     </View>
-
-                    {/* Visão de Suporte Operacional (Clientes, Materiais e Fornecedores) */}
-                    <View style={[pagesStyles.card, styles.supportCard, { maxWidth: maxCardWidth }]}>
-                        <View style={styles.supportHeader}>
-                            <View style={styles.supportIcon}>
-                                <Ionicons name="business" size={20} color="#79553D" />
-                            </View>
-                            <View>
-                                <Text style={styles.supportTitle}>Infraestrutura & Parceiros</Text>
-                                <Text style={styles.supportSubtitle}>
-                                    Base ativa de clientes, catálogo e fornecedores da cadeia
-                                </Text>
-                            </View>
-                        </View>
-
-                        <View style={styles.supportMetricsRow}>
-                            <View style={styles.supportMetricItem}>
-                                <Text style={styles.supportMetricNum}>{totalClientes}</Text>
-                                <Text style={styles.supportMetricLabel}>Clientes Ativos</Text>
-                            </View>
-
-                            <View style={styles.supportDivider} />
-
-                            <View style={styles.supportMetricItem}>
-                                <Text style={styles.supportMetricNum}>{totalMateriais}</Text>
-                                <Text style={styles.supportMetricLabel}>Materiais Cadastrados</Text>
-                            </View>
-
-                            <View style={styles.supportDivider} />
-
-                            <View style={styles.supportMetricItem}>
-                                <Text style={styles.supportMetricNum}>{totalFornecedores}</Text>
-                                <Text style={styles.supportMetricLabel}>Fornecedores</Text>
-                            </View>
-
-                            <View style={styles.supportDivider} />
-
-                            <View style={styles.supportMetricItem}>
-                                <Text style={styles.supportMetricNum} numberOfLines={1}>
-                                    {formatCurrency(precoMedioMateriais)}
-                                </Text>
-                                <Text style={styles.supportMetricLabel}>Preço Médio Catálogo</Text>
-                            </View>
-                        </View>
-                    </View>
                 </>
             ) : (
                 <View style={styles.loadingContainer}>
-                    <ActivityIndicator size="large" color="#79553D" />
+                    <ActivityIndicator size="large" color="#0B4F6C" />
                     <Text style={styles.loadingText}>Carregando métricas consolidadas...</Text>
                 </View>
-            )}
-        </PagesLayout>
+            )
+            }
+        </PagesLayout >
     );
 }
 
@@ -568,13 +567,13 @@ const styles = StyleSheet.create({
     dashboardTitle: {
         fontSize: 24,
         fontFamily: "WorksansBold",
-        color: "#2C2520",
+        color: "#0F172A",
         marginTop: 4,
     },
     dashboardSubtitle: {
         fontSize: 13,
         fontFamily: "WorksansRegular",
-        color: "#766E64",
+        color: "#475569",
         marginTop: 2,
     },
     kpiContainer: {
@@ -590,19 +589,19 @@ const styles = StyleSheet.create({
         borderRadius: 16,
         padding: 16,
         borderWidth: 1,
-        borderColor: "#E8E2D8",
+        borderColor: "#DCE7EE",
         flexDirection: "row",
         alignItems: "center",
         gap: 14,
-        shadowColor: "#30241A",
+        shadowColor: "#082F42",
         shadowOffset: { width: 0, height: 3 },
         shadowOpacity: 0.05,
         shadowRadius: 10,
         elevation: 2,
     },
     kpiCardHighlight: {
-        borderColor: "#D8C7B8",
-        backgroundColor: "#FFFEFC",
+        borderColor: "#CBD8E2",
+        backgroundColor: "#FFFFFF",
     },
     kpiCardMobile: {
         minWidth: "100%",
@@ -620,22 +619,22 @@ const styles = StyleSheet.create({
     kpiLabel: {
         fontSize: 12,
         fontFamily: "WorksansMedium",
-        color: "#766E64",
+        color: "#475569",
     },
     kpiValue: {
         fontSize: 20,
         fontFamily: "WorksansBold",
-        color: "#2C2520",
+        color: "#0F172A",
         marginTop: 2,
     },
     kpiValueLarge: {
         fontSize: 18,
-        color: "#79553D",
+        color: "#0B4F6C",
     },
     kpiFootnote: {
         fontSize: 11,
         fontFamily: "WorksansRegular",
-        color: "#9C948A",
+        color: "#64748B",
         marginTop: 1,
     },
     statusCardsRow: {
@@ -678,7 +677,7 @@ const styles = StyleSheet.create({
     statusCardLabel: {
         fontSize: 12,
         fontFamily: "WorksansSemiBold",
-        color: "#463E36",
+        color: "#1E293B",
     },
     statusNumberRow: {
         flexDirection: "row",
@@ -719,11 +718,11 @@ const styles = StyleSheet.create({
     periodSectionLabel: {
         fontSize: 12,
         fontFamily: "WorksansSemiBold",
-        color: "#6E665E",
+        color: "#475569",
     },
     buttonContainer: {
         flexDirection: "row",
-        backgroundColor: "#EAE3D8",
+        backgroundColor: "#D9E5EC",
         borderRadius: 12,
         padding: 4,
         gap: 4,
@@ -738,7 +737,7 @@ const styles = StyleSheet.create({
     },
     periodButtonActive: {
         backgroundColor: "#FFFFFF",
-        shadowColor: "#30241A",
+        shadowColor: "#082F42",
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
         shadowRadius: 4,
@@ -747,10 +746,10 @@ const styles = StyleSheet.create({
     periodButtonText: {
         fontSize: 12,
         fontFamily: "WorksansSemiBold",
-        color: "#6E665E",
+        color: "#475569",
     },
     periodButtonTextActive: {
-        color: "#79553D",
+        color: "#0B4F6C",
         fontFamily: "WorksansBold",
     },
     graphCard: {
@@ -788,28 +787,28 @@ const styles = StyleSheet.create({
         width: 40,
         height: 40,
         borderRadius: 10,
-        backgroundColor: "#F4EDE6",
+        backgroundColor: "#E8F1F5",
         alignItems: "center",
         justifyContent: "center",
     },
     supportTitle: {
         fontSize: 16,
         fontFamily: "WorksansBold",
-        color: "#2C2520",
+        color: "#0F172A",
     },
     supportSubtitle: {
         fontSize: 12,
         fontFamily: "WorksansRegular",
-        color: "#766E64",
+        color: "#475569",
     },
     supportMetricsRow: {
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "space-between",
-        backgroundColor: "#FAF8F5",
+        backgroundColor: "#F8FAFC",
         borderRadius: 12,
         borderWidth: 1,
-        borderColor: "#EAE4DC",
+        borderColor: "#DDE8EF",
         paddingVertical: 14,
         paddingHorizontal: 12,
         flexWrap: "wrap",
@@ -823,17 +822,17 @@ const styles = StyleSheet.create({
     supportDivider: {
         width: 1,
         height: 28,
-        backgroundColor: "#DCD4C7",
+        backgroundColor: "#CFDDE6",
     },
     supportMetricNum: {
         fontSize: 16,
         fontFamily: "WorksansBold",
-        color: "#65442F",
+        color: "#0B4F6C",
     },
     supportMetricLabel: {
         fontSize: 11,
         fontFamily: "WorksansMedium",
-        color: "#8C8276",
+        color: "#64748B",
         marginTop: 2,
         textAlign: "center",
     },
@@ -847,6 +846,6 @@ const styles = StyleSheet.create({
     loadingText: {
         fontSize: 14,
         fontFamily: "WorksansRegular",
-        color: "#79553D",
+        color: "#0B4F6C",
     },
 });

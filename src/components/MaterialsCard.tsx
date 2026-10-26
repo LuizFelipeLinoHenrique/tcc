@@ -56,7 +56,7 @@ export function MaterialCard({
                 {/* Header do Card */}
                 <View style={styles.header}>
                     <View style={styles.avatar}>
-                        <Ionicons name="layers-outline" size={22} color="#79553D" />
+                        <Ionicons name="layers-outline" size={22} color="#0B4F6C" />
                     </View>
 
                     <View style={styles.headerInfo}>
@@ -78,14 +78,14 @@ export function MaterialCard({
                 {/* Detalhes do Material */}
                 <View style={styles.detailsList}>
                     <View style={styles.detailRow}>
-                        <Ionicons name="pricetag-outline" size={15} color="#8C8276" style={styles.detailIcon} />
+                        <Ionicons name="pricetag-outline" size={15} color="#64748B" style={styles.detailIcon} />
                         <Text style={styles.priceHighlight} numberOfLines={1}>
                             {formatMoney(preco)}
                         </Text>
                     </View>
 
                     <View style={styles.detailRow}>
-                        <Ionicons name="document-text-outline" size={15} color="#8C8276" style={styles.detailIcon} />
+                        <Ionicons name="document-text-outline" size={15} color="#64748B" style={styles.detailIcon} />
                         <Text style={styles.detailText} numberOfLines={2}>
                             {descricao ? descricao : "Sem descrição informada"}
                         </Text>
@@ -103,7 +103,7 @@ export function MaterialCard({
                         ]}
                         hitSlop={4}
                     >
-                        <Ionicons name="eye-outline" size={16} color="#79553D" />
+                        <Ionicons name="eye-outline" size={16} color="#0B4F6C" />
                         <Text style={styles.detailsBtnText}>Detalhes</Text>
                     </Pressable>
 
@@ -116,7 +116,7 @@ export function MaterialCard({
                         ]}
                         hitSlop={4}
                     >
-                        <Ionicons name="pencil-outline" size={16} color="#79553D" />
+                        <Ionicons name="pencil-outline" size={16} color="#0B4F6C" />
                         <Text style={styles.editBtnText}>Editar</Text>
                     </Pressable>
 
@@ -147,9 +147,9 @@ const styles = StyleSheet.create({
         backgroundColor: "#FFFFFF",
         borderRadius: 18,
         borderWidth: 1,
-        borderColor: "#E8E2D8",
+        borderColor: "#DCE7EE",
         padding: 18,
-        shadowColor: "#30241A",
+        shadowColor: "#082F42",
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.06,
         shadowRadius: 12,
@@ -164,9 +164,9 @@ const styles = StyleSheet.create({
         width: 44,
         height: 44,
         borderRadius: 22,
-        backgroundColor: "#F4EFEA",
+        backgroundColor: "#EDF3F7",
         borderWidth: 1.5,
-        borderColor: "#E3D7CB",
+        borderColor: "#D4E1E9",
         alignItems: "center",
         justifyContent: "center",
     },
@@ -182,11 +182,11 @@ const styles = StyleSheet.create({
     name: {
         fontSize: 16,
         fontFamily: "WorksansBold",
-        color: "#2C2520",
+        color: "#0F172A",
         flex: 1,
     },
     idBadge: {
-        backgroundColor: "#F5EEE8",
+        backgroundColor: "#E0EDF4",
         paddingHorizontal: 7,
         paddingVertical: 2,
         borderRadius: 6,
@@ -194,17 +194,17 @@ const styles = StyleSheet.create({
     idBadgeText: {
         fontSize: 11,
         fontFamily: "WorksansSemiBold",
-        color: "#79553D",
+        color: "#0B4F6C",
     },
     subtext: {
         fontSize: 12,
         fontFamily: "WorksansRegular",
-        color: "#8C8276",
+        color: "#64748B",
         marginTop: 1,
     },
     divider: {
         height: 1,
-        backgroundColor: "#F0EBE2",
+        backgroundColor: "#E2EBF0",
         marginVertical: 14,
     },
     detailsList: {
@@ -222,12 +222,12 @@ const styles = StyleSheet.create({
     priceHighlight: {
         fontSize: 14,
         fontFamily: "WorksansBold",
-        color: "#79553D",
+        color: "#0B4F6C",
     },
     detailText: {
         fontSize: 13,
         fontFamily: "WorksansRegular",
-        color: "#463E36",
+        color: "#1E293B",
         flex: 1,
         lineHeight: 18,
     },
@@ -237,7 +237,7 @@ const styles = StyleSheet.create({
         gap: 8,
         paddingTop: 12,
         borderTopWidth: 1,
-        borderTopColor: "#F4EFEA",
+        borderTopColor: "#EDF3F7",
     },
     actionBtn: {
         flexDirection: "row",
@@ -254,21 +254,21 @@ const styles = StyleSheet.create({
     },
     detailsBtn: {
         flex: 1,
-        backgroundColor: "#F7F3EE",
+        backgroundColor: "#F0F5F8",
     },
     detailsBtnText: {
         fontSize: 12,
         fontFamily: "WorksansSemiBold",
-        color: "#79553D",
+        color: "#0B4F6C",
     },
     editBtn: {
         flex: 1,
-        backgroundColor: "#F0EBE3",
+        backgroundColor: "#E2EBF0",
     },
     editBtnText: {
         fontSize: 12,
         fontFamily: "WorksansSemiBold",
-        color: "#79553D",
+        color: "#0B4F6C",
     },
     deleteBtn: {
         backgroundColor: "#FDF2EF",

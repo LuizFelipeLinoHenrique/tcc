@@ -60,14 +60,14 @@ export default function SignInPage() {
             E-mail
           </Text>
           <View style={localStyles.inputWrapper}>
-            <Ionicons name="mail-outline" size={20} color="#9C9286" style={localStyles.inputIcon} />
+            <Ionicons name="mail-outline" size={20} color="#64748B" style={localStyles.inputIcon} />
             <TextInput
               autoCapitalize="none"
               autoComplete="email"
               keyboardType="email-address"
               onChangeText={setEmail}
               placeholder="voce@exemplo.com"
-              placeholderTextColor="#A79E92"
+              placeholderTextColor="#94A3B8"
               style={[authStyles.input, localStyles.inputWithIcon]}
               value={email}
             />
@@ -79,19 +79,19 @@ export default function SignInPage() {
             <Text style={authStyles.label}>
               Senha
             </Text>
-            <Pressable accessibilityRole="button" onPress={() => router.push("/sendResetPassword")}>
+            <Pressable accessibilityRole="button" onPress={() => router.push("/(auth)/sendResetPassword")}>
               <Text style={authStyles.link}>
                 Esqueceu a senha?
               </Text>
             </Pressable>
           </View>
           <View style={localStyles.inputWrapper}>
-            <Ionicons name="lock-closed-outline" size={20} color="#9C9286" style={localStyles.inputIcon} />
+            <Ionicons name="lock-closed-outline" size={20} color="#64748B" style={localStyles.inputIcon} />
             <TextInput
               autoComplete="current-password"
               onChangeText={setPassword}
               placeholder="Digite sua senha"
-              placeholderTextColor="#A79E92"
+              placeholderTextColor="#94A3B8"
               secureTextEntry={!showPassword}
               style={[authStyles.input, localStyles.inputWithIcon, localStyles.inputWithRightIcon]}
               value={password}
@@ -104,7 +104,7 @@ export default function SignInPage() {
               <Ionicons
                 name={showPassword ? "eye-off-outline" : "eye-outline"}
                 size={20}
-                color="#8D5C3B"
+                color="#0E7490"
               />
             </Pressable>
           </View>

@@ -145,7 +145,7 @@ export function EditSupplierCard({
     if (loading) {
         return (
             <View style={[pagesStyles.card, styles.loading]}>
-                <ActivityIndicator color="#79553D" />
+                <ActivityIndicator color="#0B4F6C" />
                 <Text style={pagesStyles.text}>Carregando dados do fornecedor...</Text>
             </View>
         );
@@ -203,7 +203,7 @@ export function EditSupplierCard({
                                 setError("");
                             }}
                             placeholder="Ex: Madeireira São Paulo Ltda."
-                            placeholderTextColor="#8A8178"
+                            placeholderTextColor="#64748B"
                             style={pagesStyles.input}
                         />
                     </View>
@@ -218,7 +218,7 @@ export function EditSupplierCard({
                                 setError("");
                             }}
                             placeholder="Ex: 00.000.000/0001-00"
-                            placeholderTextColor="#8A8178"
+                            placeholderTextColor="#64748B"
                             keyboardType="numeric"
                             style={pagesStyles.input}
                         />
@@ -234,7 +234,7 @@ export function EditSupplierCard({
                                 setError("");
                             }}
                             placeholder="Ex: (11) 98765-4321"
-                            placeholderTextColor="#8A8178"
+                            placeholderTextColor="#64748B"
                             keyboardType="phone-pad"
                             style={pagesStyles.input}
                         />
@@ -250,7 +250,7 @@ export function EditSupplierCard({
                                 setError("");
                             }}
                             placeholder="Ex: vendas@fornecedor.com.br"
-                            placeholderTextColor="#8A8178"
+                            placeholderTextColor="#64748B"
                             keyboardType="email-address"
                             autoCapitalize="none"
                             style={pagesStyles.input}
@@ -267,7 +267,7 @@ export function EditSupplierCard({
                                 setError("");
                             }}
                             placeholder="Ex: Carlos Oliveira"
-                            placeholderTextColor="#8A8178"
+                            placeholderTextColor="#64748B"
                             style={pagesStyles.input}
                         />
                     </View>
@@ -282,7 +282,7 @@ export function EditSupplierCard({
                                 setError("");
                             }}
                             placeholder="Ex: Rod. Anhangüera, Km 45 - Jundiaí, SP"
-                            placeholderTextColor="#8A8178"
+                            placeholderTextColor="#64748B"
                             multiline
                             numberOfLines={3}
                             style={[pagesStyles.input, styles.textArea]}
@@ -355,7 +355,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 14,
         paddingVertical: 10,
         borderRadius: 10,
-        backgroundColor: "#EFE9E2",
+        backgroundColor: "#E0EAF0",
     },
     idBoxMobile: {
         width: "100%",
@@ -369,7 +369,7 @@ const styles = StyleSheet.create({
     readOnlyValue: {
         paddingVertical: 2,
         fontSize: 16,
-        color: "#65442F",
+        color: "#0B4F6C",
         fontWeight: "600",
     },
     section: {
@@ -377,12 +377,12 @@ const styles = StyleSheet.create({
         marginTop: 24,
         paddingTop: 20,
         borderTopWidth: 1,
-        borderTopColor: "#DDD5CC",
+        borderTopColor: "#CFDDE6",
     },
     sectionTitle: {
         fontSize: 16,
         fontWeight: "700",
-        color: "#65442F",
+        color: "#0B4F6C",
         marginBottom: 14,
     },
     fields: {

@@ -33,19 +33,16 @@ export default function ResetPasswordPage() {
         setTimeout(() => {
           setErrorMessage("");
         }, 3000);
-        throw error;
-      };
+        return;
+      }
 
-    }
-    catch {
+      await supabase.auth.signOut();
+      router.replace("/(auth)/signIn");
+    } catch {
       console.log("Erro ao recuperar senha");
-
     } finally {
       setLoading(false);
     }
-
-    await supabase.auth.signOut();
-    router.replace("/(auth)/signIn");
   };
 
   return (
@@ -66,12 +63,12 @@ export default function ResetPasswordPage() {
             Nova senha
           </Text>
           <View style={localStyles.inputWrapper}>
-            <Ionicons name="lock-closed-outline" size={20} color="#9C9286" style={localStyles.inputIcon} />
+            <Ionicons name="lock-closed-outline" size={20} color="#64748B" style={localStyles.inputIcon} />
             <TextInput
               autoComplete="new-password"
               onChangeText={setPassword}
               placeholder="Digite sua nova senha"
-              placeholderTextColor="#A79E92"
+              placeholderTextColor="#94A3B8"
               secureTextEntry={!showPassword}
               style={[authStyles.input, localStyles.inputWithIcon, localStyles.inputWithRightIcon]}
               value={password}
@@ -84,7 +81,7 @@ export default function ResetPasswordPage() {
               <Ionicons
                 name={showPassword ? "eye-off-outline" : "eye-outline"}
                 size={20}
-                color="#8D5C3B"
+                color="#0E7490"
               />
             </Pressable>
           </View>

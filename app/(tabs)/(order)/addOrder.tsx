@@ -258,7 +258,7 @@ export default function ordersManager() {
                     {/* CABEÇALHO */}
                     <View style={styles.header}>
                         <View style={styles.headerIcon}>
-                            <Ionicons name="add-circle" size={26} color="#79553D" />
+                            <Ionicons name="add-circle" size={26} color="#0B4F6C" />
                         </View>
                         <View style={styles.headerTextContainer}>
                             <Text style={pagesStyles.brand}>NOVO REGISTRO</Text>
@@ -292,7 +292,7 @@ export default function ordersManager() {
                                             ? "#166534"
                                             : clienteStatus === "error"
                                             ? "#B91C1C"
-                                            : "#8A8178"
+                                            : "#64748B"
                                     }
                                     style={styles.inputIcon}
                                 />
@@ -301,14 +301,14 @@ export default function ordersManager() {
                                     onChangeText={alterarCliente}
                                     onBlur={() => verificarCliente()}
                                     placeholder="Ex: 1"
-                                    placeholderTextColor="#A59D94"
+                                    placeholderTextColor="#94A3B8"
                                     keyboardType="number-pad"
                                     returnKeyType="next"
                                     editable={!loading}
                                     style={styles.input}
                                 />
                                 {clienteStatus === "loading" && (
-                                    <ActivityIndicator size="small" color="#79553D" />
+                                    <ActivityIndicator size="small" color="#0B4F6C" />
                                 )}
                             </View>
 
@@ -345,7 +345,7 @@ export default function ordersManager() {
                                             ? "#166534"
                                             : produtoStatus === "error"
                                             ? "#B91C1C"
-                                            : "#8A8178"
+                                            : "#64748B"
                                     }
                                     style={styles.inputIcon}
                                 />
@@ -354,14 +354,14 @@ export default function ordersManager() {
                                     onChangeText={alterarProduto}
                                     onBlur={() => verificarProduto()}
                                     placeholder="Ex: 10"
-                                    placeholderTextColor="#A59D94"
+                                    placeholderTextColor="#94A3B8"
                                     keyboardType="number-pad"
                                     returnKeyType="next"
                                     editable={!loading}
                                     style={styles.input}
                                 />
                                 {produtoStatus === "loading" && (
-                                    <ActivityIndicator size="small" color="#79553D" />
+                                    <ActivityIndicator size="small" color="#0B4F6C" />
                                 )}
                             </View>
 
@@ -392,7 +392,7 @@ export default function ordersManager() {
                                 <Ionicons
                                     name="layers-outline"
                                     size={18}
-                                    color={quantidadeErro ? "#B91C1C" : "#8A8178"}
+                                    color={quantidadeErro ? "#B91C1C" : "#64748B"}
                                     style={styles.inputIcon}
                                 />
                                 <TextInput
@@ -400,7 +400,7 @@ export default function ordersManager() {
                                     onChangeText={alterarQuantidade}
                                     onBlur={validarQuantidade}
                                     placeholder="Ex: 10"
-                                    placeholderTextColor="#A59D94"
+                                    placeholderTextColor="#94A3B8"
                                     keyboardType="decimal-pad"
                                     returnKeyType="done"
                                     editable={!loading}
@@ -481,7 +481,7 @@ const styles = StyleSheet.create({
         width: 48,
         height: 48,
         borderRadius: 12,
-        backgroundColor: "#F4EDE6",
+        backgroundColor: "#E8F1F5",
         alignItems: "center",
         justifyContent: "center",
         marginTop: 2,
@@ -495,7 +495,7 @@ const styles = StyleSheet.create({
     },
     divider: {
         height: 1,
-        backgroundColor: "#EAE4DC",
+        backgroundColor: "#DDE8EF",
         marginVertical: 20,
     },
     formContainer: {
@@ -504,9 +504,9 @@ const styles = StyleSheet.create({
     inputWrapper: {
         flexDirection: "row",
         alignItems: "center",
-        backgroundColor: "#FAF8F5",
+        backgroundColor: "#F8FAFC",
         borderWidth: 1,
-        borderColor: "#DCD4C7",
+        borderColor: "#CFDDE6",
         borderRadius: 12,
         paddingHorizontal: 12,
     },
@@ -526,7 +526,7 @@ const styles = StyleSheet.create({
         minHeight: 46,
         fontSize: 15,
         fontFamily: "WorksansRegular",
-        color: "#2C2520",
+        color: "#0F172A",
     },
     verifiedBox: {
         flexDirection: "row",

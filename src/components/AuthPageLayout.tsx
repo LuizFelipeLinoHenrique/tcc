@@ -21,7 +21,7 @@ export function AuthPageLayout({ children }: PropsWithChildren) {
               <Ionicons name="cube" size={26} color="#FFFDF9" />
             </View>
             <View style={styles.brandTextContainer}>
-              <Text style={styles.brandAppTitle}>NEXUS GESTÃO</Text>
+              <Text style={styles.brandAppTitle}>PALLETCORE</Text>
               <Text style={styles.brandSubtitle}>SISTEMA INTEGRADO • TCC</Text>
             </View>
           </View>
@@ -40,7 +40,7 @@ export function AuthPageLayout({ children }: PropsWithChildren) {
 export const authStyles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: "#F6F3ED"
+    backgroundColor: "#F4F7F9"
   },
   flex: {
     flex: 1
@@ -61,10 +61,10 @@ export const authStyles = StyleSheet.create({
     width: 54,
     height: 54,
     borderRadius: 16,
-    backgroundColor: "#79553D",
+    backgroundColor: "#0B4F6C",
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: "#79553D",
+    shadowColor: "#0B4F6C",
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.25,
     shadowRadius: 10,
@@ -76,13 +76,13 @@ export const authStyles = StyleSheet.create({
   brandAppTitle: {
     fontSize: 19,
     fontFamily: "WorksansBold",
-    color: "#302B26",
+    color: "#0F172A",
     letterSpacing: 1.5,
   },
   brandSubtitle: {
     fontSize: 11,
     fontFamily: "WorksansSemiBold",
-    color: "#9A6540",
+    color: "#0891B2",
     letterSpacing: 1.8,
     marginTop: 2,
   },
@@ -91,18 +91,18 @@ export const authStyles = StyleSheet.create({
     maxWidth: 440,
     backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: "#E8E1D5",
+    borderColor: "#DCE7EE",
     borderRadius: 24,
     paddingHorizontal: 28,
     paddingVertical: 32,
-    shadowColor: "#3A2A1D",
+    shadowColor: "#0A3B52",
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.08,
     shadowRadius: 20,
     elevation: 4,
   },
   brand: {
-    color: "#9A6540",
+    color: "#0891B2",
     fontSize: 12,
     fontFamily: "WorksansSemiBold",
     letterSpacing: 1.4,
@@ -110,14 +110,14 @@ export const authStyles = StyleSheet.create({
   },
   title: {
     marginTop: 8,
-    color: "#2C2520",
+    color: "#0F172A",
     fontSize: 26,
     lineHeight: 32,
     fontFamily: "WorksansBold"
   },
   description: {
     marginTop: 8,
-    color: "#6E655B",
+    color: "#475569",
     fontSize: 14,
     lineHeight: 20,
     fontFamily: "WorksansRegular"
@@ -130,18 +130,18 @@ export const authStyles = StyleSheet.create({
     gap: 7
   },
   label: {
-    color: "#463E36",
+    color: "#1E293B",
     fontSize: 13,
     fontFamily: "WorksansSemiBold"
   },
   input: {
     minHeight: 50,
     borderWidth: 1,
-    borderColor: "#DCD4C7",
+    borderColor: "#CFDDE6",
     borderRadius: 12,
-    backgroundColor: "#FAF8F5",
+    backgroundColor: "#F8FAFC",
     paddingHorizontal: 16,
-    color: "#2C2520",
+    color: "#0F172A",
     fontSize: 15,
     fontFamily: "WorksansRegular",
   },
@@ -150,16 +150,16 @@ export const authStyles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     borderRadius: 12,
-    backgroundColor: "#79553D",
+    backgroundColor: "#0B4F6C",
     marginTop: 6,
-    shadowColor: "#79553D",
+    shadowColor: "#0B4F6C",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.22,
     shadowRadius: 8,
     elevation: 3,
   },
   primaryButtonPressed: {
-    backgroundColor: "#63422C",
+    backgroundColor: "#083A50",
     transform: [{ scale: 0.99 }]
   },
   primaryButtonText: {
@@ -169,7 +169,7 @@ export const authStyles = StyleSheet.create({
     letterSpacing: 0.3,
   },
   link: {
-    color: "#8D5C3B",
+    color: "#0E7490",
     fontSize: 13,
     fontFamily: "WorksansSemiBold"
   },
@@ -177,7 +177,7 @@ export const authStyles = StyleSheet.create({
     marginTop: 24,
     paddingTop: 18,
     borderTopWidth: 1,
-    borderTopColor: "#F0EBE1",
+    borderTopColor: "#E2EBF0",
     alignItems: "center",
     flexDirection: "row",
     justifyContent: "center",
@@ -185,7 +185,7 @@ export const authStyles = StyleSheet.create({
     gap: 5
   },
   footerText: {
-    color: "#766E64",
+    color: "#475569",
     fontSize: 13,
     fontFamily: "WorksansRegular"
   },
@@ -229,11 +229,11 @@ export const authStyles = StyleSheet.create({
     justifyContent: "center",
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: "#D8CFC3",
+    borderColor: "#CBD8E2",
     backgroundColor: "#FFFFFF",
   },
   secondaryButtonText: {
-    color: "#5C5248",
+    color: "#334155",
     fontSize: 14,
     fontFamily: "WorksansSemiBold"
   },
@@ -242,7 +242,7 @@ export const authStyles = StyleSheet.create({
     alignItems: "center",
   },
   bottomWatermarkText: {
-    color: "#A8A095",
+    color: "#94A3B8",
     fontSize: 11,
     fontFamily: "WorksansRegular",
     letterSpacing: 0.5,

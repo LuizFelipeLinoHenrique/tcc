@@ -67,7 +67,7 @@ function AnimatedTab({ tab, active }: {
                 <Ionicons
                     name={iconName}
                     size={18}
-                    color={active ? "#79553D" : "#766E64"}
+                    color={active ? "#0B4F6C" : "#475569"}
                     style={styles.tabIcon}
                 />
                 <Text
@@ -115,7 +115,7 @@ const styles = StyleSheet.create({
     container: {
         flexDirection: "row",
         width: "100%",
-        backgroundColor: "#EAE3D8",
+        backgroundColor: "#D9E5EC",
         borderRadius: 14,
         padding: 4,
         gap: 4,
@@ -131,7 +131,7 @@ const styles = StyleSheet.create({
     },
     activeTab: {
         backgroundColor: "#FFFFFF",
-        shadowColor: "#30241A",
+        shadowColor: "#082F42",
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.12,
         shadowRadius: 5,
@@ -141,12 +141,12 @@ const styles = StyleSheet.create({
         marginRight: 2,
     },
     tabText: {
-        color: "#6E665E",
+        color: "#475569",
         fontSize: 14,
         fontFamily: "WorksansMedium",
     },
     activeTabText: {
-        color: "#79553D",
+        color: "#0B4F6C",
         fontFamily: "WorksansBold",
     },
 });

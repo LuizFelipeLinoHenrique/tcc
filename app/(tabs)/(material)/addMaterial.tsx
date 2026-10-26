@@ -125,7 +125,7 @@ export default function AddMaterial() {
                     {/* CABEÇALHO */}
                     <View style={styles.header}>
                         <View style={styles.headerIcon}>
-                            <Ionicons name="layers" size={24} color="#79553D" />
+                            <Ionicons name="layers" size={24} color="#0B4F6C" />
                         </View>
                         <View style={styles.headerTextContainer}>
                             <Text style={pagesStyles.brand}>CADASTRO DE MATERIAIS</Text>
@@ -148,7 +148,7 @@ export default function AddMaterial() {
                                 <Ionicons
                                     name="cube-outline"
                                     size={18}
-                                    color="#8A8178"
+                                    color="#64748B"
                                     style={styles.inputIcon}
                                 />
                                 <TextInput
@@ -159,7 +159,7 @@ export default function AddMaterial() {
                                         setMensagemSucesso(null);
                                     }}
                                     placeholder="Ex: Madeira Maciça de Ipê"
-                                    placeholderTextColor="#A59D94"
+                                    placeholderTextColor="#94A3B8"
                                     returnKeyType="next"
                                     editable={!loading}
                                     style={styles.input}
@@ -174,14 +174,14 @@ export default function AddMaterial() {
                                 <Ionicons
                                     name="pricetag-outline"
                                     size={18}
-                                    color="#8A8178"
+                                    color="#64748B"
                                     style={styles.inputIcon}
                                 />
                                 <TextInput
                                     value={preco}
                                     onChangeText={handlePrecoChange}
                                     placeholder="Ex: 149.90 ou 149,90"
-                                    placeholderTextColor="#A59D94"
+                                    placeholderTextColor="#94A3B8"
                                     keyboardType="decimal-pad"
                                     returnKeyType="next"
                                     editable={!loading}
@@ -197,7 +197,7 @@ export default function AddMaterial() {
                                 <Ionicons
                                     name="document-text-outline"
                                     size={18}
-                                    color="#8A8178"
+                                    color="#64748B"
                                     style={[styles.inputIcon, styles.inputIconMultiline]}
                                 />
                                 <TextInput
@@ -208,7 +208,7 @@ export default function AddMaterial() {
                                         setMensagemSucesso(null);
                                     }}
                                     placeholder="Ex: Peça aparelhada de madeira de alta densidade e resistência..."
-                                    placeholderTextColor="#A59D94"
+                                    placeholderTextColor="#94A3B8"
                                     multiline
                                     numberOfLines={3}
                                     textAlignVertical="top"
@@ -273,7 +273,7 @@ const styles = StyleSheet.create({
         width: 48,
         height: 48,
         borderRadius: 12,
-        backgroundColor: "#F4EDE6",
+        backgroundColor: "#E8F1F5",
         alignItems: "center",
         justifyContent: "center",
         marginTop: 2,
@@ -287,7 +287,7 @@ const styles = StyleSheet.create({
     },
     divider: {
         height: 1,
-        backgroundColor: "#EAE4DC",
+        backgroundColor: "#DDE8EF",
         marginVertical: 20,
     },
     formContainer: {
@@ -296,9 +296,9 @@ const styles = StyleSheet.create({
     inputWrapper: {
         flexDirection: "row",
         alignItems: "center",
-        backgroundColor: "#FAF8F5",
+        backgroundColor: "#F8FAFC",
         borderWidth: 1,
-        borderColor: "#DCD4C7",
+        borderColor: "#CFDDE6",
         borderRadius: 12,
         paddingHorizontal: 12,
     },
@@ -317,7 +317,7 @@ const styles = StyleSheet.create({
         minHeight: 46,
         fontSize: 15,
         fontFamily: "WorksansRegular",
-        color: "#2C2520",
+        color: "#0F172A",
     },
     textArea: {
         minHeight: 80,

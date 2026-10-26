@@ -75,14 +75,14 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 22,
         fontFamily: "WorksansBold",
-        color: "#2C2520",
+        color: "#0F172A",
         marginBottom: 8,
         textAlign: "center",
     },
     description: {
         fontSize: 14,
         fontFamily: "WorksansRegular",
-        color: "#6E655B",
+        color: "#475569",
         textAlign: "center",
         lineHeight: 20,
         marginBottom: 24,
