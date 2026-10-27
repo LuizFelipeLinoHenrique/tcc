@@ -1,11 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
-import {
-    Pressable,
-    StyleSheet,
-    Text,
-    View,
-} from "react-native";
-import useResponsive from "../hooks/useResponsive";
+import React from "react";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 
 export type Fornecedor = {
     id: number;
@@ -17,14 +12,15 @@ export type Fornecedor = {
     contato?: string;
 };
 
-type SupplierCardProps = {
+export type SupplierCardProps = {
     fornecedor: Fornecedor;
     iconDetails: () => void;
     iconEdit: () => void;
     iconDelete?: () => void;
+    index?: number;
 };
 
-function formatPhone(phone: number | string | undefined): string {
+export function formatPhone(phone: number | string | undefined): string {
     if (!phone) return "Não informado";
     const s = String(phone).replace(/\D/g, "");
     if (s.length === 11) {
@@ -36,7 +32,7 @@ function formatPhone(phone: number | string | undefined): string {
     return String(phone);
 }
 
-function formatCnpj(cnpj: string | undefined): string {
+export function formatCnpj(cnpj: string | undefined): string {
     if (!cnpj) return "Não informado";
     const digits = cnpj.replace(/\D/g, "");
     if (digits.length === 14) {
@@ -45,83 +41,112 @@ function formatCnpj(cnpj: string | undefined): string {
     return cnpj;
 }
 
-export function SupplierCard({
+export function SupplierTableHeader() {
+    return (
+        <View style={styles.headerRow}>
+            <View style={styles.colId}>
+                <Text style={styles.headerText}>ID</Text>
+            </View>
+            <View style={styles.colName}>
+                <Text style={styles.headerText}>FORNECEDOR</Text>
+            </View>
+            <View style={styles.colCnpj}>
+                <Text style={styles.headerText}>CNPJ</Text>
+            </View>
+            <View style={styles.colEmail}>
+                <Text style={styles.headerText}>E-MAIL</Text>
+            </View>
+            <View style={styles.colPhone}>
+                <Text style={styles.headerText}>TELEFONE</Text>
+            </View>
+            <View style={styles.colAddress}>
+                <Text style={styles.headerText}>ENDEREÇO</Text>
+            </View>
+            <View style={styles.colActions}>
+                <Text style={[styles.headerText, styles.headerTextRight]}>AÇÕES</Text>
+            </View>
+        </View>
+    );
+}
+
+export function SupplierTableRow({
     fornecedor,
     iconDetails,
     iconEdit,
     iconDelete,
+    index = 0,
 }: SupplierCardProps) {
-    const { isMobile } = useResponsive();
+    const isEven = index % 2 === 0;
 
     return (
-        <View
-            style={[
-                styles.container,
-                isMobile ? { width: "100%" } : { width: "50%" },
-            ]}
-        >
-            <View style={styles.card}>
-                {/* Header do Card */}
-                <View style={styles.header}>
-                    <View style={styles.avatar}>
-                        <Ionicons name="business-outline" size={22} color="#0B4F6C" />
-                    </View>
+        <View style={[styles.row, isEven ? styles.rowEven : styles.rowOdd]}>
+            {/* ID */}
+            <View style={styles.colId}>
+                <View style={styles.idBadge}>
+                    <Text style={styles.idBadgeText}>#{fornecedor.id}</Text>
+                </View>
+            </View>
 
-                    <View style={styles.headerInfo}>
-                        <View style={styles.nameRow}>
-                            <Text style={styles.name} numberOfLines={1}>
-                                {fornecedor.nome}
-                            </Text>
-                            <View style={styles.idBadge}>
-                                <Text style={styles.idBadgeText}>#{fornecedor.id}</Text>
-                            </View>
-                        </View>
-                        <Text style={styles.subtext}>
-                            {fornecedor.contato ? `Contato: ${fornecedor.contato}` : "Fornecedor cadastrado"}
+            {/* Fornecedor (Ícone + Nome + Contato) */}
+            <View style={styles.colName}>
+                <View style={styles.supplierInfo}>
+                    <View style={styles.supplierIconBox}>
+                        <Ionicons name="business-outline" size={17} color="#0B4F6C" />
+                    </View>
+                    <View style={styles.nameContainer}>
+                        <Text style={styles.supplierName} numberOfLines={1}>
+                            {fornecedor.nome}
+                        </Text>
+                        <Text style={styles.supplierSubtitle}>
+                            {fornecedor.contato ? `Contato: ${fornecedor.contato}` : "Fornecedor parceiro"}
                         </Text>
                     </View>
                 </View>
+            </View>
 
-                {/* Linha Divisória */}
-                <View style={styles.divider} />
-
-                {/* Detalhes do Fornecedor */}
-                <View style={styles.detailsList}>
-                    {fornecedor.cnpj ? (
-                        <View style={styles.detailRow}>
-                            <Ionicons name="card-outline" size={15} color="#64748B" style={styles.detailIcon} />
-                            <Text style={styles.detailText} numberOfLines={1}>
-                                {formatCnpj(fornecedor.cnpj)}
-                            </Text>
-                        </View>
-                    ) : null}
-
-                    <View style={styles.detailRow}>
-                        <Ionicons name="mail-outline" size={15} color="#64748B" style={styles.detailIcon} />
-                        <Text style={styles.detailText} numberOfLines={1}>
-                            {fornecedor.email || "E-mail não informado"}
-                        </Text>
-                    </View>
-
-                    <View style={styles.detailRow}>
-                        <Ionicons name="call-outline" size={15} color="#64748B" style={styles.detailIcon} />
-                        <Text style={styles.detailText} numberOfLines={1}>
-                            {formatPhone(fornecedor.telefone)}
-                        </Text>
-                    </View>
-
-                    {fornecedor.endereco ? (
-                        <View style={styles.detailRow}>
-                            <Ionicons name="location-outline" size={15} color="#64748B" style={styles.detailIcon} />
-                            <Text style={styles.detailText} numberOfLines={2}>
-                                {fornecedor.endereco}
-                            </Text>
-                        </View>
-                    ) : null}
+            {/* CNPJ */}
+            <View style={styles.colCnpj}>
+                <View style={styles.iconTextRow}>
+                    <Ionicons name="card-outline" size={13} color="#64748B" />
+                    <Text style={styles.cellText} numberOfLines={1}>
+                        {formatCnpj(fornecedor.cnpj)}
+                    </Text>
                 </View>
+            </View>
 
-                {/* Barra de Ações Inferior */}
-                <View style={styles.actionsBar}>
+            {/* E-mail */}
+            <View style={styles.colEmail}>
+                <View style={styles.iconTextRow}>
+                    <Ionicons name="mail-outline" size={13} color="#64748B" />
+                    <Text style={styles.cellText} numberOfLines={1}>
+                        {fornecedor.email || "Não informado"}
+                    </Text>
+                </View>
+            </View>
+
+            {/* Telefone */}
+            <View style={styles.colPhone}>
+                <View style={styles.iconTextRow}>
+                    <Ionicons name="call-outline" size={13} color="#64748B" />
+                    <Text style={styles.cellText} numberOfLines={1}>
+                        {formatPhone(fornecedor.telefone)}
+                    </Text>
+                </View>
+            </View>
+
+            {/* Endereço */}
+            <View style={styles.colAddress}>
+                <View style={styles.iconTextRow}>
+                    <Ionicons name="location-outline" size={13} color="#64748B" />
+                    <Text style={styles.cellText} numberOfLines={1}>
+                        {fornecedor.endereco || "Não informado"}
+                    </Text>
+                </View>
+            </View>
+
+            {/* Ações */}
+            <View style={styles.colActions}>
+                <View style={styles.actionsContainer}>
                     <Pressable
                         onPress={iconDetails}
                         style={({ pressed }) => [
@@ -131,7 +156,7 @@ export function SupplierCard({
                         ]}
                         hitSlop={4}
                     >
-                        <Ionicons name="eye-outline" size={16} color="#0B4F6C" />
+                        <Ionicons name="eye-outline" size={15} color="#0B4F6C" />
                         <Text style={styles.detailsBtnText}>Detalhes</Text>
                     </Pressable>
 
@@ -144,7 +169,7 @@ export function SupplierCard({
                         ]}
                         hitSlop={4}
                     >
-                        <Ionicons name="pencil-outline" size={16} color="#0B4F6C" />
+                        <Ionicons name="pencil-outline" size={15} color="#0E7490" />
                         <Text style={styles.editBtnText}>Editar</Text>
                     </Pressable>
 
@@ -158,7 +183,8 @@ export function SupplierCard({
                             ]}
                             hitSlop={4}
                         >
-                            <Ionicons name="trash-outline" size={16} color="#A74E3C" />
+                            <Ionicons name="trash-outline" size={15} color="#A74E3C" />
+                            <Text style={styles.deleteBtnText}>Excluir</Text>
                         </Pressable>
                     ) : null}
                 </View>
@@ -167,117 +193,155 @@ export function SupplierCard({
     );
 }
 
+// Exportamos SupplierCard como alias para SupplierTableRow para compatibilidade total
+export const SupplierCard = SupplierTableRow;
+
 const styles = StyleSheet.create({
-    container: {
-        padding: 8,
-    },
-    card: {
-        backgroundColor: "#FFFFFF",
-        borderRadius: 18,
-        borderWidth: 1,
-        borderColor: "#DCE7EE",
-        padding: 18,
-        shadowColor: "#082F42",
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.06,
-        shadowRadius: 12,
-        elevation: 2,
-    },
-    header: {
+    headerRow: {
         flexDirection: "row",
         alignItems: "center",
-        gap: 12,
+        backgroundColor: "#E8F1F5",
+        paddingVertical: 12,
+        paddingHorizontal: 16,
+        borderBottomWidth: 1.5,
+        borderColor: "#CFDDE6",
+        minWidth: 920,
     },
-    avatar: {
-        width: 44,
-        height: 44,
-        borderRadius: 22,
-        backgroundColor: "#EDF3F7",
-        borderWidth: 1.5,
-        borderColor: "#D4E1E9",
+    headerText: {
+        fontSize: 11,
+        fontFamily: "WorksansBold",
+        color: "#0B4F6C",
+        letterSpacing: 0.8,
+        textTransform: "uppercase",
+    },
+    headerTextRight: {
+        textAlign: "right",
+    },
+    row: {
+        flexDirection: "row",
         alignItems: "center",
+        paddingVertical: 10,
+        paddingHorizontal: 16,
+        borderBottomWidth: 1,
+        borderColor: "#E2EBF0",
+        minWidth: 920,
+    },
+    rowEven: {
+        backgroundColor: "#FFFFFF",
+    },
+    rowOdd: {
+        backgroundColor: "#F8FAFC",
+    },
+
+    // Colunas
+    colId: {
+        width: 70,
         justifyContent: "center",
     },
-    headerInfo: {
-        flex: 1,
-        minWidth: 0,
+    colName: {
+        flex: 1.5,
+        minWidth: 180,
+        justifyContent: "center",
     },
-    nameRow: {
-        flexDirection: "row",
-        alignItems: "center",
-        gap: 8,
+    colCnpj: {
+        width: 145,
+        justifyContent: "center",
     },
-    name: {
-        fontSize: 16,
-        fontFamily: "WorksansBold",
-        color: "#0F172A",
-        flex: 1,
+    colEmail: {
+        flex: 1.3,
+        minWidth: 150,
+        justifyContent: "center",
     },
+    colPhone: {
+        width: 140,
+        justifyContent: "center",
+    },
+    colAddress: {
+        flex: 1.5,
+        minWidth: 170,
+        justifyContent: "center",
+    },
+    colActions: {
+        width: 220,
+        alignItems: "flex-end",
+        justifyContent: "center",
+    },
+
+    // Células e textos
     idBadge: {
-        backgroundColor: "#E0EDF4",
-        paddingHorizontal: 7,
-        paddingVertical: 2,
+        backgroundColor: "#E8F1F5",
+        paddingHorizontal: 8,
+        paddingVertical: 4,
         borderRadius: 6,
+        alignSelf: "flex-start",
     },
     idBadgeText: {
-        fontSize: 11,
-        fontFamily: "WorksansSemiBold",
+        fontSize: 12,
+        fontFamily: "WorksansBold",
         color: "#0B4F6C",
     },
-    subtext: {
-        fontSize: 12,
-        fontFamily: "WorksansRegular",
-        color: "#64748B",
-        marginTop: 1,
-    },
-    divider: {
-        height: 1,
-        backgroundColor: "#E2EBF0",
-        marginVertical: 14,
-    },
-    detailsList: {
-        gap: 8,
-        marginBottom: 16,
-    },
-    detailRow: {
-        flexDirection: "row",
-        alignItems: "flex-start",
-        gap: 8,
-    },
-    detailIcon: {
-        marginTop: 2,
-    },
-    detailText: {
-        fontSize: 13,
-        fontFamily: "WorksansRegular",
-        color: "#1E293B",
-        flex: 1,
-        lineHeight: 18,
-    },
-    actionsBar: {
+    supplierInfo: {
         flexDirection: "row",
         alignItems: "center",
-        gap: 8,
-        paddingTop: 12,
-        borderTopWidth: 1,
-        borderTopColor: "#EDF3F7",
+        gap: 10,
+    },
+    supplierIconBox: {
+        width: 32,
+        height: 32,
+        borderRadius: 8,
+        backgroundColor: "#E8F1F5",
+        alignItems: "center",
+        justifyContent: "center",
+        borderWidth: 1,
+        borderColor: "#CFDDE6",
+    },
+    nameContainer: {
+        flex: 1,
+    },
+    supplierName: {
+        fontSize: 13,
+        fontFamily: "WorksansSemiBold",
+        color: "#0F172A",
+    },
+    supplierSubtitle: {
+        fontSize: 10,
+        fontFamily: "WorksansRegular",
+        color: "#64748B",
+    },
+    iconTextRow: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 6,
+    },
+    cellText: {
+        fontSize: 13,
+        fontFamily: "WorksansRegular",
+        color: "#334155",
+        flex: 1,
+    },
+
+    // Ações
+    actionsContainer: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 6,
     },
     actionBtn: {
         flexDirection: "row",
         alignItems: "center",
-        justifyContent: "center",
-        paddingVertical: 8,
-        paddingHorizontal: 12,
-        borderRadius: 9,
-        gap: 6,
+        paddingVertical: 6,
+        paddingHorizontal: 9,
+        borderRadius: 8,
+        borderWidth: 1,
+        gap: 4,
     },
     actionBtnPressed: {
-        opacity: 0.75,
-        transform: [{ scale: 0.98 }],
+        opacity: 0.7,
+        transform: [{ scale: 0.97 }],
     },
     detailsBtn: {
-        flex: 1,
-        backgroundColor: "#F0F5F8",
+        backgroundColor: "#E8F1F5",
+        borderColor: "#CFDDE6",
     },
     detailsBtnText: {
         fontSize: 12,
@@ -285,16 +349,21 @@ const styles = StyleSheet.create({
         color: "#0B4F6C",
     },
     editBtn: {
-        flex: 1,
-        backgroundColor: "#E2EBF0",
+        backgroundColor: "#E0F2FE",
+        borderColor: "#BAE6FD",
     },
     editBtnText: {
         fontSize: 12,
         fontFamily: "WorksansSemiBold",
-        color: "#0B4F6C",
+        color: "#0E7490",
     },
     deleteBtn: {
-        backgroundColor: "#FDF2EF",
-        paddingHorizontal: 10,
+        backgroundColor: "#FEE2E2",
+        borderColor: "#FECACA",
+    },
+    deleteBtnText: {
+        fontSize: 12,
+        fontFamily: "WorksansSemiBold",
+        color: "#A74E3C",
     },
 });

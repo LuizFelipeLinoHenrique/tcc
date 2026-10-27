@@ -1,11 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
-import {
-    Pressable,
-    StyleSheet,
-    Text,
-    View,
-} from "react-native";
-import useResponsive from "../hooks/useResponsive";
+import React from "react";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 
 export type Cliente = {
     id: number;
@@ -15,21 +10,22 @@ export type Cliente = {
     telefone: number;
 };
 
-type ClientCardProps = {
+export type ClientCardProps = {
     cliente: Cliente;
     iconDetails: () => void;
     iconEdit: () => void;
     iconDelete?: () => void;
+    index?: number;
 };
 
-function getInitials(name: string): string {
+export function getInitials(name: string): string {
     if (!name) return "CL";
     const parts = name.trim().split(/\s+/);
     if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
     return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 }
 
-function formatPhone(phone: number | string): string {
+export function formatPhone(phone: number | string): string {
     const s = String(phone || "").replace(/\D/g, "");
     if (s.length === 11) {
         return `(${s.substring(0, 2)}) ${s.substring(2, 7)}-${s.substring(7)}`;
@@ -37,75 +33,102 @@ function formatPhone(phone: number | string): string {
     if (s.length === 10) {
         return `(${s.substring(0, 2)}) ${s.substring(2, 6)}-${s.substring(6)}`;
     }
-    return String(phone);
+    return String(phone || "Não informado");
 }
 
-export function ClientCard({
+export function ClientTableHeader() {
+    return (
+        <View style={styles.headerRow}>
+            <View style={styles.colId}>
+                <Text style={styles.headerText}>ID</Text>
+            </View>
+            <View style={styles.colName}>
+                <Text style={styles.headerText}>CLIENTE</Text>
+            </View>
+            <View style={styles.colEmail}>
+                <Text style={styles.headerText}>E-MAIL</Text>
+            </View>
+            <View style={styles.colPhone}>
+                <Text style={styles.headerText}>TELEFONE</Text>
+            </View>
+            <View style={styles.colAddress}>
+                <Text style={styles.headerText}>ENDEREÇO</Text>
+            </View>
+            <View style={styles.colActions}>
+                <Text style={[styles.headerText, styles.headerTextRight]}>AÇÕES</Text>
+            </View>
+        </View>
+    );
+}
+
+export function ClientTableRow({
     cliente,
     iconDetails,
     iconEdit,
     iconDelete,
+    index = 0,
 }: ClientCardProps) {
-    const { isMobile } = useResponsive();
+    const isEven = index % 2 === 0;
 
     return (
-        <View
-            style={[
-                styles.container,
-                isMobile ? { width: "100%" } : { width: "50%" },
-            ]}
-        >
-            <View style={styles.card}>
-                {/* Header do Card */}
-                <View style={styles.header}>
+        <View style={[styles.row, isEven ? styles.rowEven : styles.rowOdd]}>
+            {/* ID */}
+            <View style={styles.colId}>
+                <View style={styles.idBadge}>
+                    <Text style={styles.idBadgeText}>#{cliente.id}</Text>
+                </View>
+            </View>
+
+            {/* Cliente (Avatar + Nome) */}
+            <View style={styles.colName}>
+                <View style={styles.clientInfo}>
                     <View style={styles.avatar}>
                         <Text style={styles.avatarText}>
                             {getInitials(cliente.nome)}
                         </Text>
                     </View>
-
-                    <View style={styles.headerInfo}>
-                        <View style={styles.nameRow}>
-                            <Text style={styles.name} numberOfLines={1}>
-                                {cliente.nome}
-                            </Text>
-                            <View style={styles.idBadge}>
-                                <Text style={styles.idBadgeText}>#{cliente.id}</Text>
-                            </View>
-                        </View>
-                        <Text style={styles.subtext}>Cliente cadastrado</Text>
+                    <View style={styles.nameContainer}>
+                        <Text style={styles.clientName} numberOfLines={1}>
+                            {cliente.nome}
+                        </Text>
+                        <Text style={styles.clientSubtitle}>Cliente cadastrado</Text>
                     </View>
                 </View>
+            </View>
 
-                {/* Linha Divisória */}
-                <View style={styles.divider} />
-
-                {/* Detalhes de Contato */}
-                <View style={styles.detailsList}>
-                    <View style={styles.detailRow}>
-                        <Ionicons name="mail-outline" size={15} color="#64748B" style={styles.detailIcon} />
-                        <Text style={styles.detailText} numberOfLines={1}>
-                            {cliente.email}
-                        </Text>
-                    </View>
-
-                    <View style={styles.detailRow}>
-                        <Ionicons name="call-outline" size={15} color="#64748B" style={styles.detailIcon} />
-                        <Text style={styles.detailText} numberOfLines={1}>
-                            {formatPhone(cliente.telefone)}
-                        </Text>
-                    </View>
-
-                    <View style={styles.detailRow}>
-                        <Ionicons name="location-outline" size={15} color="#64748B" style={styles.detailIcon} />
-                        <Text style={styles.detailText} numberOfLines={2}>
-                            {cliente.endereco}
-                        </Text>
-                    </View>
+            {/* E-mail */}
+            <View style={styles.colEmail}>
+                <View style={styles.iconTextRow}>
+                    <Ionicons name="mail-outline" size={13} color="#64748B" />
+                    <Text style={styles.cellText} numberOfLines={1}>
+                        {cliente.email || "Sem e-mail"}
+                    </Text>
                 </View>
+            </View>
 
-                {/* Barra de Ações Inferior */}
-                <View style={styles.actionsBar}>
+            {/* Telefone */}
+            <View style={styles.colPhone}>
+                <View style={styles.iconTextRow}>
+                    <Ionicons name="call-outline" size={13} color="#64748B" />
+                    <Text style={styles.cellText} numberOfLines={1}>
+                        {formatPhone(cliente.telefone)}
+                    </Text>
+                </View>
+            </View>
+
+            {/* Endereço */}
+            <View style={styles.colAddress}>
+                <View style={styles.iconTextRow}>
+                    <Ionicons name="location-outline" size={13} color="#64748B" />
+                    <Text style={styles.cellText} numberOfLines={1}>
+                        {cliente.endereco || "Não informado"}
+                    </Text>
+                </View>
+            </View>
+
+            {/* Ações */}
+            <View style={styles.colActions}>
+                <View style={styles.actionsContainer}>
                     <Pressable
                         onPress={iconDetails}
                         style={({ pressed }) => [
@@ -115,7 +138,7 @@ export function ClientCard({
                         ]}
                         hitSlop={4}
                     >
-                        <Ionicons name="eye-outline" size={16} color="#0B4F6C" />
+                        <Ionicons name="eye-outline" size={15} color="#0B4F6C" />
                         <Text style={styles.detailsBtnText}>Detalhes</Text>
                     </Pressable>
 
@@ -128,7 +151,7 @@ export function ClientCard({
                         ]}
                         hitSlop={4}
                     >
-                        <Ionicons name="pencil-outline" size={16} color="#0B4F6C" />
+                        <Ionicons name="pencil-outline" size={15} color="#0E7490" />
                         <Text style={styles.editBtnText}>Editar</Text>
                     </Pressable>
 
@@ -142,7 +165,8 @@ export function ClientCard({
                             ]}
                             hitSlop={4}
                         >
-                            <Ionicons name="trash-outline" size={16} color="#A74E3C" />
+                            <Ionicons name="trash-outline" size={15} color="#A74E3C" />
+                            <Text style={styles.deleteBtnText}>Excluir</Text>
                         </Pressable>
                     ) : null}
                 </View>
@@ -151,122 +175,156 @@ export function ClientCard({
     );
 }
 
+// Exportamos ClientCard como alias para ClientTableRow para compatibilidade total
+export const ClientCard = ClientTableRow;
+
 const styles = StyleSheet.create({
-    container: {
-        padding: 8,
-    },
-    card: {
-        backgroundColor: "#FFFFFF",
-        borderRadius: 18,
-        borderWidth: 1,
-        borderColor: "#DCE7EE",
-        padding: 18,
-        shadowColor: "#082F42",
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.06,
-        shadowRadius: 12,
-        elevation: 2,
-    },
-    header: {
+    headerRow: {
         flexDirection: "row",
         alignItems: "center",
-        gap: 12,
+        backgroundColor: "#E8F1F5",
+        paddingVertical: 12,
+        paddingHorizontal: 16,
+        borderBottomWidth: 1.5,
+        borderColor: "#CFDDE6",
+        minWidth: 860,
     },
-    avatar: {
-        width: 44,
-        height: 44,
-        borderRadius: 22,
-        backgroundColor: "#EDF3F7",
-        borderWidth: 1.5,
-        borderColor: "#D4E1E9",
+    headerText: {
+        fontSize: 11,
+        fontFamily: "WorksansBold",
+        color: "#0B4F6C",
+        letterSpacing: 0.8,
+        textTransform: "uppercase",
+    },
+    headerTextRight: {
+        textAlign: "right",
+    },
+    row: {
+        flexDirection: "row",
         alignItems: "center",
+        paddingVertical: 10,
+        paddingHorizontal: 16,
+        borderBottomWidth: 1,
+        borderColor: "#E2EBF0",
+        minWidth: 860,
+    },
+    rowEven: {
+        backgroundColor: "#FFFFFF",
+    },
+    rowOdd: {
+        backgroundColor: "#F8FAFC",
+    },
+
+    // Colunas
+    colId: {
+        width: 70,
         justifyContent: "center",
     },
-    avatarText: {
-        fontSize: 15,
-        fontFamily: "WorksansBold",
-        color: "#0B4F6C",
+    colName: {
+        flex: 1.5,
+        minWidth: 180,
+        justifyContent: "center",
     },
-    headerInfo: {
-        flex: 1,
-        minWidth: 0,
+    colEmail: {
+        flex: 1.3,
+        minWidth: 150,
+        justifyContent: "center",
     },
-    nameRow: {
-        flexDirection: "row",
-        alignItems: "center",
-        gap: 8,
+    colPhone: {
+        width: 140,
+        justifyContent: "center",
     },
-    name: {
-        fontSize: 16,
-        fontFamily: "WorksansBold",
-        color: "#0F172A",
-        flex: 1,
+    colAddress: {
+        flex: 1.5,
+        minWidth: 170,
+        justifyContent: "center",
     },
+    colActions: {
+        width: 220,
+        alignItems: "flex-end",
+        justifyContent: "center",
+    },
+
+    // Células e textos
     idBadge: {
-        backgroundColor: "#E0EDF4",
-        paddingHorizontal: 7,
-        paddingVertical: 2,
+        backgroundColor: "#E8F1F5",
+        paddingHorizontal: 8,
+        paddingVertical: 4,
         borderRadius: 6,
+        alignSelf: "flex-start",
     },
     idBadgeText: {
-        fontSize: 11,
-        fontFamily: "WorksansSemiBold",
+        fontSize: 12,
+        fontFamily: "WorksansBold",
         color: "#0B4F6C",
     },
-    subtext: {
-        fontSize: 12,
-        fontFamily: "WorksansRegular",
-        color: "#64748B",
-        marginTop: 1,
-    },
-    divider: {
-        height: 1,
-        backgroundColor: "#E2EBF0",
-        marginVertical: 14,
-    },
-    detailsList: {
-        gap: 8,
-        marginBottom: 16,
-    },
-    detailRow: {
-        flexDirection: "row",
-        alignItems: "flex-start",
-        gap: 8,
-    },
-    detailIcon: {
-        marginTop: 2,
-    },
-    detailText: {
-        fontSize: 13,
-        fontFamily: "WorksansRegular",
-        color: "#1E293B",
-        flex: 1,
-        lineHeight: 18,
-    },
-    actionsBar: {
+    clientInfo: {
         flexDirection: "row",
         alignItems: "center",
-        gap: 8,
-        paddingTop: 12,
-        borderTopWidth: 1,
-        borderTopColor: "#EDF3F7",
+        gap: 10,
+    },
+    avatar: {
+        width: 34,
+        height: 34,
+        borderRadius: 17,
+        backgroundColor: "#E8F1F5",
+        alignItems: "center",
+        justifyContent: "center",
+        borderWidth: 1,
+        borderColor: "#CFDDE6",
+    },
+    avatarText: {
+        color: "#0B4F6C",
+        fontSize: 12,
+        fontFamily: "WorksansBold",
+    },
+    nameContainer: {
+        flex: 1,
+    },
+    clientName: {
+        fontSize: 13,
+        fontFamily: "WorksansSemiBold",
+        color: "#0F172A",
+    },
+    clientSubtitle: {
+        fontSize: 10,
+        fontFamily: "WorksansRegular",
+        color: "#64748B",
+    },
+    iconTextRow: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 6,
+    },
+    cellText: {
+        fontSize: 13,
+        fontFamily: "WorksansRegular",
+        color: "#334155",
+        flex: 1,
+    },
+
+    // Ações
+    actionsContainer: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 6,
     },
     actionBtn: {
         flexDirection: "row",
         alignItems: "center",
-        justifyContent: "center",
-        paddingVertical: 8,
-        paddingHorizontal: 12,
-        borderRadius: 9,
-        gap: 6,
+        paddingVertical: 6,
+        paddingHorizontal: 9,
+        borderRadius: 8,
+        borderWidth: 1,
+        gap: 4,
     },
     actionBtnPressed: {
-        opacity: 0.75,
-        transform: [{ scale: 0.98 }],
+        opacity: 0.7,
+        transform: [{ scale: 0.97 }],
     },
     detailsBtn: {
-        flex: 1,
-        backgroundColor: "#F0F5F8",
+        backgroundColor: "#E8F1F5",
+        borderColor: "#CFDDE6",
     },
     detailsBtnText: {
         fontSize: 12,
@@ -274,16 +332,21 @@ const styles = StyleSheet.create({
         color: "#0B4F6C",
     },
     editBtn: {
-        flex: 1,
-        backgroundColor: "#E2EBF0",
+        backgroundColor: "#E0F2FE",
+        borderColor: "#BAE6FD",
     },
     editBtnText: {
         fontSize: 12,
         fontFamily: "WorksansSemiBold",
-        color: "#0B4F6C",
+        color: "#0E7490",
     },
     deleteBtn: {
-        backgroundColor: "#FDF2EF",
-        paddingHorizontal: 10,
+        backgroundColor: "#FEE2E2",
+        borderColor: "#FECACA",
+    },
+    deleteBtnText: {
+        fontSize: 12,
+        fontFamily: "WorksansSemiBold",
+        color: "#A74E3C",
     },
 });

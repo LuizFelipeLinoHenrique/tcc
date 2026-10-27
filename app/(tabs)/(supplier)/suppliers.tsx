@@ -17,6 +17,7 @@ import { supabase } from "@/src/lib/supabase";
 import {
     Fornecedor,
     SupplierCard,
+    SupplierTableHeader,
 } from "@/src/components/SuppliersCard";
 import { SupplierDetailsCard } from "@/src/components/SuppliersDetails";
 import { EditSupplierCard } from "@/src/components/SuppliersEdit";
@@ -246,58 +247,52 @@ export default function Suppliers() {
                     />
                 </View>
 
-                <FlatList
-                    data={fornecedores}
-                    keyExtractor={(item) => item.id.toString()}
-                    numColumns={isMobile ? 1 : 2}
-                    key={isMobile ? "mobile" : "desktop"}
-                    contentContainerStyle={styles.listContent}
-                    columnWrapperStyle={
-                        !isMobile
-                            ? styles.columnWrapper
-                            : undefined
-                    }
-                    showsVerticalScrollIndicator={false}
-                    renderItem={({ item }) => (
-                        <SupplierCard
-                            fornecedor={item}
-                            iconDetails={() => abrirDetalhes(item)}
-                            iconEdit={() => abrirEditar(item)}
-                            iconDelete={() => confirmarExclusao(item)}
+                <ScrollView
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    style={styles.tableScroll}
+                    contentContainerStyle={styles.tableScrollContent}
+                >
+                    <View style={styles.tableContainer}>
+                        <FlatList
+                            data={fornecedores}
+                            keyExtractor={(item) => item.id.toString()}
+                            ListHeaderComponent={<SupplierTableHeader />}
+                            showsVerticalScrollIndicator={false}
+                            renderItem={({ item, index }) => (
+                                <SupplierCard
+                                    index={index}
+                                    fornecedor={item}
+                                    iconDetails={() => abrirDetalhes(item)}
+                                    iconEdit={() => abrirEditar(item)}
+                                    iconDelete={() => confirmarExclusao(item)}
+                                />
+                            )}
+                            onEndReached={carregarMais}
+                            onEndReachedThreshold={0.5}
+                            ListFooterComponent={
+                                loading ? (
+                                    <View style={styles.loadingContainer}>
+                                        <Text style={styles.loadingText}>Carregando...</Text>
+                                    </View>
+                                ) : hasMore && fornecedores.length > 0 ? (
+                                    <View style={styles.moreContainer}>
+                                        <Pressable style={styles.moreButton} onPress={carregarMais}>
+                                            <Text style={styles.moreButtonText}>Carregar mais</Text>
+                                        </Pressable>
+                                    </View>
+                                ) : null
+                            }
+                            ListEmptyComponent={
+                                !loading ? (
+                                    <View style={styles.emptyContainer}>
+                                        <Text style={styles.emptyText}>Nenhum fornecedor encontrado.</Text>
+                                    </View>
+                                ) : null
+                            }
                         />
-                    )}
-                    onEndReached={carregarMais}
-                    onEndReachedThreshold={0.5}
-                    ListFooterComponent={
-                        loading ? (
-                            <View style={styles.loadingContainer}>
-                                <Text style={styles.loadingText}>
-                                    Carregando...
-                                </Text>
-                            </View>
-                        ) : hasMore && fornecedores.length > 0 ? (
-                            <View style={styles.moreContainer}>
-                                <Pressable
-                                    style={styles.moreButton}
-                                    onPress={carregarMais}
-                                >
-                                    <Text style={styles.moreButtonText}>
-                                        Carregar mais
-                                    </Text>
-                                </Pressable>
-                            </View>
-                        ) : null
-                    }
-                    ListEmptyComponent={
-                        !loading ? (
-                            <View style={styles.emptyContainer}>
-                                <Text style={styles.emptyText}>
-                                    Nenhum fornecedor encontrado.
-                                </Text>
-                            </View>
-                        ) : null
-                    }
-                />
+                    </View>
+                </ScrollView>
             </View>
 
             {/* Modal de Detalhes */}
@@ -429,6 +424,29 @@ export default function Suppliers() {
 }
 
 const styles = StyleSheet.create({
+    tableScroll: {
+        flex: 1,
+        width: "100%",
+        marginTop: 10,
+    },
+    tableScrollContent: {
+        minWidth: "100%",
+        flexGrow: 1,
+    },
+    tableContainer: {
+        minWidth: "100%",
+        flex: 1,
+        backgroundColor: "#FFFFFF",
+        borderRadius: 14,
+        borderWidth: 1,
+        borderColor: "#DCE7EE",
+        overflow: "hidden",
+        shadowColor: "#082F42",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.05,
+        shadowRadius: 8,
+        elevation: 2,
+    },
     container: {
         flex: 1,
         width: "100%",

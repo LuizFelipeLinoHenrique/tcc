@@ -1,5 +1,5 @@
 import { AnimatedButton } from "@/src/components/AnimatedButton";
-import { OrderCard } from "@/src/components/OrdersCard";
+import { OrderCard, OrderTableHeader } from "@/src/components/OrdersCard";
 import {
     OrderDetail,
     OrderDetailsCard,
@@ -21,6 +21,7 @@ import {
     Modal,
     Pressable,
     ScrollView,
+    StyleSheet,
     Text,
     View,
 } from "react-native";
@@ -470,10 +471,10 @@ export default function Orders() {
             }}
         >
             <View
-                style={{
-                    flex: 1,
-                }}
+                style={styles.container}
             >
+
+
                 <OrdersFilters
                     pesquisa={pesquisa}
                     setPesquisa={setPesquisa}
@@ -488,79 +489,56 @@ export default function Orders() {
                     isMobile={isMobile}
                 />
 
-                <FlatList
-                    data={pedidos}
-                    numColumns={
-                        isMobile ? 1 : 2
-                    }
-                    keyExtractor={(item) =>
-                        item.id.toString()
-                    }
-                    renderItem={({ item }) => (
-                        <OrderCard
-                            pedido={item}
-                            iconDetails={() =>
-                                abrirDetalhes(
-                                    item.id
-                                )
-                            }
-                            iconEdit={() =>
-                                abrirEditar(
-                                    item.id
-                                )
-                            }
-                            iconDelete={() =>
-                                deleteOrder(
-                                    item.id
-                                )
-                            }
-                        />
-                    )}
-                    showsVerticalScrollIndicator={
-                        false
-                    }
-                    ListFooterComponent={
-                        <View
-                            style={{
-                                justifyContent:
-                                    "center",
-                                alignItems:
-                                    "center",
-                                paddingVertical: 20,
-                            }}
-                        >
-                            {hasMore
-                                ? (
-                                    <AnimatedButton
-                                        stylesPressable={[pagesStyles.primaryButton, { minWidth: !isMobile ? 200 : 100 }]}
-                                        stylesText={pagesStyles.primaryButtonText}
-                                        title={
-                                            loading
-                                                ? (
-                                                    <ActivityIndicator
-                                                        color="#F7F4EE"
-                                                    />
-                                                )
-                                                : (
-                                                    <Text
-                                                        style={
-                                                            pagesStyles.primaryButtonText
-                                                        }
-                                                    >
-                                                        Carregar
-                                                        mais
+                <ScrollView
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    style={styles.tableScroll}
+                    contentContainerStyle={styles.tableScrollContent}
+                >
+                    <View style={styles.tableContainer}>
+                        <FlatList
+                            data={pedidos}
+                            ListHeaderComponent={<OrderTableHeader />}
+                            keyExtractor={(item) => item.id.toString()}
+                            renderItem={({ item, index }) => (
+                                <OrderCard
+                                    index={index}
+                                    pedido={item}
+                                    iconDetails={() => abrirDetalhes(item.id)}
+                                    iconEdit={() => abrirEditar(item.id)}
+                                    iconDelete={() => deleteOrder(item.id)}
+                                />
+                            )}
+                            showsVerticalScrollIndicator={false}
+                            ListFooterComponent={
+                                <View
+                                    style={{
+                                        justifyContent: "center",
+                                        alignItems: "center",
+                                        paddingVertical: 20,
+                                    }}
+                                >
+                                    {hasMore ? (
+                                        <AnimatedButton
+                                            stylesPressable={[pagesStyles.primaryButton, { minWidth: !isMobile ? 200 : 100 }]}
+                                            stylesText={pagesStyles.primaryButtonText}
+                                            title={
+                                                loading ? (
+                                                    <ActivityIndicator color="#F7F4EE" />
+                                                ) : (
+                                                    <Text style={pagesStyles.primaryButtonText}>
+                                                        Carregar mais
                                                     </Text>
                                                 )
-                                        }
-                                        onPress={() => loadOrders(false)}
-                                    />
-                                )
-                                :
-                                null
+                                            }
+                                            onPress={() => loadOrders(false)}
+                                        />
+                                    ) : null}
+                                </View>
                             }
-                        </View>
-                    }
-                />
+                        />
+                    </View>
+                </ScrollView>
 
                 <Modal
                     visible={reloadPage}
@@ -760,3 +738,33 @@ export default function Orders() {
         </PagesLayout >
     );
 }
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        width: "100%",
+    },
+    tableScroll: {
+        flex: 1,
+        width: "100%",
+        marginTop: 10,
+    },
+    tableScrollContent: {
+        minWidth: "100%",
+        flexGrow: 1,
+    },
+    tableContainer: {
+        minWidth: "100%",
+        flex: 1,
+        backgroundColor: "#FFFFFF",
+        borderRadius: 14,
+        borderWidth: 1,
+        borderColor: "#DCE7EE",
+        overflow: "hidden",
+        shadowColor: "#082F42",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.05,
+        shadowRadius: 8,
+        elevation: 2,
+    },
+});

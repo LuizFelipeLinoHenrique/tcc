@@ -1,8 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
+import React from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import useResponsive from "../hooks/useResponsive";
 
-type Pedido = {
+export type Pedido = {
     id: number;
     data_pedido: string;
     id_cliente: number;
@@ -11,18 +11,19 @@ type Pedido = {
     status: string;
 };
 
-type OrderCardProps = {
+export type OrderCardProps = {
+    pedido: Pedido;
     iconDetails: () => void;
     iconEdit: () => void;
     iconDelete?: () => void;
-    pedido: Pedido;
+    index?: number;
 };
 
 function renderStatusBadge(status: string) {
     if (status === "P") {
         return (
             <View style={[styles.statusBadge, styles.statusPending]}>
-                <Ionicons name="time-outline" size={13} color="#9C6E2E" />
+                <Ionicons name="time-outline" size={12} color="#92400E" />
                 <Text style={styles.statusPendingText}>Pendente</Text>
             </View>
         );
@@ -30,7 +31,7 @@ function renderStatusBadge(status: string) {
     if (status === "E") {
         return (
             <View style={[styles.statusBadge, styles.statusDelivered]}>
-                <Ionicons name="checkmark-circle-outline" size={13} color="#3D7A42" />
+                <Ionicons name="checkmark-circle-outline" size={12} color="#166534" />
                 <Text style={styles.statusDeliveredText}>Entregue</Text>
             </View>
         );
@@ -38,7 +39,7 @@ function renderStatusBadge(status: string) {
     if (status === "C") {
         return (
             <View style={[styles.statusBadge, styles.statusCanceled]}>
-                <Ionicons name="close-circle-outline" size={13} color="#A74E3C" />
+                <Ionicons name="close-circle-outline" size={12} color="#991B1B" />
                 <Text style={styles.statusCanceledText}>Cancelado</Text>
             </View>
         );
@@ -50,62 +51,91 @@ function renderStatusBadge(status: string) {
     );
 }
 
-export function OrderCard({ pedido, iconDetails, iconEdit, iconDelete }: OrderCardProps) {
-    const { isMobile } = useResponsive();
+export function OrderTableHeader() {
+    return (
+        <View style={styles.headerRow}>
+            <View style={styles.colId}>
+                <Text style={styles.headerText}>ID</Text>
+            </View>
+            <View style={styles.colDate}>
+                <Text style={styles.headerText}>DATA</Text>
+            </View>
+            <View style={styles.colClient}>
+                <Text style={styles.headerText}>CLIENTE</Text>
+            </View>
+            <View style={styles.colProduct}>
+                <Text style={styles.headerText}>PRODUTO</Text>
+            </View>
+            <View style={styles.colQty}>
+                <Text style={styles.headerText}>QUANTIDADE</Text>
+            </View>
+            <View style={styles.colStatus}>
+                <Text style={styles.headerText}>STATUS</Text>
+            </View>
+            <View style={styles.colActions}>
+                <Text style={[styles.headerText, styles.headerTextRight]}>AÇÕES</Text>
+            </View>
+        </View>
+    );
+}
+
+export function OrderTableRow({
+    pedido,
+    iconDetails,
+    iconEdit,
+    iconDelete,
+    index = 0,
+}: OrderCardProps) {
+    const isEven = index % 2 === 0;
 
     return (
-        <View style={[styles.container, isMobile ? { width: "100%" } : { width: "50%" }]}>
-            <View style={styles.card}>
-                {/* Header do Pedido */}
-                <View style={styles.header}>
-                    <View style={styles.headerLeft}>
-                        <View style={styles.orderIconBox}>
-                            <Ionicons name="cube" size={20} color="#0B4F6C" />
-                        </View>
-                        <View>
-                            <Text style={styles.orderTitle}>Pedido #{pedido.id}</Text>
-                            <View style={styles.dateRow}>
-                                <Ionicons name="calendar-outline" size={12} color="#64748B" />
-                                <Text style={styles.dateText}>{pedido.data_pedido}</Text>
-                            </View>
-                        </View>
-                    </View>
-
-                    {renderStatusBadge(pedido.status)}
+        <View style={[styles.row, isEven ? styles.rowEven : styles.rowOdd]}>
+            {/* ID */}
+            <View style={styles.colId}>
+                <View style={styles.idBadge}>
+                    <Text style={styles.idBadgeText}>#{pedido.id}</Text>
                 </View>
+            </View>
 
-                {/* Linha Divisória */}
-                <View style={styles.divider} />
-
-                {/* Grid de Metadados */}
-                <View style={styles.metaGrid}>
-                    <View style={styles.metaItem}>
-                        <View style={styles.metaLabelRow}>
-                            <Ionicons name="person-outline" size={14} color="#64748B" />
-                            <Text style={styles.metaLabel}>Cliente</Text>
-                        </View>
-                        <Text style={styles.metaValue}>ID #{pedido.id_cliente}</Text>
-                    </View>
-
-                    <View style={styles.metaItem}>
-                        <View style={styles.metaLabelRow}>
-                            <Ionicons name="cube-outline" size={14} color="#64748B" />
-                            <Text style={styles.metaLabel}>Produto</Text>
-                        </View>
-                        <Text style={styles.metaValue}>ID #{pedido.id_produto}</Text>
-                    </View>
-
-                    <View style={styles.metaItem}>
-                        <View style={styles.metaLabelRow}>
-                            <Ionicons name="layers-outline" size={14} color="#64748B" />
-                            <Text style={styles.metaLabel}>Quantidade</Text>
-                        </View>
-                        <Text style={styles.metaValue}>{pedido.qtde} un.</Text>
-                    </View>
+            {/* Data */}
+            <View style={styles.colDate}>
+                <View style={styles.dateContainer}>
+                    <Ionicons name="calendar-outline" size={13} color="#64748B" />
+                    <Text style={styles.cellText}>{pedido.data_pedido}</Text>
                 </View>
+            </View>
 
-                {/* Barra de Ações */}
-                <View style={styles.actionsBar}>
+            {/* Cliente */}
+            <View style={styles.colClient}>
+                <View style={styles.labelValueContainer}>
+                    <Ionicons name="person-outline" size={13} color="#0B4F6C" />
+                    <Text style={styles.cellTextBold}>Cliente #{pedido.id_cliente}</Text>
+                </View>
+            </View>
+
+            {/* Produto */}
+            <View style={styles.colProduct}>
+                <View style={styles.labelValueContainer}>
+                    <Ionicons name="cube-outline" size={13} color="#0E7490" />
+                    <Text style={styles.cellText}>Item #{pedido.id_produto}</Text>
+                </View>
+            </View>
+
+            {/* Quantidade */}
+            <View style={styles.colQty}>
+                <View style={styles.qtyBadge}>
+                    <Text style={styles.qtyBadgeText}>{pedido.qtde} un.</Text>
+                </View>
+            </View>
+
+            {/* Status */}
+            <View style={styles.colStatus}>
+                {renderStatusBadge(pedido.status)}
+            </View>
+
+            {/* Ações */}
+            <View style={styles.colActions}>
+                <View style={styles.actionsContainer}>
                     <Pressable
                         onPress={iconDetails}
                         style={({ pressed }) => [
@@ -115,7 +145,7 @@ export function OrderCard({ pedido, iconDetails, iconEdit, iconDelete }: OrderCa
                         ]}
                         hitSlop={4}
                     >
-                        <Ionicons name="eye-outline" size={16} color="#0B4F6C" />
+                        <Ionicons name="eye-outline" size={15} color="#0B4F6C" />
                         <Text style={styles.detailsBtnText}>Detalhes</Text>
                     </Pressable>
 
@@ -128,7 +158,7 @@ export function OrderCard({ pedido, iconDetails, iconEdit, iconDelete }: OrderCa
                         ]}
                         hitSlop={4}
                     >
-                        <Ionicons name="pencil-outline" size={16} color="#0B4F6C" />
+                        <Ionicons name="pencil-outline" size={15} color="#0E7490" />
                         <Text style={styles.editBtnText}>Editar</Text>
                     </Pressable>
 
@@ -142,170 +172,203 @@ export function OrderCard({ pedido, iconDetails, iconEdit, iconDelete }: OrderCa
                             ]}
                             hitSlop={4}
                         >
-                            <Ionicons name="trash-outline" size={16} color="#A74E3C" />
+                            <Ionicons name="trash-outline" size={15} color="#A74E3C" />
+                            <Text style={styles.deleteBtnText}>Excluir</Text>
                         </Pressable>
                     ) : null}
                 </View>
             </View>
         </View>
     );
-};
+}
+
+// Exportamos OrderCard como alias para OrderTableRow para compatibilidade total
+export const OrderCard = OrderTableRow;
 
 const styles = StyleSheet.create({
-    container: {
-        padding: 8,
+    headerRow: {
+        flexDirection: "row",
+        alignItems: "center",
+        backgroundColor: "#E8F1F5",
+        paddingVertical: 12,
+        paddingHorizontal: 16,
+        borderBottomWidth: 1.5,
+        borderColor: "#CFDDE6",
+        minWidth: 860,
     },
-    card: {
+    headerText: {
+        fontSize: 11,
+        fontFamily: "WorksansBold",
+        color: "#0B4F6C",
+        letterSpacing: 0.8,
+        textTransform: "uppercase",
+    },
+    headerTextRight: {
+        textAlign: "right",
+    },
+    row: {
+        flexDirection: "row",
+        alignItems: "center",
+        paddingVertical: 11,
+        paddingHorizontal: 16,
+        borderBottomWidth: 1,
+        borderColor: "#E2EBF0",
+        minWidth: 860,
+    },
+    rowEven: {
         backgroundColor: "#FFFFFF",
-        borderRadius: 18,
-        borderWidth: 1,
-        borderColor: "#DCE7EE",
-        padding: 18,
-        shadowColor: "#082F42",
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.06,
-        shadowRadius: 12,
-        elevation: 2,
     },
-    header: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
+    rowOdd: {
+        backgroundColor: "#F8FAFC",
     },
-    headerLeft: {
-        flexDirection: "row",
-        alignItems: "center",
-        gap: 12,
-    },
-    orderIconBox: {
-        width: 42,
-        height: 42,
-        borderRadius: 12,
-        backgroundColor: "#E0EDF4",
-        borderWidth: 1,
-        borderColor: "#D9E5EC",
-        alignItems: "center",
+
+    // Colunas
+    colId: {
+        width: 75,
         justifyContent: "center",
     },
-    orderTitle: {
-        fontSize: 16,
-        fontFamily: "WorksansBold",
-        color: "#0F172A",
+    colDate: {
+        width: 125,
+        justifyContent: "center",
     },
-    dateRow: {
+    colClient: {
+        flex: 1.1,
+        minWidth: 130,
+        justifyContent: "center",
+    },
+    colProduct: {
+        flex: 1.1,
+        minWidth: 130,
+        justifyContent: "center",
+    },
+    colQty: {
+        width: 115,
+        justifyContent: "center",
+    },
+    colStatus: {
+        width: 130,
+        justifyContent: "center",
+    },
+    colActions: {
+        width: 220,
+        alignItems: "flex-end",
+        justifyContent: "center",
+    },
+
+    // Células e textos
+    idBadge: {
+        backgroundColor: "#E8F1F5",
+        paddingHorizontal: 8,
+        paddingVertical: 4,
+        borderRadius: 6,
+        alignSelf: "flex-start",
+    },
+    idBadgeText: {
+        fontSize: 12,
+        fontFamily: "WorksansBold",
+        color: "#0B4F6C",
+    },
+    dateContainer: {
         flexDirection: "row",
         alignItems: "center",
-        gap: 4,
-        marginTop: 2,
+        gap: 6,
     },
-    dateText: {
-        fontSize: 12,
+    cellText: {
+        fontSize: 13,
         fontFamily: "WorksansRegular",
-        color: "#64748B",
+        color: "#334155",
     },
+    cellTextBold: {
+        fontSize: 13,
+        fontFamily: "WorksansSemiBold",
+        color: "#0F172A",
+    },
+    labelValueContainer: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 6,
+    },
+    qtyBadge: {
+        backgroundColor: "#EDF3F7",
+        paddingHorizontal: 8,
+        paddingVertical: 4,
+        borderRadius: 6,
+        alignSelf: "flex-start",
+    },
+    qtyBadgeText: {
+        fontSize: 12,
+        fontFamily: "WorksansMedium",
+        color: "#1E293B",
+    },
+
+    // Status
     statusBadge: {
         flexDirection: "row",
         alignItems: "center",
-        gap: 5,
         paddingHorizontal: 9,
         paddingVertical: 4,
-        borderRadius: 8,
-        backgroundColor: "#F8FAFC",
-        borderWidth: 1,
-        borderColor: "#D4E1E9",
+        borderRadius: 20,
+        gap: 4,
+        alignSelf: "flex-start",
     },
     statusPending: {
-        backgroundColor: "#FDF7ED",
-        borderColor: "#F0DFBC",
+        backgroundColor: "#FEF3C7",
+        borderWidth: 1,
+        borderColor: "#FDE68A",
     },
     statusPendingText: {
-        fontSize: 12,
+        fontSize: 11,
         fontFamily: "WorksansSemiBold",
-        color: "#9C6E2E",
+        color: "#92400E",
     },
     statusDelivered: {
-        backgroundColor: "#EFF7EF",
-        borderColor: "#CBE2CB",
+        backgroundColor: "#DCFCE7",
+        borderWidth: 1,
+        borderColor: "#BBF7D0",
     },
     statusDeliveredText: {
-        fontSize: 12,
+        fontSize: 11,
         fontFamily: "WorksansSemiBold",
-        color: "#3D7A42",
+        color: "#166534",
     },
     statusCanceled: {
-        backgroundColor: "#FDF2EF",
-        borderColor: "#F0CBC2",
+        backgroundColor: "#FEE2E2",
+        borderWidth: 1,
+        borderColor: "#FECACA",
     },
     statusCanceledText: {
-        fontSize: 12,
+        fontSize: 11,
         fontFamily: "WorksansSemiBold",
-        color: "#A74E3C",
+        color: "#991B1B",
     },
     statusDefaultText: {
-        fontSize: 12,
-        fontFamily: "WorksansSemiBold",
-        color: "#334155",
-    },
-    divider: {
-        height: 1,
-        backgroundColor: "#E2EBF0",
-        marginVertical: 14,
-    },
-    metaGrid: {
-        flexDirection: "row",
-        flexWrap: "wrap",
-        gap: 10,
-        marginBottom: 16,
-    },
-    metaItem: {
-        flex: 1,
-        minWidth: 90,
-        backgroundColor: "#F8FAFC",
-        borderRadius: 10,
-        padding: 10,
-        borderWidth: 1,
-        borderColor: "#DDE8EF",
-    },
-    metaLabelRow: {
-        flexDirection: "row",
-        alignItems: "center",
-        gap: 5,
-        marginBottom: 3,
-    },
-    metaLabel: {
         fontSize: 11,
-        fontFamily: "WorksansRegular",
-        color: "#64748B",
+        fontFamily: "WorksansSemiBold",
+        color: "#475569",
     },
-    metaValue: {
-        fontSize: 13,
-        fontFamily: "WorksansBold",
-        color: "#0F172A",
-    },
-    actionsBar: {
+
+    // Ações
+    actionsContainer: {
         flexDirection: "row",
         alignItems: "center",
-        gap: 8,
-        paddingTop: 12,
-        borderTopWidth: 1,
-        borderTopColor: "#EDF3F7",
+        gap: 6,
     },
     actionBtn: {
         flexDirection: "row",
         alignItems: "center",
-        justifyContent: "center",
-        paddingVertical: 8,
-        paddingHorizontal: 12,
-        borderRadius: 9,
-        gap: 6,
+        paddingVertical: 6,
+        paddingHorizontal: 9,
+        borderRadius: 8,
+        borderWidth: 1,
+        gap: 4,
     },
     actionBtnPressed: {
-        opacity: 0.75,
-        transform: [{ scale: 0.98 }],
+        opacity: 0.7,
+        transform: [{ scale: 0.97 }],
     },
     detailsBtn: {
-        flex: 1,
-        backgroundColor: "#F0F5F8",
+        backgroundColor: "#E8F1F5",
+        borderColor: "#CFDDE6",
     },
     detailsBtnText: {
         fontSize: 12,
@@ -313,16 +376,21 @@ const styles = StyleSheet.create({
         color: "#0B4F6C",
     },
     editBtn: {
-        flex: 1,
-        backgroundColor: "#E2EBF0",
+        backgroundColor: "#E0F2FE",
+        borderColor: "#BAE6FD",
     },
     editBtnText: {
         fontSize: 12,
         fontFamily: "WorksansSemiBold",
-        color: "#0B4F6C",
+        color: "#0E7490",
     },
     deleteBtn: {
-        backgroundColor: "#FDF2EF",
-        paddingHorizontal: 10,
+        backgroundColor: "#FEE2E2",
+        borderColor: "#FECACA",
+    },
+    deleteBtnText: {
+        fontSize: 12,
+        fontFamily: "WorksansSemiBold",
+        color: "#A74E3C",
     },
 });

@@ -1,11 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
-import {
-    Pressable,
-    StyleSheet,
-    Text,
-    View,
-} from "react-native";
-import useResponsive from "../hooks/useResponsive";
+import React from "react";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 
 export type Material = {
     id: number;
@@ -16,11 +11,12 @@ export type Material = {
     preço?: number;
 };
 
-type MaterialCardProps = {
+export type MaterialCardProps = {
     material: Material;
     iconDetails: () => void;
     iconEdit: () => void;
     iconDelete?: () => void;
+    index?: number;
 };
 
 export function getMaterialDescricao(m: Material): string {
@@ -31,69 +27,85 @@ export function getMaterialPreco(m: Material): number {
     return Number(m.preco ?? m.preço ?? 0);
 }
 
-function formatMoney(value: number): string {
+export function formatMoney(value: number): string {
     return `R$ ${Number(value || 0).toFixed(2).replace(".", ",")}`;
 }
 
-export function MaterialCard({
+export function MaterialTableHeader() {
+    return (
+        <View style={styles.headerRow}>
+            <View style={styles.colId}>
+                <Text style={styles.headerText}>ID</Text>
+            </View>
+            <View style={styles.colName}>
+                <Text style={styles.headerText}>MATERIAL</Text>
+            </View>
+            <View style={styles.colPrice}>
+                <Text style={styles.headerText}>PREÇO UNITÁRIO</Text>
+            </View>
+            <View style={styles.colDesc}>
+                <Text style={styles.headerText}>DESCRIÇÃO</Text>
+            </View>
+            <View style={styles.colActions}>
+                <Text style={[styles.headerText, styles.headerTextRight]}>AÇÕES</Text>
+            </View>
+        </View>
+    );
+}
+
+export function MaterialTableRow({
     material,
     iconDetails,
     iconEdit,
     iconDelete,
+    index = 0,
 }: MaterialCardProps) {
-    const { isMobile } = useResponsive();
+    const isEven = index % 2 === 0;
     const descricao = getMaterialDescricao(material);
     const preco = getMaterialPreco(material);
 
     return (
-        <View
-            style={[
-                styles.container,
-                isMobile ? { width: "100%" } : { width: "50%" },
-            ]}
-        >
-            <View style={styles.card}>
-                {/* Header do Card */}
-                <View style={styles.header}>
-                    <View style={styles.avatar}>
-                        <Ionicons name="layers-outline" size={22} color="#0B4F6C" />
-                    </View>
+        <View style={[styles.row, isEven ? styles.rowEven : styles.rowOdd]}>
+            {/* ID */}
+            <View style={styles.colId}>
+                <View style={styles.idBadge}>
+                    <Text style={styles.idBadgeText}>#{material.id}</Text>
+                </View>
+            </View>
 
-                    <View style={styles.headerInfo}>
-                        <View style={styles.nameRow}>
-                            <Text style={styles.name} numberOfLines={1}>
-                                {material.nome}
-                            </Text>
-                            <View style={styles.idBadge}>
-                                <Text style={styles.idBadgeText}>#{material.id}</Text>
-                            </View>
-                        </View>
-                        <Text style={styles.subtext}>Material cadastrado</Text>
+            {/* Material */}
+            <View style={styles.colName}>
+                <View style={styles.materialInfo}>
+                    <View style={styles.materialIconBox}>
+                        <Ionicons name="layers-outline" size={17} color="#0B4F6C" />
+                    </View>
+                    <View style={styles.nameContainer}>
+                        <Text style={styles.materialName} numberOfLines={1}>
+                            {material.nome}
+                        </Text>
+                        <Text style={styles.materialSubtitle}>Item de catálogo</Text>
                     </View>
                 </View>
+            </View>
 
-                {/* Linha Divisória */}
-                <View style={styles.divider} />
-
-                {/* Detalhes do Material */}
-                <View style={styles.detailsList}>
-                    <View style={styles.detailRow}>
-                        <Ionicons name="pricetag-outline" size={15} color="#64748B" style={styles.detailIcon} />
-                        <Text style={styles.priceHighlight} numberOfLines={1}>
-                            {formatMoney(preco)}
-                        </Text>
-                    </View>
-
-                    <View style={styles.detailRow}>
-                        <Ionicons name="document-text-outline" size={15} color="#64748B" style={styles.detailIcon} />
-                        <Text style={styles.detailText} numberOfLines={2}>
-                            {descricao ? descricao : "Sem descrição informada"}
-                        </Text>
-                    </View>
+            {/* Preço */}
+            <View style={styles.colPrice}>
+                <View style={styles.priceBadge}>
+                    <Ionicons name="pricetag-outline" size={12} color="#0E7490" />
+                    <Text style={styles.priceText}>{formatMoney(preco)}</Text>
                 </View>
+            </View>
 
-                {/* Barra de Ações Inferior */}
-                <View style={styles.actionsBar}>
+            {/* Descrição */}
+            <View style={styles.colDesc}>
+                <Text style={styles.descText} numberOfLines={2}>
+                    {descricao ? descricao : "Sem descrição informada"}
+                </Text>
+            </View>
+
+            {/* Ações */}
+            <View style={styles.colActions}>
+                <View style={styles.actionsContainer}>
                     <Pressable
                         onPress={iconDetails}
                         style={({ pressed }) => [
@@ -103,7 +115,7 @@ export function MaterialCard({
                         ]}
                         hitSlop={4}
                     >
-                        <Ionicons name="eye-outline" size={16} color="#0B4F6C" />
+                        <Ionicons name="eye-outline" size={15} color="#0B4F6C" />
                         <Text style={styles.detailsBtnText}>Detalhes</Text>
                     </Pressable>
 
@@ -116,7 +128,7 @@ export function MaterialCard({
                         ]}
                         hitSlop={4}
                     >
-                        <Ionicons name="pencil-outline" size={16} color="#0B4F6C" />
+                        <Ionicons name="pencil-outline" size={15} color="#0E7490" />
                         <Text style={styles.editBtnText}>Editar</Text>
                     </Pressable>
 
@@ -130,7 +142,8 @@ export function MaterialCard({
                             ]}
                             hitSlop={4}
                         >
-                            <Ionicons name="trash-outline" size={16} color="#A74E3C" />
+                            <Ionicons name="trash-outline" size={15} color="#A74E3C" />
+                            <Text style={styles.deleteBtnText}>Excluir</Text>
                         </Pressable>
                     ) : null}
                 </View>
@@ -139,122 +152,158 @@ export function MaterialCard({
     );
 }
 
+// Exportamos MaterialCard como alias para MaterialTableRow para compatibilidade total
+export const MaterialCard = MaterialTableRow;
+
 const styles = StyleSheet.create({
-    container: {
-        padding: 8,
-    },
-    card: {
-        backgroundColor: "#FFFFFF",
-        borderRadius: 18,
-        borderWidth: 1,
-        borderColor: "#DCE7EE",
-        padding: 18,
-        shadowColor: "#082F42",
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.06,
-        shadowRadius: 12,
-        elevation: 2,
-    },
-    header: {
+    headerRow: {
         flexDirection: "row",
         alignItems: "center",
-        gap: 12,
+        backgroundColor: "#E8F1F5",
+        paddingVertical: 12,
+        paddingHorizontal: 16,
+        borderBottomWidth: 1.5,
+        borderColor: "#CFDDE6",
+        minWidth: 840,
     },
-    avatar: {
-        width: 44,
-        height: 44,
-        borderRadius: 22,
-        backgroundColor: "#EDF3F7",
-        borderWidth: 1.5,
-        borderColor: "#D4E1E9",
+    headerText: {
+        fontSize: 11,
+        fontFamily: "WorksansBold",
+        color: "#0B4F6C",
+        letterSpacing: 0.8,
+        textTransform: "uppercase",
+    },
+    headerTextRight: {
+        textAlign: "right",
+    },
+    row: {
+        flexDirection: "row",
         alignItems: "center",
+        paddingVertical: 10,
+        paddingHorizontal: 16,
+        borderBottomWidth: 1,
+        borderColor: "#E2EBF0",
+        minWidth: 840,
+    },
+    rowEven: {
+        backgroundColor: "#FFFFFF",
+    },
+    rowOdd: {
+        backgroundColor: "#F8FAFC",
+    },
+
+    // Colunas
+    colId: {
+        width: 70,
         justifyContent: "center",
     },
-    headerInfo: {
-        flex: 1,
-        minWidth: 0,
+    colName: {
+        flex: 1.5,
+        minWidth: 180,
+        justifyContent: "center",
     },
-    nameRow: {
-        flexDirection: "row",
-        alignItems: "center",
-        gap: 8,
+    colPrice: {
+        width: 140,
+        justifyContent: "center",
     },
-    name: {
-        fontSize: 16,
-        fontFamily: "WorksansBold",
-        color: "#0F172A",
-        flex: 1,
+    colDesc: {
+        flex: 2,
+        minWidth: 200,
+        justifyContent: "center",
     },
+    colActions: {
+        width: 220,
+        alignItems: "flex-end",
+        justifyContent: "center",
+    },
+
+    // Células e textos
     idBadge: {
-        backgroundColor: "#E0EDF4",
-        paddingHorizontal: 7,
-        paddingVertical: 2,
+        backgroundColor: "#E8F1F5",
+        paddingHorizontal: 8,
+        paddingVertical: 4,
         borderRadius: 6,
+        alignSelf: "flex-start",
     },
     idBadgeText: {
-        fontSize: 11,
-        fontFamily: "WorksansSemiBold",
-        color: "#0B4F6C",
-    },
-    subtext: {
         fontSize: 12,
-        fontFamily: "WorksansRegular",
-        color: "#64748B",
-        marginTop: 1,
-    },
-    divider: {
-        height: 1,
-        backgroundColor: "#E2EBF0",
-        marginVertical: 14,
-    },
-    detailsList: {
-        gap: 8,
-        marginBottom: 16,
-    },
-    detailRow: {
-        flexDirection: "row",
-        alignItems: "flex-start",
-        gap: 8,
-    },
-    detailIcon: {
-        marginTop: 2,
-    },
-    priceHighlight: {
-        fontSize: 14,
         fontFamily: "WorksansBold",
         color: "#0B4F6C",
     },
-    detailText: {
-        fontSize: 13,
-        fontFamily: "WorksansRegular",
-        color: "#1E293B",
-        flex: 1,
-        lineHeight: 18,
-    },
-    actionsBar: {
+    materialInfo: {
         flexDirection: "row",
         alignItems: "center",
-        gap: 8,
-        paddingTop: 12,
-        borderTopWidth: 1,
-        borderTopColor: "#EDF3F7",
+        gap: 10,
+    },
+    materialIconBox: {
+        width: 32,
+        height: 32,
+        borderRadius: 8,
+        backgroundColor: "#E8F1F5",
+        alignItems: "center",
+        justifyContent: "center",
+        borderWidth: 1,
+        borderColor: "#CFDDE6",
+    },
+    nameContainer: {
+        flex: 1,
+    },
+    materialName: {
+        fontSize: 13,
+        fontFamily: "WorksansSemiBold",
+        color: "#0F172A",
+    },
+    materialSubtitle: {
+        fontSize: 10,
+        fontFamily: "WorksansRegular",
+        color: "#64748B",
+    },
+    priceBadge: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 4,
+        backgroundColor: "#E0F2FE",
+        paddingHorizontal: 9,
+        paddingVertical: 4,
+        borderRadius: 6,
+        alignSelf: "flex-start",
+        borderWidth: 1,
+        borderColor: "#BAE6FD",
+    },
+    priceText: {
+        fontSize: 12,
+        fontFamily: "WorksansBold",
+        color: "#0369A1",
+    },
+    descText: {
+        fontSize: 12,
+        fontFamily: "WorksansRegular",
+        color: "#475569",
+        lineHeight: 17,
+    },
+
+    // Ações
+    actionsContainer: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 6,
     },
     actionBtn: {
         flexDirection: "row",
         alignItems: "center",
-        justifyContent: "center",
-        paddingVertical: 8,
-        paddingHorizontal: 12,
-        borderRadius: 9,
-        gap: 6,
+        paddingVertical: 6,
+        paddingHorizontal: 9,
+        borderRadius: 8,
+        borderWidth: 1,
+        gap: 4,
     },
     actionBtnPressed: {
-        opacity: 0.75,
-        transform: [{ scale: 0.98 }],
+        opacity: 0.7,
+        transform: [{ scale: 0.97 }],
     },
     detailsBtn: {
-        flex: 1,
-        backgroundColor: "#F0F5F8",
+        backgroundColor: "#E8F1F5",
+        borderColor: "#CFDDE6",
     },
     detailsBtnText: {
         fontSize: 12,
@@ -262,16 +311,21 @@ const styles = StyleSheet.create({
         color: "#0B4F6C",
     },
     editBtn: {
-        flex: 1,
-        backgroundColor: "#E2EBF0",
+        backgroundColor: "#E0F2FE",
+        borderColor: "#BAE6FD",
     },
     editBtnText: {
         fontSize: 12,
         fontFamily: "WorksansSemiBold",
-        color: "#0B4F6C",
+        color: "#0E7490",
     },
     deleteBtn: {
-        backgroundColor: "#FDF2EF",
-        paddingHorizontal: 10,
+        backgroundColor: "#FEE2E2",
+        borderColor: "#FECACA",
+    },
+    deleteBtnText: {
+        fontSize: 12,
+        fontFamily: "WorksansSemiBold",
+        color: "#A74E3C",
     },
 });

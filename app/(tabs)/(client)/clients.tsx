@@ -6,13 +6,14 @@ import {
   FlatList,
   Modal,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   View
 } from "react-native";
 
 import { supabase } from "@/src//lib/supabase";
-import { ClientCard, Cliente } from "@/src/components/ClientsCard";
+import { ClientCard, Cliente, ClientTableHeader } from "@/src/components/ClientsCard";
 import { ClientDetailsCard } from "@/src/components/ClientsDetails";
 import { EditClientCard } from "@/src/components/ClientsEdit";
 import {
@@ -258,64 +259,52 @@ export default function Clients() {
           />
         </View>
 
-        <FlatList
-          data={clientes}
-          keyExtractor={(item) => item.id.toString()}
-          numColumns={isMobile ? 1 : 2}
-          key={isMobile ? "mobile" : "desktop"}
-          contentContainerStyle={styles.listContent}
-          columnWrapperStyle={
-            !isMobile
-              ? styles.columnWrapper
-              : undefined
-          }
-          showsVerticalScrollIndicator={false}
-          renderItem={({ item }) => (
-            <ClientCard
-              cliente={item}
-              iconDetails={() =>
-                abrirDetalhes(item)
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.tableScroll}
+          contentContainerStyle={styles.tableScrollContent}
+        >
+          <View style={styles.tableContainer}>
+            <FlatList
+              data={clientes}
+              keyExtractor={(item) => item.id.toString()}
+              ListHeaderComponent={<ClientTableHeader />}
+              showsVerticalScrollIndicator={false}
+              renderItem={({ item, index }) => (
+                <ClientCard
+                  index={index}
+                  cliente={item}
+                  iconDetails={() => abrirDetalhes(item)}
+                  iconEdit={() => abrirEditar(item)}
+                  iconDelete={() => deleteCliente(item.id)}
+                />
+              )}
+              onEndReached={carregarMais}
+              onEndReachedThreshold={0.5}
+              ListFooterComponent={
+                loading ? (
+                  <View style={styles.loadingContainer}>
+                    <Text style={styles.loadingText}>Carregando...</Text>
+                  </View>
+                ) : hasMore && clientes.length > 0 ? (
+                  <View style={styles.moreContainer}>
+                    <Pressable style={styles.moreButton} onPress={carregarMais}>
+                      <Text style={styles.moreButtonText}>Carregar mais</Text>
+                    </Pressable>
+                  </View>
+                ) : null
               }
-              iconEdit={() =>
-                abrirEditar(item)
-              }
-              iconDelete={() =>
-                deleteCliente(item.id)
+              ListEmptyComponent={
+                !loading ? (
+                  <View style={styles.emptyContainer}>
+                    <Text style={styles.emptyText}>Nenhum cliente encontrado.</Text>
+                  </View>
+                ) : null
               }
             />
-          )}
-          onEndReached={carregarMais}
-          onEndReachedThreshold={0.5}
-          ListFooterComponent={
-            loading ? (
-              <View style={styles.loadingContainer}>
-                <Text style={styles.loadingText}>
-                  Carregando...
-                </Text>
-              </View>
-            ) : hasMore && clientes.length > 0 ? (
-              <View style={styles.moreContainer}>
-                <Pressable
-                  style={styles.moreButton}
-                  onPress={carregarMais}
-                >
-                  <Text style={styles.moreButtonText}>
-                    Carregar mais
-                  </Text>
-                </Pressable>
-              </View>
-            ) : null
-          }
-          ListEmptyComponent={
-            !loading ? (
-              <View style={styles.emptyContainer}>
-                <Text style={styles.emptyText}>
-                  Nenhum cliente encontrado.
-                </Text>
-              </View>
-            ) : null
-          }
-        />
+          </View>
+        </ScrollView>
       </View>
 
       <Modal
@@ -416,6 +405,29 @@ export default function Clients() {
 }
 
 const styles = StyleSheet.create({
+  tableScroll: {
+    flex: 1,
+    width: "100%",
+    marginTop: 10,
+  },
+  tableScrollContent: {
+    minWidth: "100%",
+    flexGrow: 1,
+  },
+  tableContainer: {
+    minWidth: "100%",
+    flex: 1,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: "#DCE7EE",
+    overflow: "hidden",
+    shadowColor: "#082F42",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+  },
   container: {
     flex: 1,
     width: "100%",
