@@ -1,3 +1,4 @@
+import { Colors } from "@/src/theme/colors";
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
@@ -39,7 +40,7 @@ export function PieGraph({
                     </View>
                 </View>
                 <View style={styles.emptyContainer}>
-                    <Ionicons name="pie-chart-outline" size={32} color="#94A3B8" />
+                    <Ionicons name="pie-chart-outline" size={32} color={Colors.hex94A3B8} />
                     <Text style={styles.emptyText}>Nenhum pedido registrado para o gráfico</Text>
                 </View>
             </View>
@@ -47,11 +48,11 @@ export function PieGraph({
     }
 
     const activePieData = data.filter((item) => item.value > 0);
-    const pieData = (activePieData.length > 0 ? activePieData : [{ value: 1, color: "#CBD8E2", text: "" }]).map((item) => ({
+    const pieData = (activePieData.length > 0 ? activePieData : [{ value: 1, color: Colors.hexCBD8E2, text: "" }]).map((item) => ({
         value: item.value,
         color: item.color,
         text: item.value > 0 && total > 0 ? `${Math.round((item.value / total) * 100)}%` : "",
-        textColor: "#FFFFFF",
+        textColor: Colors.white,
         textSize: 11,
     }));
 
@@ -63,7 +64,7 @@ export function PieGraph({
                     {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
                 </View>
                 <View style={styles.badge}>
-                    <Ionicons name="pie-chart" size={14} color="#0B4F6C" />
+                    <Ionicons name="pie-chart" size={14} color={Colors.hex0B4F6C} />
                     <Text style={styles.badgeText}>Status</Text>
                 </View>
             </View>
@@ -77,7 +78,7 @@ export function PieGraph({
                         animationDuration={600}
                         radius={70}
                         innerRadius={46}
-                        innerCircleColor="#FFFFFF"
+                        innerCircleColor={Colors.white}
                         data={pieData}
                         centerLabelComponent={() => (
                             <View style={styles.centerLabel}>
@@ -131,19 +132,19 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 18,
         fontFamily: "WorksansBold",
-        color: "#0F172A",
+        color: Colors.hex0F172A,
     },
     subtitle: {
         fontSize: 12,
         fontFamily: "WorksansRegular",
-        color: "#475569",
+        color: Colors.hex475569,
         marginTop: 2,
     },
     badge: {
         flexDirection: "row",
         alignItems: "center",
         gap: 4,
-        backgroundColor: "#E8F1F5",
+        backgroundColor: Colors.hexE8F1F5,
         paddingHorizontal: 8,
         paddingVertical: 4,
         borderRadius: 8,
@@ -151,7 +152,7 @@ const styles = StyleSheet.create({
     badgeText: {
         fontSize: 11,
         fontFamily: "WorksansSemiBold",
-        color: "#0B4F6C",
+        color: Colors.hex0B4F6C,
     },
     contentRow: {
         flexDirection: "row",
@@ -172,12 +173,12 @@ const styles = StyleSheet.create({
     centerValue: {
         fontSize: 18,
         fontFamily: "WorksansBold",
-        color: "#0F172A",
+        color: Colors.hex0F172A,
     },
     centerSubText: {
         fontSize: 10,
         fontFamily: "WorksansRegular",
-        color: "#64748B",
+        color: Colors.hex64748B,
     },
     legendContainer: {
         flex: 1,
@@ -204,7 +205,7 @@ const styles = StyleSheet.create({
     legendLabel: {
         fontSize: 13,
         fontFamily: "WorksansMedium",
-        color: "#1E293B",
+        color: Colors.hex1E293B,
     },
     legendValues: {
         flexDirection: "row",
@@ -214,12 +215,12 @@ const styles = StyleSheet.create({
     legendCount: {
         fontSize: 13,
         fontFamily: "WorksansBold",
-        color: "#0F172A",
+        color: Colors.hex0F172A,
     },
     legendPct: {
         fontSize: 11,
         fontFamily: "WorksansRegular",
-        color: "#64748B",
+        color: Colors.hex64748B,
     },
     emptyContainer: {
         paddingVertical: 40,
@@ -230,6 +231,6 @@ const styles = StyleSheet.create({
     emptyText: {
         fontSize: 13,
         fontFamily: "WorksansRegular",
-        color: "#64748B",
+        color: Colors.hex64748B,
     },
 });

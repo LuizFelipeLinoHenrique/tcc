@@ -1,3 +1,4 @@
+import { Colors } from "@/src/theme/colors";
 import { Ionicons } from "@expo/vector-icons";
 import { useRef, useState } from "react";
 import {
@@ -114,7 +115,7 @@ export default function SpeedDial({ actions }: SpeedDialProps) {
                                     <Ionicons
                                         name={action.icon}
                                         size={20}
-                                        color="#FFFDF9"
+                                        color={Colors.hexFFFDF9}
                                     />
                                 </View>
 
@@ -157,7 +158,7 @@ export default function SpeedDial({ actions }: SpeedDialProps) {
                         <Ionicons
                             name="add"
                             size={28}
-                            color="#FFFDF9"
+                            color={Colors.hexFFFDF9}
                         />
                     </Animated.View>
                 </Pressable>
@@ -173,7 +174,7 @@ const styles = StyleSheet.create({
         left: 0,
         right: 0,
         bottom: 0,
-        backgroundColor: "rgba(35, 27, 20, 0.35)",
+        backgroundColor: Colors.overlayBrown35,
         zIndex: 998,
     },
 
@@ -199,13 +200,13 @@ const styles = StyleSheet.create({
     },
 
     labelContainer: {
-        backgroundColor: "#FFFFFF",
+        backgroundColor: Colors.white,
         paddingHorizontal: 12,
         paddingVertical: 7,
         borderRadius: 10,
         borderWidth: 1,
-        borderColor: "#DCE7EE",
-        shadowColor: "#062534",
+        borderColor: Colors.hexDCE7EE,
+        shadowColor: Colors.hex062534,
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.12,
         shadowRadius: 6,
@@ -214,22 +215,22 @@ const styles = StyleSheet.create({
 
     label: {
         fontSize: 13,
-        color: "#0F172A",
+        color: Colors.hex0F172A,
         fontFamily: "WorksansSemiBold",
     },
 
     destructiveLabel: {
-        color: "#A74E3C",
+        color: Colors.hexA74E3C,
     },
 
     actionButton: {
         width: 44,
         height: 44,
         borderRadius: 22,
-        backgroundColor: "#145D7E",
+        backgroundColor: Colors.hex145D7E,
         alignItems: "center",
         justifyContent: "center",
-        shadowColor: "#302016",
+        shadowColor: Colors.hex302016,
         shadowOffset: { width: 0, height: 3 },
         shadowOpacity: 0.22,
         shadowRadius: 6,
@@ -237,31 +238,31 @@ const styles = StyleSheet.create({
     },
 
     destructiveActionButton: {
-        backgroundColor: "#A74E3C",
+        backgroundColor: Colors.hexA74E3C,
     },
 
     mainButton: {
         width: 56,
         height: 56,
         borderRadius: 28,
-        backgroundColor: "#0B4F6C",
+        backgroundColor: Colors.hex0B4F6C,
         alignItems: "center",
         justifyContent: "center",
-        shadowColor: "#052635",
+        shadowColor: Colors.hex052635,
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.28,
         shadowRadius: 10,
         elevation: 5,
         borderWidth: 1.5,
-        borderColor: "rgba(255, 255, 255, 0.2)",
+        borderColor: Colors.overlayWhite20,
     },
 
     mainButtonPressed: {
-        backgroundColor: "#083A50",
+        backgroundColor: Colors.hex083A50,
         transform: [{ scale: 0.96 }],
     },
 
     mainButtonOpen: {
-        backgroundColor: "#062E40",
+        backgroundColor: Colors.hex062E40,
     },
 });

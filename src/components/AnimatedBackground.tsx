@@ -1,3 +1,4 @@
+import { Colors } from "@/src/theme/colors";
 import { ReactNode, useEffect, useRef } from "react";
 import { Animated, StyleSheet } from "react-native";
 import AnimatedSquares from "./Squares";
@@ -37,7 +38,7 @@ export function AnimatedBackground({ children }: AnimatedBackgroundProps) {
 
     const backgroundColor = animation.interpolate({
         inputRange: [0, 1],
-        outputRange: ["#4f39f6", "#211e5a"],
+        outputRange: [Colors.hex4F39F6, Colors.hex211E5A],
     });
 
     return (
@@ -62,4 +63,3 @@ export function AnimatedBackground({ children }: AnimatedBackgroundProps) {
         </Animated.View>
     );
 }
-

@@ -1,3 +1,4 @@
+import { Colors } from "@/src/theme/colors";
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
 import { Platform, StyleSheet, Text, View } from "react-native";
@@ -32,7 +33,7 @@ export function LineGraph({
                     </View>
                 </View>
                 <View style={styles.emptyContainer}>
-                    <Ionicons name="analytics-outline" size={32} color="#94A3B8" />
+                    <Ionicons name="analytics-outline" size={32} color={Colors.hex94A3B8} />
                     <Text style={styles.emptyText}>Nenhum pedido registrado no período selecionado</Text>
                 </View>
             </View>
@@ -55,7 +56,7 @@ export function LineGraph({
                     {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
                 </View>
                 <View style={styles.badge}>
-                    <Ionicons name="trending-up" size={14} color="#0B4F6C" />
+                    <Ionicons name="trending-up" size={14} color={Colors.hex0B4F6C} />
                     <Text style={styles.badgeText}>Métricas</Text>
                 </View>
             </View>
@@ -69,10 +70,10 @@ export function LineGraph({
                     width={width}
                     data={data}
                     maxValue={maxValue || 10}
-                    color="#0B4F6C"
+                    color={Colors.hex0B4F6C}
                     thickness={3}
-                    startFillColor="#0B4F6C"
-                    endFillColor="#F8FAFC"
+                    startFillColor={Colors.hex0B4F6C}
+                    endFillColor={Colors.hexF8FAFC}
                     startOpacity={0.28}
                     endOpacity={0.02}
                     noOfSections={noOfSections}
@@ -80,7 +81,7 @@ export function LineGraph({
                     animationDuration={1000}
                     onDataChangeAnimationDuration={400}
                     yAxisTextStyle={styles.axisText}
-                    dataPointsColor="#0B4F6C"
+                    dataPointsColor={Colors.hex0B4F6C}
                     dataPointsRadius={4}
                     dataPointsWidth={8}
                     dataPointsHeight={8}
@@ -88,13 +89,13 @@ export function LineGraph({
                     disableForeignObject={true}
                     focusEnabled={false}
                     spacing={safeSpacing}
-                    rulesColor="#E2EBF0"
+                    rulesColor={Colors.hexE2EBF0}
                     rulesType="dashed"
                     initialSpacing={safeInitialSpacing}
                     yAxisThickness={0}
                     yAxisLabelWidth={24}
                     xAxisThickness={1}
-                    xAxisColor="#CBD8E2"
+                    xAxisColor={Colors.hexCBD8E2}
                     xAxisLabelTextStyle={styles.axisText}
                     xAxisLabelsHeight={24}
                 />
@@ -119,19 +120,19 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 18,
         fontFamily: "WorksansBold",
-        color: "#0F172A",
+        color: Colors.hex0F172A,
     },
     subtitle: {
         fontSize: 12,
         fontFamily: "WorksansRegular",
-        color: "#475569",
+        color: Colors.hex475569,
         marginTop: 2,
     },
     badge: {
         flexDirection: "row",
         alignItems: "center",
         gap: 4,
-        backgroundColor: "#E8F1F5",
+        backgroundColor: Colors.hexE8F1F5,
         paddingHorizontal: 8,
         paddingVertical: 4,
         borderRadius: 8,
@@ -139,14 +140,14 @@ const styles = StyleSheet.create({
     badgeText: {
         fontSize: 11,
         fontFamily: "WorksansSemiBold",
-        color: "#0B4F6C",
+        color: Colors.hex0B4F6C,
     },
     chartWrapper: {
         width: "100%",
         paddingTop: 8,
     },
     axisText: {
-        color: "#64748B",
+        color: Colors.hex64748B,
         fontSize: 11,
         fontFamily: "WorksansRegular",
     },
@@ -159,16 +160,16 @@ const styles = StyleSheet.create({
     emptyText: {
         fontSize: 13,
         fontFamily: "WorksansRegular",
-        color: "#64748B",
+        color: Colors.hex64748B,
     },
     customPoint: {
         width: 8,
         height: 8,
         borderRadius: 4,
-        backgroundColor: "#0B4F6C",
+        backgroundColor: Colors.hex0B4F6C,
         borderWidth: 1.5,
-        borderColor: "#FFFFFF",
-        shadowColor: "#082F42",
+        borderColor: Colors.white,
+        shadowColor: Colors.hex082F42,
         shadowOffset: { width: 0, height: 1 },
         shadowOpacity: 0.15,
         shadowRadius: 2,

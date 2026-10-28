@@ -1,3 +1,4 @@
+import { Colors } from "@/src/theme/colors";
 // import { useEffect, useState } from "react";
 // import {
 //     ActivityIndicator,
@@ -79,7 +80,7 @@
 //                             <AnimatedButton
 //                                 title={
 //                                     <View style={styles.switchButtonContent}>
-//                                         <Ionicons name="search-outline" size={16} color="#0B4F6C" />
+//                                         <Ionicons name="search-outline" size={16} color={Colors.hex0B4F6C} />
 //                                         <Text style={styles.switchButtonText}>Editar outro fornecedor</Text>
 //                                     </View>
 //                                 }
@@ -104,7 +105,7 @@
 //                         {/* CABEÇALHO */}
 //                         <View style={styles.header}>
 //                             <View style={styles.headerIcon}>
-//                                 <Ionicons name="create" size={24} color="#0B4F6C" />
+//                                 <Ionicons name="create" size={24} color={Colors.hex0B4F6C} />
 //                             </View>
 //                             <View style={styles.headerTextContainer}>
 //                                 <Text style={pagesStyles.brand}>GESTÃO DE FORNECEDORES</Text>
@@ -126,7 +127,7 @@
 //                                     <Ionicons
 //                                         name="finger-print-outline"
 //                                         size={18}
-//                                         color="#64748B"
+//                                         color={Colors.hex64748B}
 //                                         style={styles.inputIcon}
 //                                     />
 //                                     <TextInput
@@ -136,7 +137,7 @@
 //                                             setErroBusca(null);
 //                                         }}
 //                                         placeholder="Ex: 1"
-//                                         placeholderTextColor="#94A3B8"
+//                                         placeholderTextColor={Colors.hex94A3B8}
 //                                         keyboardType="numeric"
 //                                         returnKeyType="search"
 //                                         onSubmitEditing={buscarFornecedor}
@@ -148,7 +149,7 @@
 
 //                             {erroBusca ? (
 //                                 <View style={styles.errorBox}>
-//                                     <Ionicons name="alert-circle" size={18} color="#B91C1C" />
+//                                     <Ionicons name="alert-circle" size={18} color={Colors.hexB91C1C} />
 //                                     <Text style={styles.errorBoxText}>{erroBusca}</Text>
 //                                 </View>
 //                             ) : null}
@@ -163,7 +164,7 @@
 //                                 disabled={!inputId.trim() || buscando}
 //                                 title={
 //                                     buscando ? (
-//                                         <ActivityIndicator size="small" color="#FFFDF9" />
+//                                         <ActivityIndicator size="small" color={Colors.hexFFFDF9} />
 //                                     ) : (
 //                                         "Carregar Fornecedor"
 //                                     )
@@ -192,7 +193,7 @@
 //         width: 48,
 //         height: 48,
 //         borderRadius: 12,
-//         backgroundColor: "#E8F1F5",
+//         backgroundColor: Colors.hexE8F1F5,
 //         alignItems: "center",
 //         justifyContent: "center",
 //         marginTop: 2,
@@ -206,7 +207,7 @@
 //     },
 //     divider: {
 //         height: 1,
-//         backgroundColor: "#DDE8EF",
+//         backgroundColor: Colors.hexDDE8EF,
 //         marginVertical: 20,
 //     },
 //     searchSection: {
@@ -215,9 +216,9 @@
 //     inputWrapper: {
 //         flexDirection: "row",
 //         alignItems: "center",
-//         backgroundColor: "#F8FAFC",
+//         backgroundColor: Colors.hexF8FAFC,
 //         borderWidth: 1,
-//         borderColor: "#CFDDE6",
+//         borderColor: Colors.hexCFDDE6,
 //         borderRadius: 12,
 //         paddingHorizontal: 12,
 //     },
@@ -229,15 +230,15 @@
 //         minHeight: 46,
 //         fontSize: 15,
 //         fontFamily: "WorksansRegular",
-//         color: "#0F172A",
+//         color: Colors.hex0F172A,
 //     },
 //     errorBox: {
 //         flexDirection: "row",
 //         alignItems: "center",
 //         gap: 8,
-//         backgroundColor: "#FEF2F2",
+//         backgroundColor: Colors.hexFEF2F2,
 //         borderWidth: 1,
-//         borderColor: "#FECACA",
+//         borderColor: Colors.hexFECACA,
 //         paddingHorizontal: 12,
 //         paddingVertical: 10,
 //         borderRadius: 10,
@@ -245,16 +246,16 @@
 //     errorBoxText: {
 //         fontSize: 13,
 //         fontFamily: "WorksansMedium",
-//         color: "#B91C1C",
+//         color: Colors.hexB91C1C,
 //         flex: 1,
 //     },
 //     buttonDisabled: {
 //         opacity: 0.5,
 //     },
 //     switchButton: {
-//         backgroundColor: "#F8FAFC",
+//         backgroundColor: Colors.hexF8FAFC,
 //         borderWidth: 1,
-//         borderColor: "#CFDDE6",
+//         borderColor: Colors.hexCFDDE6,
 //         paddingHorizontal: 14,
 //         paddingVertical: 8,
 //         borderRadius: 10,
@@ -267,6 +268,6 @@
 //     switchButtonText: {
 //         fontSize: 13,
 //         fontFamily: "WorksansSemiBold",
-//         color: "#0B4F6C",
+//         color: Colors.hex0B4F6C,
 //     },
 // });

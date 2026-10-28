@@ -1,3 +1,4 @@
+import { Colors } from "@/src/theme/colors";
 import { supabase } from "@/src/lib/supabase";
 
 import { useEffect, useState } from "react";
@@ -292,7 +293,7 @@ export function EditClientCard({
                             value={nome}
                             onChangeText={setNome}
                             placeholder="Nome do cliente"
-                            placeholderTextColor="#64748B"
+                            placeholderTextColor={Colors.hex64748B}
                             style={pagesStyles.input}
                         />
                     </View>
@@ -318,7 +319,7 @@ export function EditClientCard({
                             value={email}
                             onChangeText={setEmail}
                             placeholder="E-mail do cliente"
-                            placeholderTextColor="#64748B"
+                            placeholderTextColor={Colors.hex64748B}
                             keyboardType="email-address"
                             autoCapitalize="none"
                             style={pagesStyles.input}
@@ -344,7 +345,7 @@ export function EditClientCard({
                             value={telefone}
                             onChangeText={setTelefone}
                             placeholder="Telefone do cliente"
-                            placeholderTextColor="#64748B"
+                            placeholderTextColor={Colors.hex64748B}
                             keyboardType="numeric"
                             style={pagesStyles.input}
                         />
@@ -370,7 +371,7 @@ export function EditClientCard({
                             value={endereco}
                             onChangeText={setEndereco}
                             placeholder="Endereço do cliente"
-                            placeholderTextColor="#64748B"
+                            placeholderTextColor={Colors.hex64748B}
                             multiline
                             numberOfLines={4}
                             style={[
@@ -415,7 +416,7 @@ export function EditClientCard({
                     title={
                         saving ? (
                             <ActivityIndicator
-                                color="#FFFDF9"
+                                color={Colors.hexFFFDF9}
                             />
                         ) : (
                             "Salvar Alterações"
@@ -470,7 +471,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 14,
         paddingVertical: 10,
         borderRadius: 10,
-        backgroundColor: "#E0EAF0",
+        backgroundColor: Colors.hexE0EAF0,
     },
 
     idBoxMobile: {
@@ -487,7 +488,7 @@ const styles = StyleSheet.create({
     readOnlyValue: {
         paddingVertical: 2,
         fontSize: 16,
-        color: "#0B4F6C",
+        color: Colors.hex0B4F6C,
         fontWeight: "600",
     },
 
@@ -496,13 +497,13 @@ const styles = StyleSheet.create({
         marginTop: 24,
         paddingTop: 20,
         borderTopWidth: 1,
-        borderTopColor: "#CFDDE6",
+        borderTopColor: Colors.hexCFDDE6,
     },
 
     sectionTitle: {
         fontSize: 16,
         fontWeight: "700",
-        color: "#0B4F6C",
+        color: Colors.hex0B4F6C,
         marginBottom: 14,
     },
 
@@ -532,13 +533,13 @@ const styles = StyleSheet.create({
     input: {
         width: "100%",
         borderWidth: 1,
-        borderColor: "#B8C9D5",
+        borderColor: Colors.hexB8C9D5,
         borderRadius: 8,
         paddingHorizontal: 12,
         paddingVertical: 11,
         fontSize: 16,
-        backgroundColor: "#F8FAFC",
-        color: "#0F172A",
+        backgroundColor: Colors.hexF8FAFC,
+        color: Colors.hex0F172A,
     },
 
     textArea: {

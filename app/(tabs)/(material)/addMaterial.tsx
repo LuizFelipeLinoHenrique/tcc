@@ -1,3 +1,4 @@
+import { Colors } from "@/src/theme/colors";
 import { useState } from "react";
 import {
     ActivityIndicator,
@@ -125,7 +126,7 @@ export default function AddMaterial() {
                     {/* CABEÇALHO */}
                     <View style={styles.header}>
                         <View style={styles.headerIcon}>
-                            <Ionicons name="layers" size={24} color="#0B4F6C" />
+                            <Ionicons name="layers" size={24} color={Colors.hex0B4F6C} />
                         </View>
                         <View style={styles.headerTextContainer}>
                             <Text style={pagesStyles.brand}>CADASTRO DE MATERIAIS</Text>
@@ -148,7 +149,7 @@ export default function AddMaterial() {
                                 <Ionicons
                                     name="cube-outline"
                                     size={18}
-                                    color="#64748B"
+                                    color={Colors.hex64748B}
                                     style={styles.inputIcon}
                                 />
                                 <TextInput
@@ -159,7 +160,7 @@ export default function AddMaterial() {
                                         setMensagemSucesso(null);
                                     }}
                                     placeholder="Ex: Madeira Maciça de Ipê"
-                                    placeholderTextColor="#94A3B8"
+                                    placeholderTextColor={Colors.hex94A3B8}
                                     returnKeyType="next"
                                     editable={!loading}
                                     style={styles.input}
@@ -174,14 +175,14 @@ export default function AddMaterial() {
                                 <Ionicons
                                     name="pricetag-outline"
                                     size={18}
-                                    color="#64748B"
+                                    color={Colors.hex64748B}
                                     style={styles.inputIcon}
                                 />
                                 <TextInput
                                     value={preco}
                                     onChangeText={handlePrecoChange}
                                     placeholder="Ex: 149.90 ou 149,90"
-                                    placeholderTextColor="#94A3B8"
+                                    placeholderTextColor={Colors.hex94A3B8}
                                     keyboardType="decimal-pad"
                                     returnKeyType="next"
                                     editable={!loading}
@@ -197,7 +198,7 @@ export default function AddMaterial() {
                                 <Ionicons
                                     name="document-text-outline"
                                     size={18}
-                                    color="#64748B"
+                                    color={Colors.hex64748B}
                                     style={[styles.inputIcon, styles.inputIconMultiline]}
                                 />
                                 <TextInput
@@ -208,7 +209,7 @@ export default function AddMaterial() {
                                         setMensagemSucesso(null);
                                     }}
                                     placeholder="Ex: Peça aparelhada de madeira de alta densidade e resistência..."
-                                    placeholderTextColor="#94A3B8"
+                                    placeholderTextColor={Colors.hex94A3B8}
                                     multiline
                                     numberOfLines={3}
                                     textAlignVertical="top"
@@ -221,7 +222,7 @@ export default function AddMaterial() {
                         {/* MENSAGEM DE ERRO */}
                         {erro && (
                             <View style={styles.errorBox}>
-                                <Ionicons name="alert-circle" size={18} color="#B91C1C" />
+                                <Ionicons name="alert-circle" size={18} color={Colors.hexB91C1C} />
                                 <Text style={styles.errorBoxText}>{erro}</Text>
                             </View>
                         )}
@@ -229,7 +230,7 @@ export default function AddMaterial() {
                         {/* MENSAGEM DE SUCESSO */}
                         {mensagemSucesso && (
                             <View style={styles.successBox}>
-                                <Ionicons name="checkmark-circle" size={20} color="#166534" />
+                                <Ionicons name="checkmark-circle" size={20} color={Colors.hex166534} />
                                 <Text style={styles.successBoxText}>{mensagemSucesso}</Text>
                             </View>
                         )}
@@ -245,7 +246,7 @@ export default function AddMaterial() {
                             disabled={!formPreenchido}
                             title={
                                 loading ? (
-                                    <ActivityIndicator size="small" color="#FFFDF9" />
+                                    <ActivityIndicator size="small" color={Colors.hexFFFDF9} />
                                 ) : (
                                     "Cadastrar Material"
                                 )
@@ -273,7 +274,7 @@ const styles = StyleSheet.create({
         width: 48,
         height: 48,
         borderRadius: 12,
-        backgroundColor: "#E8F1F5",
+        backgroundColor: Colors.hexE8F1F5,
         alignItems: "center",
         justifyContent: "center",
         marginTop: 2,
@@ -287,7 +288,7 @@ const styles = StyleSheet.create({
     },
     divider: {
         height: 1,
-        backgroundColor: "#DDE8EF",
+        backgroundColor: Colors.hexDDE8EF,
         marginVertical: 20,
     },
     formContainer: {
@@ -296,9 +297,9 @@ const styles = StyleSheet.create({
     inputWrapper: {
         flexDirection: "row",
         alignItems: "center",
-        backgroundColor: "#F8FAFC",
+        backgroundColor: Colors.hexF8FAFC,
         borderWidth: 1,
-        borderColor: "#CFDDE6",
+        borderColor: Colors.hexCFDDE6,
         borderRadius: 12,
         paddingHorizontal: 12,
     },
@@ -317,7 +318,7 @@ const styles = StyleSheet.create({
         minHeight: 46,
         fontSize: 15,
         fontFamily: "WorksansRegular",
-        color: "#0F172A",
+        color: Colors.hex0F172A,
     },
     textArea: {
         minHeight: 80,
@@ -326,9 +327,9 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         gap: 8,
-        backgroundColor: "#FEF2F2",
+        backgroundColor: Colors.hexFEF2F2,
         borderWidth: 1,
-        borderColor: "#FECACA",
+        borderColor: Colors.hexFECACA,
         paddingHorizontal: 12,
         paddingVertical: 10,
         borderRadius: 10,
@@ -336,16 +337,16 @@ const styles = StyleSheet.create({
     errorBoxText: {
         fontSize: 13,
         fontFamily: "WorksansMedium",
-        color: "#B91C1C",
+        color: Colors.hexB91C1C,
         flex: 1,
     },
     successBox: {
         flexDirection: "row",
         alignItems: "center",
         gap: 10,
-        backgroundColor: "#F0FDF4",
+        backgroundColor: Colors.hexF0FDF4,
         borderWidth: 1,
-        borderColor: "#BBF7D0",
+        borderColor: Colors.hexBBF7D0,
         paddingHorizontal: 14,
         paddingVertical: 12,
         borderRadius: 12,
@@ -353,7 +354,7 @@ const styles = StyleSheet.create({
     successBoxText: {
         fontSize: 14,
         fontFamily: "WorksansMedium",
-        color: "#166534",
+        color: Colors.hex166534,
         flex: 1,
     },
     buttonDisabled: {

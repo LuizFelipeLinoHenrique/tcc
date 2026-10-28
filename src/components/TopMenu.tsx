@@ -1,3 +1,4 @@
+import { Colors } from "@/src/theme/colors";
 import { Ionicons } from "@expo/vector-icons";
 import { Href, router, usePathname } from "expo-router";
 import { useRef } from "react";
@@ -67,7 +68,7 @@ function AnimatedTab({ tab, active }: {
                 <Ionicons
                     name={iconName}
                     size={18}
-                    color={active ? "#0B4F6C" : "#475569"}
+                    color={active ? Colors.hex0B4F6C : Colors.hex475569}
                     style={styles.tabIcon}
                 />
                 <Text
@@ -115,7 +116,7 @@ const styles = StyleSheet.create({
     container: {
         flexDirection: "row",
         width: "100%",
-        backgroundColor: "#D9E5EC",
+        backgroundColor: Colors.hexD9E5EC,
         borderRadius: 14,
         padding: 4,
         gap: 4,
@@ -130,8 +131,8 @@ const styles = StyleSheet.create({
         gap: 6,
     },
     activeTab: {
-        backgroundColor: "#FFFFFF",
-        shadowColor: "#082F42",
+        backgroundColor: Colors.white,
+        shadowColor: Colors.hex082F42,
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.12,
         shadowRadius: 5,
@@ -141,12 +142,12 @@ const styles = StyleSheet.create({
         marginRight: 2,
     },
     tabText: {
-        color: "#475569",
+        color: Colors.hex475569,
         fontSize: 14,
         fontFamily: "WorksansMedium",
     },
     activeTabText: {
-        color: "#0B4F6C",
+        color: Colors.hex0B4F6C,
         fontFamily: "WorksansBold",
     },
 });

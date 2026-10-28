@@ -1,3 +1,4 @@
+import { Colors } from "@/src/theme/colors";
 import { AnimatedButton } from "@/src/components/AnimatedButton";
 import { OrderCard, OrderTableHeader } from "@/src/components/OrdersCard";
 import {
@@ -524,7 +525,7 @@ export default function Orders() {
                                             stylesText={pagesStyles.primaryButtonText}
                                             title={
                                                 loading ? (
-                                                    <ActivityIndicator color="#F7F4EE" />
+                                                    <ActivityIndicator color={Colors.hexF7F4EE} />
                                                 ) : (
                                                     <Text style={pagesStyles.primaryButtonText}>
                                                         Carregar mais
@@ -549,7 +550,7 @@ export default function Orders() {
                         style={{
                             flex: 1,
                             backgroundColor:
-                                "rgba(0, 0, 0, 0.5)",
+                                Colors.overlayBlack50,
                             justifyContent:
                                 "center",
                             alignItems:
@@ -560,13 +561,13 @@ export default function Orders() {
                         <View
                             style={{
                                 backgroundColor:
-                                    "#F7F4EE",
+                                    Colors.hexF7F4EE,
                                 borderRadius: 12,
                                 padding: 30,
                             }}
                         >
                             <ActivityIndicator
-                                color="#0B4F6C"
+                                color={Colors.hex0B4F6C}
                             />
                         </View>
                     </View>
@@ -581,7 +582,7 @@ export default function Orders() {
                         style={{
                             flex: 1,
                             backgroundColor:
-                                "rgba(0, 0, 0, 0.5)",
+                                Colors.overlayBlack50,
                             justifyContent:
                                 "center",
                             alignItems:
@@ -592,14 +593,14 @@ export default function Orders() {
                         <View
                             style={{
                                 backgroundColor:
-                                    "#F7F4EE",
+                                    Colors.hexF7F4EE,
                                 borderRadius: 12,
                                 padding: 30,
                             }}
                         >
                             <ActivityIndicator
                                 size="large"
-                                color="#0B4F6C"
+                                color={Colors.hex0B4F6C}
                             />
                         </View>
                     </View>
@@ -615,7 +616,7 @@ export default function Orders() {
                         style={{
                             flex: 1,
                             backgroundColor:
-                                "rgba(0, 0, 0, 0.5)",
+                                Colors.overlayBlack50,
                             justifyContent: "center",
                             alignItems: "center",
                             padding: isMobile ? 8 : 20,
@@ -635,14 +636,14 @@ export default function Orders() {
                         {loadingDetalhes ? (
                             <View
                                 style={{
-                                    backgroundColor: "#F7F4EE",
+                                    backgroundColor: Colors.hexF7F4EE,
                                     borderRadius: 12,
                                     padding: 30,
                                 }}
                             >
                                 <ActivityIndicator
                                     size="large"
-                                    color="#0B4F6C"
+                                    color={Colors.hex0B4F6C}
                                 />
                             </View>
                         ) : pedidoSelecionado ? (
@@ -687,7 +688,7 @@ export default function Orders() {
                         style={{
                             flex: 1,
                             backgroundColor:
-                                "rgba(0, 0, 0, 0.5)",
+                                Colors.overlayBlack50,
                             justifyContent: "center",
                             alignItems: "center",
                             padding: isMobile ? 8 : 20,
@@ -756,12 +757,12 @@ const styles = StyleSheet.create({
     tableContainer: {
         minWidth: "100%",
         flex: 1,
-        backgroundColor: "#FFFFFF",
+        backgroundColor: Colors.white,
         borderRadius: 14,
         borderWidth: 1,
-        borderColor: "#DCE7EE",
+        borderColor: Colors.hexDCE7EE,
         overflow: "hidden",
-        shadowColor: "#082F42",
+        shadowColor: Colors.hex082F42,
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.05,
         shadowRadius: 8,

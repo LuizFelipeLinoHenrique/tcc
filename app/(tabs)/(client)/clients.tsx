@@ -1,3 +1,4 @@
+import { Colors } from "@/src/theme/colors";
 // app/(tabs)/clients/Clients.tsx
 
 import { useCallback, useEffect, useState } from "react";
@@ -318,7 +319,7 @@ export default function Clients() {
           justifyContent: "center",
           alignItems: "center",
           backgroundColor:
-            "rgba(0, 0, 0, 0.5)",
+            Colors.overlayBlack50,
         }}>
           <Pressable
             onPress={fecharDetalhes}
@@ -381,7 +382,7 @@ export default function Clients() {
           justifyContent: "center",
           alignItems: "center",
           backgroundColor:
-            "rgba(0, 0, 0, 0.5)",
+            Colors.overlayBlack50,
         }}>
           <Pressable
             onPress={fecharEditar}
@@ -417,12 +418,12 @@ const styles = StyleSheet.create({
   tableContainer: {
     minWidth: "100%",
     flex: 1,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: Colors.white,
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: "#DCE7EE",
+    borderColor: Colors.hexDCE7EE,
     overflow: "hidden",
-    shadowColor: "#082F42",
+    shadowColor: Colors.hex082F42,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
     shadowRadius: 8,
@@ -442,7 +443,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: "700",
-    color: "#0B4F6C",
+    color: Colors.hex0B4F6C,
     marginBottom: 10,
   },
 
@@ -463,7 +464,7 @@ const styles = StyleSheet.create({
 
   loadingText: {
     fontSize: 16,
-    color: "#0B4F6C",
+    color: Colors.hex0B4F6C,
   },
 
   moreContainer: {
@@ -473,14 +474,14 @@ const styles = StyleSheet.create({
   },
 
   moreButton: {
-    backgroundColor: "#0B4F6C",
+    backgroundColor: Colors.hex0B4F6C,
     paddingHorizontal: 25,
     paddingVertical: 12,
     borderRadius: 8,
   },
 
   moreButtonText: {
-    color: "#FFFFFF",
+    color: Colors.white,
     fontSize: 16,
     fontWeight: "600",
   },
@@ -494,12 +495,12 @@ const styles = StyleSheet.create({
 
   emptyText: {
     fontSize: 17,
-    color: "#0B4F6C",
+    color: Colors.hex0B4F6C,
   },
 
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.45)",
+    backgroundColor: Colors.overlayBlack45,
     alignItems: "center",
     justifyContent: "center",
     padding: 20,
@@ -525,12 +526,12 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 22,
     fontWeight: "700",
-    color: "#0B4F6C",
+    color: Colors.hex0B4F6C,
   },
 
   closeText: {
     fontSize: 32,
     lineHeight: 32,
-    color: "#0B4F6C",
+    color: Colors.hex0B4F6C,
   },
 });

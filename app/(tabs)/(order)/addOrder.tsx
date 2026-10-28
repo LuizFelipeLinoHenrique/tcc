@@ -1,3 +1,4 @@
+import { Colors } from "@/src/theme/colors";
 import { useState } from "react";
 import {
     ActivityIndicator,
@@ -189,7 +190,6 @@ export default function ordersManager() {
                 qtde: quantidadeNumerica,
                 id_produto: idProdutoNumerico,
                 status: "P",
-                data_pedido: obterDataAtual(),
             })
             .select()
             .single();
@@ -258,7 +258,7 @@ export default function ordersManager() {
                     {/* CABEÇALHO */}
                     <View style={styles.header}>
                         <View style={styles.headerIcon}>
-                            <Ionicons name="add-circle" size={26} color="#0B4F6C" />
+                            <Ionicons name="add-circle" size={26} color={Colors.hex0B4F6C} />
                         </View>
                         <View style={styles.headerTextContainer}>
                             <Text style={pagesStyles.brand}>NOVO REGISTRO</Text>
@@ -289,10 +289,10 @@ export default function ordersManager() {
                                     size={18}
                                     color={
                                         clienteStatus === "success"
-                                            ? "#166534"
+                                            ? Colors.hex166534
                                             : clienteStatus === "error"
-                                            ? "#B91C1C"
-                                            : "#64748B"
+                                            ? Colors.hexB91C1C
+                                            : Colors.hex64748B
                                     }
                                     style={styles.inputIcon}
                                 />
@@ -301,27 +301,27 @@ export default function ordersManager() {
                                     onChangeText={alterarCliente}
                                     onBlur={() => verificarCliente()}
                                     placeholder="Ex: 1"
-                                    placeholderTextColor="#94A3B8"
+                                    placeholderTextColor={Colors.hex94A3B8}
                                     keyboardType="number-pad"
                                     returnKeyType="next"
                                     editable={!loading}
                                     style={styles.input}
                                 />
                                 {clienteStatus === "loading" && (
-                                    <ActivityIndicator size="small" color="#0B4F6C" />
+                                    <ActivityIndicator size="small" color={Colors.hex0B4F6C} />
                                 )}
                             </View>
 
                             {clienteStatus === "success" && nomeCliente && (
                                 <View style={styles.verifiedBox}>
-                                    <Ionicons name="checkmark-circle" size={16} color="#166534" />
+                                    <Ionicons name="checkmark-circle" size={16} color={Colors.hex166534} />
                                     <Text style={styles.verifiedText}>Cliente: {nomeCliente}</Text>
                                 </View>
                             )}
 
                             {clienteStatus === "error" && clienteErro && (
                                 <View style={styles.errorBox}>
-                                    <Ionicons name="alert-circle" size={16} color="#B91C1C" />
+                                    <Ionicons name="alert-circle" size={16} color={Colors.hexB91C1C} />
                                     <Text style={styles.errorBoxText}>{clienteErro}</Text>
                                 </View>
                             )}
@@ -342,10 +342,10 @@ export default function ordersManager() {
                                     size={18}
                                     color={
                                         produtoStatus === "success"
-                                            ? "#166534"
+                                            ? Colors.hex166534
                                             : produtoStatus === "error"
-                                            ? "#B91C1C"
-                                            : "#64748B"
+                                            ? Colors.hexB91C1C
+                                            : Colors.hex64748B
                                     }
                                     style={styles.inputIcon}
                                 />
@@ -354,27 +354,27 @@ export default function ordersManager() {
                                     onChangeText={alterarProduto}
                                     onBlur={() => verificarProduto()}
                                     placeholder="Ex: 10"
-                                    placeholderTextColor="#94A3B8"
+                                    placeholderTextColor={Colors.hex94A3B8}
                                     keyboardType="number-pad"
                                     returnKeyType="next"
                                     editable={!loading}
                                     style={styles.input}
                                 />
                                 {produtoStatus === "loading" && (
-                                    <ActivityIndicator size="small" color="#0B4F6C" />
+                                    <ActivityIndicator size="small" color={Colors.hex0B4F6C} />
                                 )}
                             </View>
 
                             {produtoStatus === "success" && nomeProduto && (
                                 <View style={styles.verifiedBox}>
-                                    <Ionicons name="checkmark-circle" size={16} color="#166534" />
+                                    <Ionicons name="checkmark-circle" size={16} color={Colors.hex166534} />
                                     <Text style={styles.verifiedText}>Material: {nomeProduto}</Text>
                                 </View>
                             )}
 
                             {produtoStatus === "error" && produtoErro && (
                                 <View style={styles.errorBox}>
-                                    <Ionicons name="alert-circle" size={16} color="#B91C1C" />
+                                    <Ionicons name="alert-circle" size={16} color={Colors.hexB91C1C} />
                                     <Text style={styles.errorBoxText}>{produtoErro}</Text>
                                 </View>
                             )}
@@ -392,7 +392,7 @@ export default function ordersManager() {
                                 <Ionicons
                                     name="layers-outline"
                                     size={18}
-                                    color={quantidadeErro ? "#B91C1C" : "#64748B"}
+                                    color={quantidadeErro ? Colors.hexB91C1C : Colors.hex64748B}
                                     style={styles.inputIcon}
                                 />
                                 <TextInput
@@ -400,7 +400,7 @@ export default function ordersManager() {
                                     onChangeText={alterarQuantidade}
                                     onBlur={validarQuantidade}
                                     placeholder="Ex: 10"
-                                    placeholderTextColor="#94A3B8"
+                                    placeholderTextColor={Colors.hex94A3B8}
                                     keyboardType="decimal-pad"
                                     returnKeyType="done"
                                     editable={!loading}
@@ -410,7 +410,7 @@ export default function ordersManager() {
 
                             {quantidadeErro && (
                                 <View style={styles.errorBox}>
-                                    <Ionicons name="alert-circle" size={16} color="#B91C1C" />
+                                    <Ionicons name="alert-circle" size={16} color={Colors.hexB91C1C} />
                                     <Text style={styles.errorBoxText}>{quantidadeErro}</Text>
                                 </View>
                             )}
@@ -419,7 +419,7 @@ export default function ordersManager() {
                         {/* STATUS INICIAL INFORMATIVO */}
                         <View style={styles.statusContainer}>
                             <View style={styles.statusIcon}>
-                                <Ionicons name="time-outline" size={20} color="#92400E" />
+                                <Ionicons name="time-outline" size={20} color={Colors.hex92400E} />
                             </View>
 
                             <View style={styles.statusTextContainer}>
@@ -437,7 +437,7 @@ export default function ordersManager() {
                         {/* MENSAGEM DE SUCESSO */}
                         {mensagemSucesso !== null && (
                             <View style={styles.successMessage}>
-                                <Ionicons name="checkmark-circle" size={22} color="#166534" />
+                                <Ionicons name="checkmark-circle" size={22} color={Colors.hex166534} />
                                 <Text style={styles.successMessageText}>{mensagemSucesso}</Text>
                             </View>
                         )}
@@ -453,7 +453,7 @@ export default function ordersManager() {
                             disabled={!formularioValido}
                             title={
                                 loading ? (
-                                    <ActivityIndicator size="small" color="#FFFDF9" />
+                                    <ActivityIndicator size="small" color={Colors.hexFFFDF9} />
                                 ) : (
                                     "Adicionar Pedido"
                                 )
@@ -481,7 +481,7 @@ const styles = StyleSheet.create({
         width: 48,
         height: 48,
         borderRadius: 12,
-        backgroundColor: "#E8F1F5",
+        backgroundColor: Colors.hexE8F1F5,
         alignItems: "center",
         justifyContent: "center",
         marginTop: 2,
@@ -495,7 +495,7 @@ const styles = StyleSheet.create({
     },
     divider: {
         height: 1,
-        backgroundColor: "#DDE8EF",
+        backgroundColor: Colors.hexDDE8EF,
         marginVertical: 20,
     },
     formContainer: {
@@ -504,19 +504,19 @@ const styles = StyleSheet.create({
     inputWrapper: {
         flexDirection: "row",
         alignItems: "center",
-        backgroundColor: "#F8FAFC",
+        backgroundColor: Colors.hexF8FAFC,
         borderWidth: 1,
-        borderColor: "#CFDDE6",
+        borderColor: Colors.hexCFDDE6,
         borderRadius: 12,
         paddingHorizontal: 12,
     },
     inputWrapperError: {
-        borderColor: "#FCA5A5",
-        backgroundColor: "#FEF2F2",
+        borderColor: Colors.hexFCA5A5,
+        backgroundColor: Colors.hexFEF2F2,
     },
     inputWrapperSuccess: {
-        borderColor: "#BBF7D0",
-        backgroundColor: "#F0FDF4",
+        borderColor: Colors.hexBBF7D0,
+        backgroundColor: Colors.hexF0FDF4,
     },
     inputIcon: {
         marginRight: 8,
@@ -526,15 +526,15 @@ const styles = StyleSheet.create({
         minHeight: 46,
         fontSize: 15,
         fontFamily: "WorksansRegular",
-        color: "#0F172A",
+        color: Colors.hex0F172A,
     },
     verifiedBox: {
         flexDirection: "row",
         alignItems: "center",
         gap: 6,
-        backgroundColor: "#F0FDF4",
+        backgroundColor: Colors.hexF0FDF4,
         borderWidth: 1,
-        borderColor: "#BBF7D0",
+        borderColor: Colors.hexBBF7D0,
         paddingHorizontal: 10,
         paddingVertical: 6,
         borderRadius: 8,
@@ -543,15 +543,15 @@ const styles = StyleSheet.create({
     verifiedText: {
         fontSize: 13,
         fontFamily: "WorksansMedium",
-        color: "#166534",
+        color: Colors.hex166534,
     },
     errorBox: {
         flexDirection: "row",
         alignItems: "center",
         gap: 6,
-        backgroundColor: "#FEF2F2",
+        backgroundColor: Colors.hexFEF2F2,
         borderWidth: 1,
-        borderColor: "#FECACA",
+        borderColor: Colors.hexFECACA,
         paddingHorizontal: 10,
         paddingVertical: 6,
         borderRadius: 8,
@@ -560,7 +560,7 @@ const styles = StyleSheet.create({
     errorBoxText: {
         fontSize: 13,
         fontFamily: "WorksansMedium",
-        color: "#B91C1C",
+        color: Colors.hexB91C1C,
     },
     statusContainer: {
         flexDirection: "row",
@@ -569,9 +569,9 @@ const styles = StyleSheet.create({
         paddingHorizontal: 14,
         paddingVertical: 12,
         borderWidth: 1,
-        borderColor: "#FDE68A",
+        borderColor: Colors.hexFDE68A,
         borderRadius: 12,
-        backgroundColor: "#FEF3C7",
+        backgroundColor: Colors.hexFEF3C7,
     },
     statusIcon: {
         width: 36,
@@ -579,7 +579,7 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         alignItems: "center",
         justifyContent: "center",
-        backgroundColor: "#FDE68A",
+        backgroundColor: Colors.hexFDE68A,
     },
     statusTextContainer: {
         flex: 1,
@@ -587,23 +587,23 @@ const styles = StyleSheet.create({
     statusTitle: {
         fontSize: 11,
         fontFamily: "WorksansSemiBold",
-        color: "#92400E",
+        color: Colors.hex92400E,
         letterSpacing: 0.5,
     },
     statusDescription: {
         fontSize: 13,
         fontFamily: "WorksansRegular",
-        color: "#78350F",
+        color: Colors.hex78350F,
         marginTop: 1,
     },
     statusBadge: {
         paddingHorizontal: 10,
         paddingVertical: 5,
         borderRadius: 8,
-        backgroundColor: "#92400E",
+        backgroundColor: Colors.hex92400E,
     },
     statusBadgeText: {
-        color: "#FFFDF9",
+        color: Colors.hexFFFDF9,
         fontSize: 12,
         fontFamily: "WorksansSemiBold",
     },
@@ -614,14 +614,14 @@ const styles = StyleSheet.create({
         paddingHorizontal: 14,
         paddingVertical: 12,
         borderRadius: 12,
-        backgroundColor: "#F0FDF4",
+        backgroundColor: Colors.hexF0FDF4,
         borderWidth: 1,
-        borderColor: "#BBF7D0",
+        borderColor: Colors.hexBBF7D0,
     },
     successMessageText: {
         fontSize: 14,
         fontFamily: "WorksansMedium",
-        color: "#166534",
+        color: Colors.hex166534,
         flex: 1,
     },
     buttonDisabled: {

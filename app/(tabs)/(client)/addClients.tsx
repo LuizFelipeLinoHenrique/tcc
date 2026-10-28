@@ -1,3 +1,4 @@
+import { Colors } from "@/src/theme/colors";
 import { useState } from "react";
 import {
     ActivityIndicator,
@@ -107,7 +108,7 @@ export default function AddClients() {
                     {/* CABEÇALHO */}
                     <View style={styles.header}>
                         <View style={styles.headerIcon}>
-                            <Ionicons name="person-add" size={24} color="#0B4F6C" />
+                            <Ionicons name="person-add" size={24} color={Colors.hex0B4F6C} />
                         </View>
                         <View style={styles.headerTextContainer}>
                             <Text style={pagesStyles.brand}>CADASTRO DE CLIENTES</Text>
@@ -130,7 +131,7 @@ export default function AddClients() {
                                 <Ionicons
                                     name="person-outline"
                                     size={18}
-                                    color="#64748B"
+                                    color={Colors.hex64748B}
                                     style={styles.inputIcon}
                                 />
                                 <TextInput
@@ -141,7 +142,7 @@ export default function AddClients() {
                                         setMensagemSucesso(null);
                                     }}
                                     placeholder="Ex: João da Silva"
-                                    placeholderTextColor="#94A3B8"
+                                    placeholderTextColor={Colors.hex94A3B8}
                                     returnKeyType="next"
                                     editable={!loading}
                                     style={styles.input}
@@ -156,7 +157,7 @@ export default function AddClients() {
                                 <Ionicons
                                     name="mail-outline"
                                     size={18}
-                                    color="#64748B"
+                                    color={Colors.hex64748B}
                                     style={styles.inputIcon}
                                 />
                                 <TextInput
@@ -167,7 +168,7 @@ export default function AddClients() {
                                         setMensagemSucesso(null);
                                     }}
                                     placeholder="Ex: cliente@email.com"
-                                    placeholderTextColor="#94A3B8"
+                                    placeholderTextColor={Colors.hex94A3B8}
                                     keyboardType="email-address"
                                     autoCapitalize="none"
                                     returnKeyType="next"
@@ -184,14 +185,14 @@ export default function AddClients() {
                                 <Ionicons
                                     name="call-outline"
                                     size={18}
-                                    color="#64748B"
+                                    color={Colors.hex64748B}
                                     style={styles.inputIcon}
                                 />
                                 <TextInput
                                     value={telefone}
                                     onChangeText={handleTelefoneChange}
                                     placeholder="Ex: (11) 98765-4321"
-                                    placeholderTextColor="#94A3B8"
+                                    placeholderTextColor={Colors.hex94A3B8}
                                     keyboardType="phone-pad"
                                     returnKeyType="next"
                                     editable={!loading}
@@ -207,7 +208,7 @@ export default function AddClients() {
                                 <Ionicons
                                     name="location-outline"
                                     size={18}
-                                    color="#64748B"
+                                    color={Colors.hex64748B}
                                     style={styles.inputIcon}
                                 />
                                 <TextInput
@@ -218,7 +219,7 @@ export default function AddClients() {
                                         setMensagemSucesso(null);
                                     }}
                                     placeholder="Ex: Av. Paulista, 1000 - São Paulo, SP"
-                                    placeholderTextColor="#94A3B8"
+                                    placeholderTextColor={Colors.hex94A3B8}
                                     returnKeyType="done"
                                     editable={!loading}
                                     style={styles.input}
@@ -229,7 +230,7 @@ export default function AddClients() {
                         {/* MENSAGEM DE ERRO */}
                         {erro && (
                             <View style={styles.errorBox}>
-                                <Ionicons name="alert-circle" size={18} color="#B91C1C" />
+                                <Ionicons name="alert-circle" size={18} color={Colors.hexB91C1C} />
                                 <Text style={styles.errorBoxText}>{erro}</Text>
                             </View>
                         )}
@@ -237,7 +238,7 @@ export default function AddClients() {
                         {/* MENSAGEM DE SUCESSO */}
                         {mensagemSucesso && (
                             <View style={styles.successBox}>
-                                <Ionicons name="checkmark-circle" size={20} color="#166534" />
+                                <Ionicons name="checkmark-circle" size={20} color={Colors.hex166534} />
                                 <Text style={styles.successBoxText}>{mensagemSucesso}</Text>
                             </View>
                         )}
@@ -253,7 +254,7 @@ export default function AddClients() {
                             disabled={!formPreenchido}
                             title={
                                 loading ? (
-                                    <ActivityIndicator size="small" color="#FFFDF9" />
+                                    <ActivityIndicator size="small" color={Colors.hexFFFDF9} />
                                 ) : (
                                     "Cadastrar Cliente"
                                 )
@@ -281,7 +282,7 @@ const styles = StyleSheet.create({
         width: 48,
         height: 48,
         borderRadius: 12,
-        backgroundColor: "#E8F1F5",
+        backgroundColor: Colors.hexE8F1F5,
         alignItems: "center",
         justifyContent: "center",
         marginTop: 2,
@@ -295,7 +296,7 @@ const styles = StyleSheet.create({
     },
     divider: {
         height: 1,
-        backgroundColor: "#DDE8EF",
+        backgroundColor: Colors.hexDDE8EF,
         marginVertical: 20,
     },
     formContainer: {
@@ -304,9 +305,9 @@ const styles = StyleSheet.create({
     inputWrapper: {
         flexDirection: "row",
         alignItems: "center",
-        backgroundColor: "#F8FAFC",
+        backgroundColor: Colors.hexF8FAFC,
         borderWidth: 1,
-        borderColor: "#CFDDE6",
+        borderColor: Colors.hexCFDDE6,
         borderRadius: 12,
         paddingHorizontal: 12,
     },
@@ -318,15 +319,15 @@ const styles = StyleSheet.create({
         minHeight: 46,
         fontSize: 15,
         fontFamily: "WorksansRegular",
-        color: "#0F172A",
+        color: Colors.hex0F172A,
     },
     errorBox: {
         flexDirection: "row",
         alignItems: "center",
         gap: 8,
-        backgroundColor: "#FEF2F2",
+        backgroundColor: Colors.hexFEF2F2,
         borderWidth: 1,
-        borderColor: "#FECACA",
+        borderColor: Colors.hexFECACA,
         paddingHorizontal: 12,
         paddingVertical: 10,
         borderRadius: 10,
@@ -334,16 +335,16 @@ const styles = StyleSheet.create({
     errorBoxText: {
         fontSize: 13,
         fontFamily: "WorksansMedium",
-        color: "#B91C1C",
+        color: Colors.hexB91C1C,
         flex: 1,
     },
     successBox: {
         flexDirection: "row",
         alignItems: "center",
         gap: 10,
-        backgroundColor: "#F0FDF4",
+        backgroundColor: Colors.hexF0FDF4,
         borderWidth: 1,
-        borderColor: "#BBF7D0",
+        borderColor: Colors.hexBBF7D0,
         paddingHorizontal: 14,
         paddingVertical: 12,
         borderRadius: 12,
@@ -351,7 +352,7 @@ const styles = StyleSheet.create({
     successBoxText: {
         fontSize: 14,
         fontFamily: "WorksansMedium",
-        color: "#166534",
+        color: Colors.hex166534,
         flex: 1,
     },
     buttonDisabled: {

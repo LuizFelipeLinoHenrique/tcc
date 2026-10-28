@@ -1,3 +1,4 @@
+import { Colors } from "@/src/theme/colors";
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
 import {
@@ -89,7 +90,7 @@ export function MaterialDetailsCard({
             {/* CABEÇALHO */}
             <View style={styles.header}>
                 <View style={styles.iconCircle}>
-                    <Ionicons name="layers" size={24} color="#0B4F6C" />
+                    <Ionicons name="layers" size={24} color={Colors.hex0B4F6C} />
                 </View>
                 <View style={styles.headerTitle}>
                     <Text style={pagesStyles.brand}>
@@ -110,7 +111,7 @@ export function MaterialDetailsCard({
             {(id || nome) && (
                 <View style={styles.section}>
                     <View style={styles.sectionHeader}>
-                        <Ionicons name="finger-print-outline" size={17} color="#0B4F6C" />
+                        <Ionicons name="finger-print-outline" size={17} color={Colors.hex0B4F6C} />
                         <Text style={styles.sectionTitle}>Identificação</Text>
                     </View>
 
@@ -125,7 +126,7 @@ export function MaterialDetailsCard({
             {preco && (
                 <View style={styles.section}>
                     <View style={styles.sectionHeader}>
-                        <Ionicons name="pricetag-outline" size={17} color="#0B4F6C" />
+                        <Ionicons name="pricetag-outline" size={17} color={Colors.hex0B4F6C} />
                         <Text style={styles.sectionTitle}>Preço</Text>
                     </View>
 
@@ -139,7 +140,7 @@ export function MaterialDetailsCard({
             {descricao && (
                 <View style={styles.section}>
                     <View style={styles.sectionHeader}>
-                        <Ionicons name="document-text-outline" size={17} color="#0B4F6C" />
+                        <Ionicons name="document-text-outline" size={17} color={Colors.hex0B4F6C} />
                         <Text style={styles.sectionTitle}>Descrição</Text>
                     </View>
 
@@ -154,7 +155,7 @@ export function MaterialDetailsCard({
 
 const styles = StyleSheet.create({
     card: {
-        backgroundColor: "#FFFFFF",
+        backgroundColor: Colors.white,
         borderRadius: 22,
         padding: 24,
     },
@@ -169,9 +170,9 @@ const styles = StyleSheet.create({
         width: 48,
         height: 48,
         borderRadius: 24,
-        backgroundColor: "#EDF3F7",
+        backgroundColor: Colors.hexEDF3F7,
         borderWidth: 1,
-        borderColor: "#D4E1E9",
+        borderColor: Colors.hexD4E1E9,
         alignItems: "center",
         justifyContent: "center",
     },
@@ -182,11 +183,11 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 20,
         fontFamily: "WorksansBold",
-        color: "#0F172A",
+        color: Colors.hex0F172A,
         marginTop: 2,
     },
     idPill: {
-        backgroundColor: "#E0EDF4",
+        backgroundColor: Colors.hexE0EDF4,
         paddingHorizontal: 10,
         paddingVertical: 5,
         borderRadius: 8,
@@ -194,14 +195,14 @@ const styles = StyleSheet.create({
     idText: {
         fontSize: 12,
         fontFamily: "WorksansBold",
-        color: "#0B4F6C",
+        color: Colors.hex0B4F6C,
     },
     section: {
         width: "100%",
         marginTop: 18,
         paddingTop: 16,
         borderTopWidth: 1,
-        borderTopColor: "#E2EBF0",
+        borderTopColor: Colors.hexE2EBF0,
     },
     sectionHeader: {
         flexDirection: "row",
@@ -212,7 +213,7 @@ const styles = StyleSheet.create({
     sectionTitle: {
         fontSize: 14,
         fontFamily: "WorksansBold",
-        color: "#0B4F6C",
+        color: Colors.hex0B4F6C,
     },
     details: {
         width: "100%",
@@ -224,9 +225,9 @@ const styles = StyleSheet.create({
         flexGrow: 1,
         flexBasis: "45%",
         minWidth: 170,
-        backgroundColor: "#F8FAFC",
+        backgroundColor: Colors.hexF8FAFC,
         borderWidth: 1,
-        borderColor: "#D9E5EC",
+        borderColor: Colors.hexD9E5EC,
         borderRadius: 12,
         padding: 12,
         gap: 4,
@@ -235,19 +236,19 @@ const styles = StyleSheet.create({
         flexBasis: "100%",
     },
     label: {
-        color: "#64748B",
+        color: Colors.hex64748B,
         fontSize: 12,
         fontFamily: "WorksansMedium",
     },
     value: {
         fontSize: 14,
         lineHeight: 20,
-        color: "#0F172A",
+        color: Colors.hex0F172A,
         fontFamily: "WorksansRegular",
     },
     highlightValue: {
         fontSize: 16,
         fontFamily: "WorksansBold",
-        color: "#0B4F6C",
+        color: Colors.hex0B4F6C,
     },
 });

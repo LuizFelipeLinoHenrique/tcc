@@ -1,3 +1,4 @@
+import { Colors } from "@/src/theme/colors";
 import { AnimatedButton } from "@/src/components/AnimatedButton";
 import { AuthPageLayout, authStyles } from "@/src/components/AuthPageLayout";
 import { Ionicons } from "@expo/vector-icons";
@@ -60,14 +61,14 @@ export default function SignInPage() {
             E-mail
           </Text>
           <View style={localStyles.inputWrapper}>
-            <Ionicons name="mail-outline" size={20} color="#64748B" style={localStyles.inputIcon} />
+            <Ionicons name="mail-outline" size={20} color={Colors.hex64748B} style={localStyles.inputIcon} />
             <TextInput
               autoCapitalize="none"
               autoComplete="email"
               keyboardType="email-address"
               onChangeText={setEmail}
               placeholder="voce@exemplo.com"
-              placeholderTextColor="#94A3B8"
+              placeholderTextColor={Colors.hex94A3B8}
               style={[authStyles.input, localStyles.inputWithIcon]}
               value={email}
             />
@@ -86,12 +87,12 @@ export default function SignInPage() {
             </Pressable>
           </View>
           <View style={localStyles.inputWrapper}>
-            <Ionicons name="lock-closed-outline" size={20} color="#64748B" style={localStyles.inputIcon} />
+            <Ionicons name="lock-closed-outline" size={20} color={Colors.hex64748B} style={localStyles.inputIcon} />
             <TextInput
               autoComplete="current-password"
               onChangeText={setPassword}
               placeholder="Digite sua senha"
-              placeholderTextColor="#94A3B8"
+              placeholderTextColor={Colors.hex94A3B8}
               secureTextEntry={!showPassword}
               style={[authStyles.input, localStyles.inputWithIcon, localStyles.inputWithRightIcon]}
               value={password}
@@ -104,7 +105,7 @@ export default function SignInPage() {
               <Ionicons
                 name={showPassword ? "eye-off-outline" : "eye-outline"}
                 size={20}
-                color="#0E7490"
+                color={Colors.hex0E7490}
               />
             </Pressable>
           </View>
@@ -112,7 +113,7 @@ export default function SignInPage() {
 
         {errorMessage ? (
           <View style={authStyles.error}>
-            <Ionicons name="alert-circle-outline" size={18} color="#A74E3C" />
+            <Ionicons name="alert-circle-outline" size={18} color={Colors.hexA74E3C} />
             <Text style={authStyles.errorText}>
               {errorMessage}
             </Text>
@@ -120,7 +121,7 @@ export default function SignInPage() {
         ) : null}
 
         <AnimatedButton
-          title={!loading ? "Entrar no Sistema" : <ActivityIndicator color={"#FFFDF9"} />}
+          title={!loading ? "Entrar no Sistema" : <ActivityIndicator color={Colors.hexFFFDF9} />}
           stylesPressable={authStyles.primaryButton}
           stylesPressablePressed={authStyles.primaryButtonPressed}
           stylesText={authStyles.primaryButtonText}

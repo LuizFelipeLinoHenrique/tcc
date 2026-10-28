@@ -1,3 +1,4 @@
+import { Colors } from "@/src/theme/colors";
 import { AnimatedButton } from "@/src/components/AnimatedButton";
 import { BarGraph, BarGraphItem } from "@/src/components/BarGraph";
 import { LineGraph } from "@/src/components/LineGraph";
@@ -11,11 +12,13 @@ import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 import { lineDataItem } from "react-native-gifted-charts";
 
 export default function HomeScreen() {
-    const { isMobile, graphWidth, maxCardWidth } = useResponsive();
+    const { width, isMobile, graphWidth, maxCardWidth } = useResponsive();
 
     const [ordersNum, setOrdersNum] = useState<lineDataItem[]>([]);
+    const [revenueTimeline, setRevenueTimeline] = useState<lineDataItem[]>([]);
     const [loadingData, setLoadingData] = useState<boolean>(true);
     const [maxValue, setMaxValue] = useState<number>(10);
+    const [maxRevenueValue, setMaxRevenueValue] = useState<number>(10);
 
     // Métricas calculadas sobre os pedidos
     const [totalPedidos, setTotalPedidos] = useState<number>(0);
@@ -35,6 +38,7 @@ export default function HomeScreen() {
     // Dados para os gráficos
     const [statusPieData, setStatusPieData] = useState<PieGraphItem[]>([]);
     const [topMateriaisData, setTopMateriaisData] = useState<BarGraphItem[]>([]);
+    const [topClientesData, setTopClientesData] = useState<BarGraphItem[]>([]);
 
     const [active, setActive] = useState<number>(3);
 
@@ -42,6 +46,11 @@ export default function HomeScreen() {
         ordersNum.length > 1
             ? Math.max((graphWidth - 40) / (ordersNum.length - 1), 20)
             : 50;
+
+    // Espaco interno real: largura da tela - paddings externos, gaps e paddings dos tres cards.
+    const tripleGraphWidth = isMobile
+        ? graphWidth
+        : Math.max(140, Math.floor((width - 40 - 28 - 96) / 3));
 
     useEffect(() => {
         async function loadAllMetrics() {
@@ -67,16 +76,17 @@ export default function HomeScreen() {
                 const listaProdutos = produtos ?? [];
 
                 // 3. Carregar Clientes
-                const { count: countClientes } = await supabase
+                const { data: clientes } = await supabase
                     .from("clientes")
-                    .select("*", { count: "exact", head: true });
+                    .select("id, nome");
 
                 // 4. Carregar Fornecedores
                 const { count: countFornecedores } = await supabase
                     .from("fornecedores")
                     .select("*", { count: "exact", head: true });
 
-                setTotalClientes(countClientes || 0);
+                const listaClientes = clientes ?? [];
+                setTotalClientes(listaClientes.length);
                 setTotalFornecedores(countFornecedores || 0);
 
                 // Mapeamento de produtos por ID e cálculo de preço médio
@@ -109,6 +119,8 @@ export default function HomeScreen() {
                 let somaQtde = 0;
                 let somaFaturamento = 0;
                 const demandaPorProduto = new Map<number, number>();
+                const demandaPorCliente = new Map<number, number>();
+                const faturamentoPorPedido = new Map<number, number>();
 
                 listaPedidos.forEach((ped: any) => {
                     const rawStatus = String(ped.status || "").trim().toUpperCase();
@@ -121,8 +133,6 @@ export default function HomeScreen() {
                     }
 
                     const qtde = Number(ped.qtde ?? ped.quantidade ?? 1);
-                    somaQtde += qtde;
-
                     const idProd = ped.id_produto ?? ped.id_material ?? ped.produto_id;
                     const prodInfo = idProd ? produtosMap.get(idProd) : undefined;
                     const precoUnit = prodInfo
@@ -131,11 +141,26 @@ export default function HomeScreen() {
                             ? Number(listaProdutos[0].preco ?? listaProdutos[0]["preço"] ?? 0)
                             : 0;
 
-                    somaFaturamento += qtde * precoUnit;
+                    const valorPedido = qtde * precoUnit;
+                    faturamentoPorPedido.set(ped.id, rawStatus === "C" || rawStatus.startsWith("CANC") ? 0 : valorPedido);
+
+                    // Pedidos cancelados sao mantidos no historico de status, mas nao
+                    // entram em demanda, volume ou receita operacional.
+                    if (rawStatus === "C" || rawStatus.startsWith("CANC")) {
+                        return;
+                    }
+
+                    somaQtde += qtde;
+                    somaFaturamento += valorPedido;
 
                     if (idProd) {
                         const demAtual = demandaPorProduto.get(idProd) || 0;
                         demandaPorProduto.set(idProd, demAtual + qtde);
+                    }
+
+                    const idCliente = ped.id_cliente ?? ped.cliente_id;
+                    if (idCliente) {
+                        demandaPorCliente.set(idCliente, (demandaPorCliente.get(idCliente) || 0) + qtde);
                     }
                 });
 
@@ -144,17 +169,18 @@ export default function HomeScreen() {
                 setPedidosCancelados(countC);
                 setTotalUnidades(somaQtde);
                 setFaturamentoEstimado(somaFaturamento);
-                setTicketMedio(total > 0 ? somaFaturamento / total : 0);
+                const pedidosAtivos = total - countC;
+                setTicketMedio(pedidosAtivos > 0 ? somaFaturamento / pedidosAtivos : 0);
 
                 // Gráfico Donut de Status
                 setStatusPieData([
-                    { label: "Pendente", value: countP, color: "#D97706" },
-                    { label: "Entregue", value: countE, color: "#16A34A" },
-                    { label: "Cancelado", value: countC, color: "#DC2626" },
+                    { label: "Pendente", value: countP, color: Colors.hexD97706 },
+                    { label: "Entregue", value: countE, color: Colors.hex16A34A },
+                    { label: "Cancelado", value: countC, color: Colors.hexDC2626 },
                 ]);
 
                 // Gráfico de Barras: Top Materiais com Demanda
-                const coresBarras = ["#0B4F6C", "#0E7490", "#145D7E", "#38BDF8"];
+                const coresBarras = [Colors.hex0B4F6C, Colors.hex0E7490, Colors.hex145D7E, Colors.hex38BDF8];
                 const topBars: BarGraphItem[] = [];
 
                 if (listaProdutos.length > 0) {
@@ -181,11 +207,27 @@ export default function HomeScreen() {
                     topBars.push({
                         value: somaQtde > 0 ? somaQtde : 1,
                         label: "Pedido #1",
-                        frontColor: "#0B4F6C",
+                        frontColor: Colors.hex0B4F6C,
                     });
                 }
 
                 setTopMateriaisData(topBars);
+
+                // Ranking de clientes por unidades em pedidos ativos.
+                const coresClientes = [Colors.hex3B6998, Colors.hex0E7490, Colors.hex4A754D, Colors.hex9C773D];
+                const nomesClientes = new Map(listaClientes.map((cliente: any) => [cliente.id, cliente.nome]));
+                const topClientes = [...demandaPorCliente.entries()]
+                    .sort(([, volumeA], [, volumeB]) => volumeB - volumeA)
+                    .slice(0, 4)
+                    .map(([idCliente, volume], index) => {
+                        const nome = nomesClientes.get(idCliente) || `Cliente #${idCliente}`;
+                        return {
+                            value: volume,
+                            label: nome.length > 9 ? `${nome.slice(0, 8)}...` : nome,
+                            frontColor: coresClientes[index % coresClientes.length],
+                        };
+                    });
+                setTopClientesData(topClientes);
 
                 // Gráfico de Linha: Evolução Temporal com Garantia de Exibição
                 // Gera a lista dos N meses selecionados
@@ -194,6 +236,15 @@ export default function HomeScreen() {
 
                 const maiorValor = Math.max(...timelinePoints.map((p) => p.value ?? 0), 0);
                 setMaxValue(Math.max(Math.ceil((maiorValor + 2) / 2) * 2, 5));
+
+                const revenuePoints = buildTimelineData(
+                    listaPedidos,
+                    active,
+                    (pedido) => faturamentoPorPedido.get(pedido.id) || 0,
+                );
+                setRevenueTimeline(revenuePoints);
+                const maiorReceita = Math.max(...revenuePoints.map((p) => p.value ?? 0), 0);
+                setMaxRevenueValue(Math.max(Math.ceil(maiorReceita / 5) * 5, 5));
             } catch (err) {
                 console.error("Erro geral ao processar métricas do dashboard:", err);
             } finally {
@@ -205,7 +256,11 @@ export default function HomeScreen() {
     }, [active]);
 
     // Função para gerar os pontos mensais do gráfico de linha
-    function buildTimelineData(pedidos: any[], monthsCount: number): lineDataItem[] {
+    function buildTimelineData(
+        pedidos: any[],
+        monthsCount: number,
+        getValue: (pedido: any) => number = () => 1,
+    ): lineDataItem[] {
         const now = new Date();
         const monthsList: { key: string; label: string; value: number }[] = [];
 
@@ -271,7 +326,7 @@ export default function HomeScreen() {
 
             const monthItem = monthsList.find((m) => m.key === targetKey);
             if (monthItem) {
-                monthItem.value += 1;
+                monthItem.value += getValue(p);
                 pedidosContabilizados++;
             }
         });
@@ -316,8 +371,8 @@ export default function HomeScreen() {
                     <View style={styles.kpiContainer}>
                         {/* Faturamento Estimado */}
                         <View style={[styles.kpiCard, styles.kpiCardHighlight, isMobile && styles.kpiCardMobile]}>
-                            <View style={[styles.kpiIconWrapper, { backgroundColor: "#E0EDF4" }]}>
-                                <Ionicons name="cash" size={22} color="#0B4F6C" />
+                            <View style={[styles.kpiIconWrapper, { backgroundColor: Colors.hexE0EDF4 }]}>
+                                <Ionicons name="cash" size={22} color={Colors.hex0B4F6C} />
                             </View>
                             <View style={styles.kpiContent}>
                                 <Text style={styles.kpiLabel}>Faturamento dos Pedidos</Text>
@@ -330,8 +385,8 @@ export default function HomeScreen() {
 
                         {/* Total de Pedidos */}
                         <View style={[styles.kpiCard, isMobile && styles.kpiCardMobile]}>
-                            <View style={[styles.kpiIconWrapper, { backgroundColor: "#EAF2EA" }]}>
-                                <Ionicons name="cube" size={22} color="#4A754D" />
+                            <View style={[styles.kpiIconWrapper, { backgroundColor: Colors.hexEAF2EA }]}>
+                                <Ionicons name="cube" size={22} color={Colors.hex4A754D} />
                             </View>
                             <View style={styles.kpiContent}>
                                 <Text style={styles.kpiLabel}>Total de Pedidos</Text>
@@ -342,8 +397,8 @@ export default function HomeScreen() {
 
                         {/* Volume Total de Itens */}
                         <View style={[styles.kpiCard, isMobile && styles.kpiCardMobile]}>
-                            <View style={[styles.kpiIconWrapper, { backgroundColor: "#F7F1E6" }]}>
-                                <Ionicons name="layers" size={22} color="#9C773D" />
+                            <View style={[styles.kpiIconWrapper, { backgroundColor: Colors.hexF7F1E6 }]}>
+                                <Ionicons name="layers" size={22} color={Colors.hex9C773D} />
                             </View>
                             <View style={styles.kpiContent}>
                                 <Text style={styles.kpiLabel}>Volume de Unidades</Text>
@@ -354,8 +409,8 @@ export default function HomeScreen() {
 
                         {/* Ticket Médio */}
                         <View style={[styles.kpiCard, isMobile && styles.kpiCardMobile]}>
-                            <View style={[styles.kpiIconWrapper, { backgroundColor: "#EEF2F6" }]}>
-                                <Ionicons name="pricetag" size={22} color="#3B6998" />
+                            <View style={[styles.kpiIconWrapper, { backgroundColor: Colors.hexEEF2F6 }]}>
+                                <Ionicons name="pricetag" size={22} color={Colors.hex3B6998} />
                             </View>
                             <View style={styles.kpiContent}>
                                 <Text style={styles.kpiLabel}>Ticket Médio</Text>
@@ -372,12 +427,12 @@ export default function HomeScreen() {
                         {/* Pendentes */}
                         <View style={[styles.statusCard, styles.statusCardPending]}>
                             <View style={styles.statusCardHeader}>
-                                <View style={[styles.statusMiniIcon, { backgroundColor: "#FEF3C7" }]}>
-                                    <Ionicons name="time" size={16} color="#D97706" />
+                                <View style={[styles.statusMiniIcon, { backgroundColor: Colors.hexFEF3C7 }]}>
+                                    <Ionicons name="time" size={16} color={Colors.hexD97706} />
                                 </View>
                                 <Text style={styles.statusCardLabel}>Pendentes</Text>
                             </View>
-                            <Text style={[styles.statusCardNumber, { color: "#B45309" }]}>
+                            <Text style={[styles.statusCardNumber, { color: Colors.hexB45309 }]}>
                                 {pedidosPendentes}
                             </Text>
                             <Text style={styles.statusCardSub}>em processamento</Text>
@@ -386,13 +441,13 @@ export default function HomeScreen() {
                         {/* Entregues */}
                         <View style={[styles.statusCard, styles.statusCardDelivered]}>
                             <View style={styles.statusCardHeader}>
-                                <View style={[styles.statusMiniIcon, { backgroundColor: "#DCFCE7" }]}>
-                                    <Ionicons name="checkmark-circle" size={16} color="#16A34A" />
+                                <View style={[styles.statusMiniIcon, { backgroundColor: Colors.hexDCFCE7 }]}>
+                                    <Ionicons name="checkmark-circle" size={16} color={Colors.hex16A34A} />
                                 </View>
                                 <Text style={styles.statusCardLabel}>Entregues</Text>
                             </View>
                             <View style={styles.statusNumberRow}>
-                                <Text style={[styles.statusCardNumber, { color: "#15803D" }]}>
+                                <Text style={[styles.statusCardNumber, { color: Colors.hex15803D }]}>
                                     {pedidosEntregues}
                                 </Text>
                                 <View style={styles.ratePill}>
@@ -405,12 +460,12 @@ export default function HomeScreen() {
                         {/* Cancelados */}
                         <View style={[styles.statusCard, styles.statusCardCanceled]}>
                             <View style={styles.statusCardHeader}>
-                                <View style={[styles.statusMiniIcon, { backgroundColor: "#FEE2E2" }]}>
-                                    <Ionicons name="close-circle" size={16} color="#DC2626" />
+                                <View style={[styles.statusMiniIcon, { backgroundColor: Colors.hexFEE2E2 }]}>
+                                    <Ionicons name="close-circle" size={16} color={Colors.hexDC2626} />
                                 </View>
                                 <Text style={styles.statusCardLabel}>Cancelados</Text>
                             </View>
-                            <Text style={[styles.statusCardNumber, { color: "#B91C1C" }]}>
+                            <Text style={[styles.statusCardNumber, { color: Colors.hexB91C1C }]}>
                                 {pedidosCancelados}
                             </Text>
                             <Text style={styles.statusCardSub}>pedidos estornados</Text>
@@ -423,7 +478,7 @@ export default function HomeScreen() {
                     <View style={[pagesStyles.card, styles.supportCard, { width: "100%" }]}>
                         <View style={styles.supportHeader}>
                             <View style={styles.supportIcon}>
-                                <Ionicons name="business" size={20} color="#0B4F6C" />
+                                <Ionicons name="business" size={20} color={Colors.hex0B4F6C} />
                             </View>
                             <View>
                                 <Text style={styles.supportTitle}>Infraestrutura & Parceiros</Text>
@@ -465,7 +520,7 @@ export default function HomeScreen() {
 
                     <View style={styles.sectionMargin}>
                         <View style={styles.periodHeader}>
-                            <Ionicons name="calendar-outline" size={16} color="#475569" />
+                            <Ionicons name="calendar-outline" size={16} color={Colors.hex475569} />
                             <Text style={styles.periodSectionLabel}>Filtrar Período do Histórico:</Text>
                         </View>
                         <View style={styles.buttonContainer}>
@@ -536,23 +591,46 @@ export default function HomeScreen() {
                             </View>
                         </View>
 
-                        {/* Bar Chart - Top Materiais Solicitados */}
-                        <View style={[pagesStyles.card, styles.dualCard, isMobile && styles.dualCardMobile]}>
-                            <BarGraph
-                                title="Materiais Mais Solicitados"
-                                subtitle="Unidades demandadas nos pedidos"
-                                badgeText="Demanda"
-                                badgeIcon="trending-up"
-                                data={topMateriaisData}
-                                width={isMobile ? graphWidth : Math.min(graphWidth / 2, 450)}
-                            />
+                        {/* Indicadores de receita, clientes e materiais */}
+                        <View style={[styles.tripleGrid, isMobile && styles.tripleGridMobile]}>
+                            <View style={[pagesStyles.card, styles.tripleCard, isMobile && styles.tripleCardMobile]}>
+                                <LineGraph
+                                    title="Receita Mensal"
+                                    subtitle="Valor dos pedidos pendentes e entregues"
+                                    data={revenueTimeline}
+                                    width={tripleGraphWidth - 40}
+                                    maxValue={maxRevenueValue}
+                                    spacing={isMobile ? spacing : Math.max((tripleGraphWidth - 80) / Math.max(revenueTimeline.length - 1, 1), 20)}
+                                    noOfSections={5}
+                                />
+                            </View>
+                            <View style={[pagesStyles.card, styles.tripleCard, isMobile && styles.tripleCardMobile]}>
+                                <BarGraph
+                                    title="Clientes com Maior Volume"
+                                    subtitle="Unidades em pedidos nao cancelados"
+                                    badgeText="Volume"
+                                    badgeIcon="people"
+                                    data={topClientesData}
+                                    width={tripleGraphWidth - 120}
+                                />
+                            </View>
+                            <View style={[pagesStyles.card, styles.tripleCard, isMobile && styles.tripleCardMobile]}>
+                                <BarGraph
+                                    title="Materiais Mais Solicitados"
+                                    subtitle="Unidades demandadas nos pedidos"
+                                    badgeText="Demanda"
+                                    badgeIcon="trending-up"
+                                    data={topMateriaisData}
+                                    width={tripleGraphWidth - 120}
+                                />
+                            </View>
                         </View>
                     </View>
                 </>
             ) : (
                 <View style={styles.loadingContainer}>
-                    <ActivityIndicator size="large" color="#0B4F6C" />
-                    <Text style={styles.loadingText}>Carregando métricas consolidadas...</Text>
+                    <ActivityIndicator size="large" color={Colors.hex0B4F6C} />
+                    <Text style={styles.loadingText}>Carregando métricas...</Text>
                 </View>
             )
             }
@@ -567,13 +645,13 @@ const styles = StyleSheet.create({
     dashboardTitle: {
         fontSize: 24,
         fontFamily: "WorksansBold",
-        color: "#0F172A",
+        color: Colors.hex0F172A,
         marginTop: 4,
     },
     dashboardSubtitle: {
         fontSize: 13,
         fontFamily: "WorksansRegular",
-        color: "#475569",
+        color: Colors.hex475569,
         marginTop: 2,
     },
     kpiContainer: {
@@ -585,23 +663,23 @@ const styles = StyleSheet.create({
     kpiCard: {
         flex: 1,
         minWidth: 155,
-        backgroundColor: "#FFFFFF",
+        backgroundColor: Colors.white,
         borderRadius: 16,
         padding: 16,
         borderWidth: 1,
-        borderColor: "#DCE7EE",
+        borderColor: Colors.hexDCE7EE,
         flexDirection: "row",
         alignItems: "center",
         gap: 14,
-        shadowColor: "#082F42",
+        shadowColor: Colors.hex082F42,
         shadowOffset: { width: 0, height: 3 },
         shadowOpacity: 0.05,
         shadowRadius: 10,
         elevation: 2,
     },
     kpiCardHighlight: {
-        borderColor: "#CBD8E2",
-        backgroundColor: "#FFFFFF",
+        borderColor: Colors.hexCBD8E2,
+        backgroundColor: Colors.white,
     },
     kpiCardMobile: {
         minWidth: "100%",
@@ -619,22 +697,22 @@ const styles = StyleSheet.create({
     kpiLabel: {
         fontSize: 12,
         fontFamily: "WorksansMedium",
-        color: "#475569",
+        color: Colors.hex475569,
     },
     kpiValue: {
         fontSize: 20,
         fontFamily: "WorksansBold",
-        color: "#0F172A",
+        color: Colors.hex0F172A,
         marginTop: 2,
     },
     kpiValueLarge: {
         fontSize: 18,
-        color: "#0B4F6C",
+        color: Colors.hex0B4F6C,
     },
     kpiFootnote: {
         fontSize: 11,
         fontFamily: "WorksansRegular",
-        color: "#64748B",
+        color: Colors.hex64748B,
         marginTop: 1,
     },
     statusCardsRow: {
@@ -651,16 +729,16 @@ const styles = StyleSheet.create({
         borderWidth: 1,
     },
     statusCardPending: {
-        backgroundColor: "#FFFBEB",
-        borderColor: "#FDE68A",
+        backgroundColor: Colors.hexFFFBEB,
+        borderColor: Colors.hexFDE68A,
     },
     statusCardDelivered: {
-        backgroundColor: "#F0FDF4",
-        borderColor: "#BBF7D0",
+        backgroundColor: Colors.hexF0FDF4,
+        borderColor: Colors.hexBBF7D0,
     },
     statusCardCanceled: {
-        backgroundColor: "#FEF2F2",
-        borderColor: "#FECACA",
+        backgroundColor: Colors.hexFEF2F2,
+        borderColor: Colors.hexFECACA,
     },
     statusCardHeader: {
         flexDirection: "row",
@@ -677,7 +755,7 @@ const styles = StyleSheet.create({
     statusCardLabel: {
         fontSize: 12,
         fontFamily: "WorksansSemiBold",
-        color: "#1E293B",
+        color: Colors.hex1E293B,
     },
     statusNumberRow: {
         flexDirection: "row",
@@ -690,7 +768,7 @@ const styles = StyleSheet.create({
         marginTop: 4,
     },
     ratePill: {
-        backgroundColor: "#DCFCE7",
+        backgroundColor: Colors.hexDCFCE7,
         paddingHorizontal: 6,
         paddingVertical: 2,
         borderRadius: 6,
@@ -698,12 +776,12 @@ const styles = StyleSheet.create({
     ratePillText: {
         fontSize: 11,
         fontFamily: "WorksansBold",
-        color: "#15803D",
+        color: Colors.hex15803D,
     },
     statusCardSub: {
         fontSize: 10,
         fontFamily: "WorksansRegular",
-        color: "#78716C",
+        color: Colors.hex78716C,
         marginTop: 2,
     },
     sectionMargin: {
@@ -718,11 +796,11 @@ const styles = StyleSheet.create({
     periodSectionLabel: {
         fontSize: 12,
         fontFamily: "WorksansSemiBold",
-        color: "#475569",
+        color: Colors.hex475569,
     },
     buttonContainer: {
         flexDirection: "row",
-        backgroundColor: "#D9E5EC",
+        backgroundColor: Colors.hexD9E5EC,
         borderRadius: 12,
         padding: 4,
         gap: 4,
@@ -736,8 +814,8 @@ const styles = StyleSheet.create({
         paddingHorizontal: 8,
     },
     periodButtonActive: {
-        backgroundColor: "#FFFFFF",
-        shadowColor: "#082F42",
+        backgroundColor: Colors.white,
+        shadowColor: Colors.hex082F42,
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
         shadowRadius: 4,
@@ -746,10 +824,10 @@ const styles = StyleSheet.create({
     periodButtonText: {
         fontSize: 12,
         fontFamily: "WorksansSemiBold",
-        color: "#475569",
+        color: Colors.hex475569,
     },
     periodButtonTextActive: {
-        color: "#0B4F6C",
+        color: Colors.hex0B4F6C,
         fontFamily: "WorksansBold",
     },
     graphCard: {
@@ -771,10 +849,28 @@ const styles = StyleSheet.create({
     dualCardMobile: {
         width: "100%",
     },
+    tripleGrid: {
+        flexDirection: "row",
+        gap: 14,
+        marginBottom: 20,
+    },
+    tripleGridMobile: {
+        flexDirection: "column",
+    },
+    tripleCard: {
+        flex: 1,
+        flexBasis: 0,
+        width: "auto",
+        minWidth: 0,
+        padding: 16,
+    },
+    tripleCardMobile: {
+        width: "100%",
+    },
     supportCard: {
         width: "100%",
         padding: 20,
-        backgroundColor: "#FFFFFF",
+        backgroundColor: Colors.white,
         marginBottom: 30,
     },
     supportHeader: {
@@ -787,28 +883,28 @@ const styles = StyleSheet.create({
         width: 40,
         height: 40,
         borderRadius: 10,
-        backgroundColor: "#E8F1F5",
+        backgroundColor: Colors.hexE8F1F5,
         alignItems: "center",
         justifyContent: "center",
     },
     supportTitle: {
         fontSize: 16,
         fontFamily: "WorksansBold",
-        color: "#0F172A",
+        color: Colors.hex0F172A,
     },
     supportSubtitle: {
         fontSize: 12,
         fontFamily: "WorksansRegular",
-        color: "#475569",
+        color: Colors.hex475569,
     },
     supportMetricsRow: {
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "space-between",
-        backgroundColor: "#F8FAFC",
+        backgroundColor: Colors.hexF8FAFC,
         borderRadius: 12,
         borderWidth: 1,
-        borderColor: "#DDE8EF",
+        borderColor: Colors.hexDDE8EF,
         paddingVertical: 14,
         paddingHorizontal: 12,
         flexWrap: "wrap",
@@ -822,17 +918,17 @@ const styles = StyleSheet.create({
     supportDivider: {
         width: 1,
         height: 28,
-        backgroundColor: "#CFDDE6",
+        backgroundColor: Colors.hexCFDDE6,
     },
     supportMetricNum: {
         fontSize: 16,
         fontFamily: "WorksansBold",
-        color: "#0B4F6C",
+        color: Colors.hex0B4F6C,
     },
     supportMetricLabel: {
         fontSize: 11,
         fontFamily: "WorksansMedium",
-        color: "#64748B",
+        color: Colors.hex64748B,
         marginTop: 2,
         textAlign: "center",
     },
@@ -846,6 +942,6 @@ const styles = StyleSheet.create({
     loadingText: {
         fontSize: 14,
         fontFamily: "WorksansRegular",
-        color: "#0B4F6C",
+        color: Colors.hex0B4F6C,
     },
 });

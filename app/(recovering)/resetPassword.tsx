@@ -1,3 +1,4 @@
+import { Colors } from "@/src/theme/colors";
 import { AnimatedButton } from "@/src/components/AnimatedButton";
 import { AuthPageLayout, authStyles } from "@/src/components/AuthPageLayout";
 import { supabase } from "@/src/lib/supabase";
@@ -63,12 +64,12 @@ export default function ResetPasswordPage() {
             Nova senha
           </Text>
           <View style={localStyles.inputWrapper}>
-            <Ionicons name="lock-closed-outline" size={20} color="#64748B" style={localStyles.inputIcon} />
+            <Ionicons name="lock-closed-outline" size={20} color={Colors.hex64748B} style={localStyles.inputIcon} />
             <TextInput
               autoComplete="new-password"
               onChangeText={setPassword}
               placeholder="Digite sua nova senha"
-              placeholderTextColor="#94A3B8"
+              placeholderTextColor={Colors.hex94A3B8}
               secureTextEntry={!showPassword}
               style={[authStyles.input, localStyles.inputWithIcon, localStyles.inputWithRightIcon]}
               value={password}
@@ -81,7 +82,7 @@ export default function ResetPasswordPage() {
               <Ionicons
                 name={showPassword ? "eye-off-outline" : "eye-outline"}
                 size={20}
-                color="#0E7490"
+                color={Colors.hex0E7490}
               />
             </Pressable>
           </View>
@@ -89,7 +90,7 @@ export default function ResetPasswordPage() {
 
         {errorMessage ? (
           <View style={authStyles.error}>
-            <Ionicons name="alert-circle-outline" size={18} color="#A74E3C" />
+            <Ionicons name="alert-circle-outline" size={18} color={Colors.hexA74E3C} />
             <Text style={authStyles.errorText}>
               {errorMessage}
             </Text>
@@ -97,7 +98,7 @@ export default function ResetPasswordPage() {
         ) : null}
 
         <AnimatedButton
-          title={!loading ? "Redefinir e Entrar" : <ActivityIndicator color={"#FFFDF9"} />}
+          title={!loading ? "Redefinir e Entrar" : <ActivityIndicator color={Colors.hexFFFDF9} />}
           stylesPressable={authStyles.primaryButton}
           stylesPressablePressed={authStyles.primaryButtonPressed}
           stylesText={authStyles.primaryButtonText}

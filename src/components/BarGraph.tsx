@@ -1,3 +1,4 @@
+import { Colors } from "@/src/theme/colors";
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
@@ -40,7 +41,7 @@ export function BarGraph({
                     </View>
                 </View>
                 <View style={styles.emptyContainer}>
-                    <Ionicons name="stats-chart-outline" size={32} color="#94A3B8" />
+                    <Ionicons name="stats-chart-outline" size={32} color={Colors.hex94A3B8} />
                     <Text style={styles.emptyText}>Sem dados suficientes para o gráfico</Text>
                 </View>
             </View>
@@ -59,7 +60,7 @@ export function BarGraph({
                     {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
                 </View>
                 <View style={styles.badge}>
-                    <Ionicons name={badgeIcon} size={14} color="#0B4F6C" />
+                    <Ionicons name={badgeIcon} size={14} color={Colors.hex0B4F6C} />
                     <Text style={styles.badgeText}>{badgeText}</Text>
                 </View>
             </View>
@@ -73,18 +74,18 @@ export function BarGraph({
                     height={190}
                     barWidth={26}
                     barBorderRadius={6}
-                    frontColor="#0B4F6C"
+                    frontColor={Colors.hex0B4F6C}
                     maxValue={calculatedMax}
                     noOfSections={noOfSections}
                     yAxisTextStyle={styles.axisText}
                     xAxisLabelTextStyle={styles.axisText}
                     spacing={spacing}
                     initialSpacing={initialSpacing}
-                    rulesColor="#E2EBF0"
+                    rulesColor={Colors.hexE2EBF0}
                     rulesType="dashed"
                     yAxisThickness={0}
                     xAxisThickness={1}
-                    xAxisColor="#CBD8E2"
+                    xAxisColor={Colors.hexCBD8E2}
                     yAxisLabelWidth={28}
                     showValuesAsTopLabel
                     topLabelTextStyle={styles.topValueText}
@@ -110,19 +111,19 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 18,
         fontFamily: "WorksansBold",
-        color: "#0F172A",
+        color: Colors.hex0F172A,
     },
     subtitle: {
         fontSize: 12,
         fontFamily: "WorksansRegular",
-        color: "#475569",
+        color: Colors.hex475569,
         marginTop: 2,
     },
     badge: {
         flexDirection: "row",
         alignItems: "center",
         gap: 4,
-        backgroundColor: "#E8F1F5",
+        backgroundColor: Colors.hexE8F1F5,
         paddingHorizontal: 8,
         paddingVertical: 4,
         borderRadius: 8,
@@ -130,7 +131,7 @@ const styles = StyleSheet.create({
     badgeText: {
         fontSize: 11,
         fontFamily: "WorksansSemiBold",
-        color: "#0B4F6C",
+        color: Colors.hex0B4F6C,
     },
     chartWrapper: {
         alignItems: "center",
@@ -139,12 +140,12 @@ const styles = StyleSheet.create({
         paddingTop: 10,
     },
     axisText: {
-        color: "#64748B",
+        color: Colors.hex64748B,
         fontSize: 11,
         fontFamily: "WorksansRegular",
     },
     topValueText: {
-        color: "#0B4F6C",
+        color: Colors.hex0B4F6C,
         fontSize: 10,
         fontFamily: "WorksansSemiBold",
         marginBottom: 2,
@@ -158,6 +159,6 @@ const styles = StyleSheet.create({
     emptyText: {
         fontSize: 13,
         fontFamily: "WorksansRegular",
-        color: "#64748B",
+        color: Colors.hex64748B,
     },
 });

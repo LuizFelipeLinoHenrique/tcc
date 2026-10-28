@@ -1,3 +1,4 @@
+import { Colors } from "@/src/theme/colors";
 import { useCallback, useEffect, useState } from "react";
 import {
     Alert,
@@ -307,7 +308,7 @@ export default function Suppliers() {
                         flex: 1,
                         justifyContent: "center",
                         alignItems: "center",
-                        backgroundColor: "rgba(0, 0, 0, 0.5)",
+                        backgroundColor: Colors.overlayBlack50,
                         padding: isMobile ? 8 : 20,
                     }}
                 >
@@ -384,7 +385,7 @@ export default function Suppliers() {
                         flex: 1,
                         justifyContent: "center",
                         alignItems: "center",
-                        backgroundColor: "rgba(0, 0, 0, 0.5)",
+                        backgroundColor: Colors.overlayBlack50,
                         padding: isMobile ? 8 : 20,
                     }}
                 >
@@ -436,12 +437,12 @@ const styles = StyleSheet.create({
     tableContainer: {
         minWidth: "100%",
         flex: 1,
-        backgroundColor: "#FFFFFF",
+        backgroundColor: Colors.white,
         borderRadius: 14,
         borderWidth: 1,
-        borderColor: "#DCE7EE",
+        borderColor: Colors.hexDCE7EE,
         overflow: "hidden",
-        shadowColor: "#082F42",
+        shadowColor: Colors.hex082F42,
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.05,
         shadowRadius: 8,
@@ -475,7 +476,7 @@ const styles = StyleSheet.create({
 
     loadingText: {
         fontSize: 16,
-        color: "#0B4F6C",
+        color: Colors.hex0B4F6C,
     },
 
     moreContainer: {
@@ -485,14 +486,14 @@ const styles = StyleSheet.create({
     },
 
     moreButton: {
-        backgroundColor: "#0B4F6C",
+        backgroundColor: Colors.hex0B4F6C,
         paddingHorizontal: 25,
         paddingVertical: 12,
         borderRadius: 8,
     },
 
     moreButtonText: {
-        color: "#FFFFFF",
+        color: Colors.white,
         fontSize: 16,
         fontWeight: "600",
     },
@@ -506,6 +507,6 @@ const styles = StyleSheet.create({
 
     emptyText: {
         fontSize: 17,
-        color: "#0B4F6C",
+        color: Colors.hex0B4F6C,
     },
 });

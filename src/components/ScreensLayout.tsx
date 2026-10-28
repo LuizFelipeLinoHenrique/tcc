@@ -1,3 +1,4 @@
+import { Colors } from "@/src/theme/colors";
 import { PropsWithChildren } from "react";
 import { KeyboardAvoidingView, Platform, ScrollView, StyleProp, StyleSheet, View, ViewStyle } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -35,7 +36,7 @@ export function PagesLayout({ children, scroll, scrollContent, noScrollContent }
 export const pagesStyles = StyleSheet.create({
     safeArea: {
         flex: 1,
-        backgroundColor: "#F4F7F9",
+        backgroundColor: Colors.hexF4F7F9,
     },
     flex: {
         flex: 1,
@@ -54,19 +55,19 @@ export const pagesStyles = StyleSheet.create({
     },
     card: {
         width: "100%",
-        backgroundColor: "#FFFFFF",
+        backgroundColor: Colors.white,
         borderWidth: 1,
-        borderColor: "#DCE7EE",
+        borderColor: Colors.hexDCE7EE,
         borderRadius: 20,
         padding: 24,
-        shadowColor: "#082F42",
+        shadowColor: Colors.hex082F42,
         shadowOffset: { width: 0, height: 6 },
         shadowOpacity: 0.07,
         shadowRadius: 16,
         elevation: 2,
     },
     brand: {
-        color: "#0891B2",
+        color: Colors.hex0891B2,
         fontSize: 12,
         fontFamily: "WorksansSemiBold",
         letterSpacing: 1.4,
@@ -74,13 +75,13 @@ export const pagesStyles = StyleSheet.create({
     },
     title: {
         marginVertical: 6,
-        color: "#0F172A",
+        color: Colors.hex0F172A,
         fontSize: 26,
         lineHeight: 32,
         fontFamily: "WorksansBold"
     },
     graphTitle: {
-        color: "#0F172A",
+        color: Colors.hex0F172A,
         fontSize: 20,
         lineHeight: 26,
         marginBottom: 14,
@@ -88,7 +89,7 @@ export const pagesStyles = StyleSheet.create({
     },
     description: {
         marginTop: 6,
-        color: "#475569",
+        color: Colors.hex475569,
         fontSize: 14,
         lineHeight: 20,
         fontFamily: "WorksansRegular"
@@ -101,7 +102,7 @@ export const pagesStyles = StyleSheet.create({
         gap: 6
     },
     label: {
-        color: "#1E293B",
+        color: Colors.hex1E293B,
         fontSize: 12,
         fontFamily: "WorksansSemiBold",
         letterSpacing: 0.2,
@@ -109,11 +110,11 @@ export const pagesStyles = StyleSheet.create({
     input: {
         minHeight: 48,
         borderWidth: 1,
-        borderColor: "#CFDDE6",
+        borderColor: Colors.hexCFDDE6,
         borderRadius: 12,
-        backgroundColor: "#F8FAFC",
+        backgroundColor: Colors.hexF8FAFC,
         paddingHorizontal: 15,
-        color: "#0F172A",
+        color: Colors.hex0F172A,
         fontSize: 15,
         fontFamily: "WorksansRegular",
     },
@@ -123,36 +124,36 @@ export const pagesStyles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "center",
         borderRadius: 12,
-        backgroundColor: "#0B4F6C",
-        shadowColor: "#0B4F6C",
+        backgroundColor: Colors.hex0B4F6C,
+        shadowColor: Colors.hex0B4F6C,
         shadowOffset: { width: 0, height: 3 },
         shadowOpacity: 0.2,
         shadowRadius: 6,
         elevation: 2,
     },
     primaryButtonPressed: {
-        backgroundColor: "#083A50",
+        backgroundColor: Colors.hex083A50,
         transform: [{ scale: 0.99 }]
     },
     primaryButtonText: {
-        color: "#FFFDF9",
+        color: Colors.hexFFFDF9,
         fontSize: 15,
         fontFamily: "WorksansSemiBold",
         letterSpacing: 0.3,
     },
     link: {
-        color: "#0E7490",
+        color: Colors.hex0E7490,
         fontSize: 13,
         fontFamily: "WorksansSemiBold"
     },
     text: {
-        color: "#1E293B",
+        color: Colors.hex1E293B,
         fontSize: 15,
         lineHeight: 21,
         fontFamily: "WorksansRegular"
     },
     textBold: {
-        color: "#0F172A",
+        color: Colors.hex0F172A,
         fontSize: 15,
         lineHeight: 21,
         fontFamily: "WorksansBold"
@@ -166,33 +167,33 @@ export const pagesStyles = StyleSheet.create({
         gap: 4
     },
     footerText: {
-        color: "#475569",
+        color: Colors.hex475569,
         fontSize: 13,
         fontFamily: "WorksansRegular"
     },
     error: {
         borderWidth: 1,
-        borderColor: "#F0CBC2",
+        borderColor: Colors.hexF0CBC2,
         borderRadius: 12,
-        backgroundColor: "#FDF2EF",
+        backgroundColor: Colors.hexFDF2EF,
         paddingHorizontal: 14,
         paddingVertical: 11
     },
     errorText: {
-        color: "#A74E3C",
+        color: Colors.hexA74E3C,
         fontSize: 14,
         fontFamily: "WorksansMedium"
     },
     warning: {
         borderWidth: 1,
-        borderColor: "#EADDC6",
+        borderColor: Colors.hexEADDC6,
         borderRadius: 12,
-        backgroundColor: "#FDF8F0",
+        backgroundColor: Colors.hexFDF8F0,
         paddingHorizontal: 14,
         paddingVertical: 11
     },
     warningText: {
-        color: "#9A6B24",
+        color: Colors.hex9A6B24,
         fontSize: 14,
         fontFamily: "WorksansMedium"
     },
@@ -203,11 +204,11 @@ export const pagesStyles = StyleSheet.create({
         justifyContent: "center",
         borderRadius: 12,
         borderWidth: 1.5,
-        borderColor: "#CBD8E2",
-        backgroundColor: "#FFFFFF",
+        borderColor: Colors.hexCBD8E2,
+        backgroundColor: Colors.white,
     },
     secondaryButtonText: {
-        color: "#334155",
+        color: Colors.hex334155,
         fontSize: 14,
         fontFamily: "WorksansSemiBold"
     },

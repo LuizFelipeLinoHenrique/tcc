@@ -1,3 +1,4 @@
+import { Colors } from "@/src/theme/colors";
 import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -96,7 +97,7 @@ export function SuppliersFilters({
                         <Ionicons
                             name="options-outline"
                             size={20}
-                            color="#0B4F6C"
+                            color={Colors.hex0B4F6C}
                         />
 
                         <Text style={pagesStyles.textBold}>
@@ -116,7 +117,7 @@ export function SuppliersFilters({
                         <Ionicons
                             name="chevron-down"
                             size={20}
-                            color="#0B4F6C"
+                            color={Colors.hex0B4F6C}
                         />
                     </Animated.View>
                 </View>
@@ -255,7 +256,7 @@ export function SuppliersFilters({
                             value={pesquisa}
                             onChangeText={setPesquisa}
                             placeholder={placeholder}
-                            placeholderTextColor="#94A3B8"
+                            placeholderTextColor={Colors.hex94A3B8}
                             style={[
                                 pagesStyles.input,
                                 styles.input,
@@ -283,7 +284,7 @@ export function SuppliersFilters({
                                     <Ionicons
                                         name="search"
                                         size={18}
-                                        color="#FFFDF9"
+                                        color={Colors.hexFFFDF9}
                                     />
 
                                     <Text
@@ -311,7 +312,7 @@ export function SuppliersFilters({
                             <Ionicons
                                 name="close-circle-outline"
                                 size={17}
-                                color="#0E7490"
+                                color={Colors.hex0E7490}
                             />
 
                             <Text style={pagesStyles.link}>
@@ -329,11 +330,11 @@ const styles = StyleSheet.create({
     container: {
         marginBottom: 14,
         padding: 6,
-        backgroundColor: "#FFFFFF",
+        backgroundColor: Colors.white,
         borderWidth: 1,
-        borderColor: "#DCE7EE",
+        borderColor: Colors.hexDCE7EE,
         borderRadius: 18,
-        shadowColor: "#082F42",
+        shadowColor: Colors.hex082F42,
         shadowOffset: { width: 0, height: 3 },
         shadowOpacity: 0.05,
         shadowRadius: 10,
@@ -350,7 +351,7 @@ const styles = StyleSheet.create({
     },
 
     headerPressed: {
-        backgroundColor: "#F0F5F8",
+        backgroundColor: Colors.hexF0F5F8,
     },
 
     headerConteudoGroup: {
@@ -376,7 +377,7 @@ const styles = StyleSheet.create({
         paddingTop: 6,
         paddingBottom: 16,
         borderTopWidth: 1,
-        borderTopColor: "#E5EEF3",
+        borderTopColor: Colors.hexE5EEF3,
     },
 
     filtroGrupo: {
@@ -395,16 +396,16 @@ const styles = StyleSheet.create({
         paddingVertical: 6,
         borderRadius: 10,
         borderWidth: 1,
-        borderColor: "#CFDDE6",
-        backgroundColor: "#F8FAFC",
+        borderColor: Colors.hexCFDDE6,
+        backgroundColor: Colors.hexF8FAFC,
         alignItems: "center",
         justifyContent: "center",
     },
 
     filtroSelecionado: {
-        backgroundColor: "#0B4F6C",
-        borderColor: "#0B4F6C",
-        shadowColor: "#0B4F6C",
+        backgroundColor: Colors.hex0B4F6C,
+        borderColor: Colors.hex0B4F6C,
+        shadowColor: Colors.hex0B4F6C,
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.15,
         shadowRadius: 4,
@@ -417,12 +418,12 @@ const styles = StyleSheet.create({
 
     filtroTexto: {
         fontSize: 13,
-        color: "#475569",
+        color: Colors.hex475569,
         fontFamily: "WorksansMedium",
     },
 
     filtroTextoSelecionado: {
-        color: "#FFFDF9",
+        color: Colors.hexFFFDF9,
         fontFamily: "WorksansSemiBold",
     },
 
@@ -446,7 +447,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "center",
         gap: 6,
-        backgroundColor: "#0B4F6C",
+        backgroundColor: Colors.hex0B4F6C,
     },
 
     botaoPesquisarPressed: {

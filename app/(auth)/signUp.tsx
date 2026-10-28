@@ -1,3 +1,4 @@
+import { Colors } from "@/src/theme/colors";
 import { AnimatedButton } from "@/src/components/AnimatedButton";
 import { AuthPageLayout, authStyles } from "@/src/components/AuthPageLayout";
 import { Ionicons } from "@expo/vector-icons";
@@ -74,12 +75,12 @@ export default function SignUpPage() {
             Nome de usuário
           </Text>
           <View style={localStyles.inputWrapper}>
-            <Ionicons name="person-outline" size={20} color="#64748B" style={localStyles.inputIcon} />
+            <Ionicons name="person-outline" size={20} color={Colors.hex64748B} style={localStyles.inputIcon} />
             <TextInput
               autoComplete="username"
               onChangeText={setDisplayName}
               placeholder="Ex: Luiz Henrique"
-              placeholderTextColor="#94A3B8"
+              placeholderTextColor={Colors.hex94A3B8}
               style={[authStyles.input, localStyles.inputWithIcon]}
               value={displayName}
             />
@@ -91,14 +92,14 @@ export default function SignUpPage() {
             E-mail corporativo
           </Text>
           <View style={localStyles.inputWrapper}>
-            <Ionicons name="mail-outline" size={20} color="#64748B" style={localStyles.inputIcon} />
+            <Ionicons name="mail-outline" size={20} color={Colors.hex64748B} style={localStyles.inputIcon} />
             <TextInput
               autoCapitalize="none"
               autoComplete="email"
               keyboardType="email-address"
               onChangeText={setEmail}
               placeholder="voce@exemplo.com"
-              placeholderTextColor="#94A3B8"
+              placeholderTextColor={Colors.hex94A3B8}
               style={[authStyles.input, localStyles.inputWithIcon]}
               value={email}
             />
@@ -110,12 +111,12 @@ export default function SignUpPage() {
             Senha de acesso
           </Text>
           <View style={localStyles.inputWrapper}>
-            <Ionicons name="lock-closed-outline" size={20} color="#64748B" style={localStyles.inputIcon} />
+            <Ionicons name="lock-closed-outline" size={20} color={Colors.hex64748B} style={localStyles.inputIcon} />
             <TextInput
               autoComplete="new-password"
               onChangeText={setPassword}
               placeholder="Defina uma senha segura"
-              placeholderTextColor="#94A3B8"
+              placeholderTextColor={Colors.hex94A3B8}
               secureTextEntry={!showPassword}
               style={[authStyles.input, localStyles.inputWithIcon, localStyles.inputWithRightIcon]}
               value={password}
@@ -128,7 +129,7 @@ export default function SignUpPage() {
               <Ionicons
                 name={showPassword ? "eye-off-outline" : "eye-outline"}
                 size={20}
-                color="#0E7490"
+                color={Colors.hex0E7490}
               />
             </Pressable>
           </View>
@@ -136,7 +137,7 @@ export default function SignUpPage() {
 
         {errorMessage ? (
           <View style={authStyles.error}>
-            <Ionicons name="alert-circle-outline" size={18} color="#A74E3C" />
+            <Ionicons name="alert-circle-outline" size={18} color={Colors.hexA74E3C} />
             <Text style={authStyles.errorText}>
               {errorMessage}
             </Text>
@@ -144,7 +145,7 @@ export default function SignUpPage() {
         ) : null}
 
         <AnimatedButton
-          title={!loading ? "Criar Minha Conta" : <ActivityIndicator color={"#FFFDF9"} />}
+          title={!loading ? "Criar Minha Conta" : <ActivityIndicator color={Colors.hexFFFDF9} />}
           stylesPressable={authStyles.primaryButton}
           stylesPressablePressed={authStyles.primaryButtonPressed}
           stylesText={authStyles.primaryButtonText}
@@ -154,7 +155,7 @@ export default function SignUpPage() {
         <AnimatedButton
           title={
             <View style={localStyles.backButtonContent}>
-              <Ionicons name="arrow-back-outline" size={16} color="#334155" />
+              <Ionicons name="arrow-back-outline" size={16} color={Colors.hex334155} />
               <Text style={authStyles.secondaryButtonText}>Voltar para o login</Text>
             </View>
           }

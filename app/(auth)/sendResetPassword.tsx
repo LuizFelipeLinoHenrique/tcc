@@ -1,3 +1,4 @@
+import { Colors } from "@/src/theme/colors";
 import { AuthPageLayout, authStyles } from "@/src/components/AuthPageLayout";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
@@ -58,14 +59,14 @@ export default function sendResetPassword() {
         <View style={authStyles.field}>
           <Text style={authStyles.label}>E-mail</Text>
           <View style={localStyles.inputWrapper}>
-            <Ionicons name="mail-outline" size={20} color="#64748B" style={localStyles.inputIcon} />
+            <Ionicons name="mail-outline" size={20} color={Colors.hex64748B} style={localStyles.inputIcon} />
             <TextInput
               autoCapitalize="none"
               autoComplete="email"
               keyboardType="email-address"
               onChangeText={setEmail}
               placeholder="voce@exemplo.com"
-              placeholderTextColor="#94A3B8"
+              placeholderTextColor={Colors.hex94A3B8}
               style={[authStyles.input, localStyles.inputWithIcon]}
               value={email}
             />
@@ -74,14 +75,14 @@ export default function sendResetPassword() {
 
         {errorMessage ? (
           <View style={authStyles.error}>
-            <Ionicons name="alert-circle-outline" size={18} color="#A74E3C" />
+            <Ionicons name="alert-circle-outline" size={18} color={Colors.hexA74E3C} />
             <Text style={authStyles.errorText}>
               {errorMessage}
             </Text>
           </View>
         ) : message ? (
           <View style={authStyles.warning}>
-            <Ionicons name="information-circle-outline" size={18} color="#9A6B24" />
+            <Ionicons name="information-circle-outline" size={18} color={Colors.hex9A6B24} />
             <Text style={authStyles.warningText}>
               {message}
             </Text>
@@ -89,7 +90,7 @@ export default function sendResetPassword() {
         ) : null}
 
         <AnimatedButton
-          title={!loading ? "Enviar Instruções" : <ActivityIndicator color={"#FFFDF9"} />}
+          title={!loading ? "Enviar Instruções" : <ActivityIndicator color={Colors.hexFFFDF9} />}
           stylesPressable={authStyles.primaryButton}
           stylesPressablePressed={authStyles.primaryButtonPressed}
           stylesText={authStyles.primaryButtonText}
@@ -99,7 +100,7 @@ export default function sendResetPassword() {
         <AnimatedButton
           title={
             <View style={localStyles.backButtonContent}>
-              <Ionicons name="arrow-back-outline" size={16} color="#334155" />
+              <Ionicons name="arrow-back-outline" size={16} color={Colors.hex334155} />
               <Text style={authStyles.secondaryButtonText}>Voltar para o login</Text>
             </View>
           }

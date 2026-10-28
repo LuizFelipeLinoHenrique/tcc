@@ -1,3 +1,4 @@
+import { Colors } from "@/src/theme/colors";
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
@@ -15,7 +16,7 @@ export default function ConfirmationCard({ action, setCardConfirmation }: Confir
             <View style={styles.overlay}>
                 <View style={[pagesStyles.card, styles.card]}>
                     <View style={styles.iconContainer}>
-                        <Ionicons name="log-out-outline" size={28} color="#A74E3C" />
+                        <Ionicons name="log-out-outline" size={28} color={Colors.hexA74E3C} />
                     </View>
 
                     <Text style={styles.title}>
@@ -65,9 +66,9 @@ const styles = StyleSheet.create({
         width: 60,
         height: 60,
         borderRadius: 30,
-        backgroundColor: "#FDF2EF",
+        backgroundColor: Colors.hexFDF2EF,
         borderWidth: 1,
-        borderColor: "#F0CBC2",
+        borderColor: Colors.hexF0CBC2,
         alignItems: "center",
         justifyContent: "center",
         marginBottom: 16,
@@ -75,14 +76,14 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 22,
         fontFamily: "WorksansBold",
-        color: "#0F172A",
+        color: Colors.hex0F172A,
         marginBottom: 8,
         textAlign: "center",
     },
     description: {
         fontSize: 14,
         fontFamily: "WorksansRegular",
-        color: "#475569",
+        color: Colors.hex475569,
         textAlign: "center",
         lineHeight: 20,
         marginBottom: 24,
@@ -96,19 +97,19 @@ const styles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "center",
         borderRadius: 12,
-        backgroundColor: "#A74E3C",
-        shadowColor: "#A74E3C",
+        backgroundColor: Colors.hexA74E3C,
+        shadowColor: Colors.hexA74E3C,
         shadowOffset: { width: 0, height: 3 },
         shadowOpacity: 0.22,
         shadowRadius: 6,
         elevation: 2,
     },
     confirmButtonPressed: {
-        backgroundColor: "#8E3D2D",
+        backgroundColor: Colors.hex8E3D2D,
         transform: [{ scale: 0.99 }],
     },
     confirmButtonText: {
-        color: "#FFFDF9",
+        color: Colors.hexFFFDF9,
         fontSize: 15,
         fontFamily: "WorksansSemiBold",
     },

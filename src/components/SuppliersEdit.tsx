@@ -1,3 +1,4 @@
+import { Colors } from "@/src/theme/colors";
 import { supabase } from "@/src/lib/supabase";
 import { useEffect, useState } from "react";
 import {
@@ -145,7 +146,7 @@ export function EditSupplierCard({
     if (loading) {
         return (
             <View style={[pagesStyles.card, styles.loading]}>
-                <ActivityIndicator color="#0B4F6C" />
+                <ActivityIndicator color={Colors.hex0B4F6C} />
                 <Text style={pagesStyles.text}>Carregando dados do fornecedor...</Text>
             </View>
         );
@@ -203,7 +204,7 @@ export function EditSupplierCard({
                                 setError("");
                             }}
                             placeholder="Ex: Madeireira São Paulo Ltda."
-                            placeholderTextColor="#64748B"
+                            placeholderTextColor={Colors.hex64748B}
                             style={pagesStyles.input}
                         />
                     </View>
@@ -218,7 +219,7 @@ export function EditSupplierCard({
                                 setError("");
                             }}
                             placeholder="Ex: 00.000.000/0001-00"
-                            placeholderTextColor="#64748B"
+                            placeholderTextColor={Colors.hex64748B}
                             keyboardType="numeric"
                             style={pagesStyles.input}
                         />
@@ -234,7 +235,7 @@ export function EditSupplierCard({
                                 setError("");
                             }}
                             placeholder="Ex: (11) 98765-4321"
-                            placeholderTextColor="#64748B"
+                            placeholderTextColor={Colors.hex64748B}
                             keyboardType="phone-pad"
                             style={pagesStyles.input}
                         />
@@ -250,7 +251,7 @@ export function EditSupplierCard({
                                 setError("");
                             }}
                             placeholder="Ex: vendas@fornecedor.com.br"
-                            placeholderTextColor="#64748B"
+                            placeholderTextColor={Colors.hex64748B}
                             keyboardType="email-address"
                             autoCapitalize="none"
                             style={pagesStyles.input}
@@ -267,7 +268,7 @@ export function EditSupplierCard({
                                 setError("");
                             }}
                             placeholder="Ex: Carlos Oliveira"
-                            placeholderTextColor="#64748B"
+                            placeholderTextColor={Colors.hex64748B}
                             style={pagesStyles.input}
                         />
                     </View>
@@ -282,7 +283,7 @@ export function EditSupplierCard({
                                 setError("");
                             }}
                             placeholder="Ex: Rod. Anhangüera, Km 45 - Jundiaí, SP"
-                            placeholderTextColor="#64748B"
+                            placeholderTextColor={Colors.hex64748B}
                             multiline
                             numberOfLines={3}
                             style={[pagesStyles.input, styles.textArea]}
@@ -315,7 +316,7 @@ export function EditSupplierCard({
                 <AnimatedButton
                     title={
                         saving ? (
-                            <ActivityIndicator color="#FFFDF9" />
+                            <ActivityIndicator color={Colors.hexFFFDF9} />
                         ) : (
                             "Salvar Alterações"
                         )
@@ -355,7 +356,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 14,
         paddingVertical: 10,
         borderRadius: 10,
-        backgroundColor: "#E0EAF0",
+        backgroundColor: Colors.hexE0EAF0,
     },
     idBoxMobile: {
         width: "100%",
@@ -369,7 +370,7 @@ const styles = StyleSheet.create({
     readOnlyValue: {
         paddingVertical: 2,
         fontSize: 16,
-        color: "#0B4F6C",
+        color: Colors.hex0B4F6C,
         fontWeight: "600",
     },
     section: {
@@ -377,12 +378,12 @@ const styles = StyleSheet.create({
         marginTop: 24,
         paddingTop: 20,
         borderTopWidth: 1,
-        borderTopColor: "#CFDDE6",
+        borderTopColor: Colors.hexCFDDE6,
     },
     sectionTitle: {
         fontSize: 16,
         fontWeight: "700",
-        color: "#0B4F6C",
+        color: Colors.hex0B4F6C,
         marginBottom: 14,
     },
     fields: {
@@ -419,9 +420,9 @@ const styles = StyleSheet.create({
     },
     successBox: {
         marginTop: 18,
-        backgroundColor: "#F0FDF4",
+        backgroundColor: Colors.hexF0FDF4,
         borderWidth: 1,
-        borderColor: "#BBF7D0",
+        borderColor: Colors.hexBBF7D0,
         paddingHorizontal: 14,
         paddingVertical: 12,
         borderRadius: 10,
@@ -429,7 +430,7 @@ const styles = StyleSheet.create({
     successText: {
         fontSize: 14,
         fontFamily: "WorksansMedium",
-        color: "#166534",
+        color: Colors.hex166534,
     },
     buttonContainer: {
         marginTop: 28,

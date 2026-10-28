@@ -1,3 +1,4 @@
+import { Colors } from "@/src/theme/colors";
 import React, { useEffect, useRef } from "react";
 import { Animated, StyleSheet, useWindowDimensions } from "react-native";
 
@@ -69,6 +70,6 @@ export default function AnimatedSquares({ index }: AnimatedSquaresProps) {
 const styles = StyleSheet.create({
     squareLeftTop: {
         position: "absolute",
-        borderColor: "#FFF"
+        borderColor: Colors.white
     }
 });

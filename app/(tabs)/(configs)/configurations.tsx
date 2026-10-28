@@ -1,3 +1,4 @@
+import { Colors } from "@/src/theme/colors";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
@@ -94,7 +95,7 @@ export default function Configurations() {
                     {/* CABEÇALHO */}
                     <View style={styles.header}>
                         <View style={styles.headerIcon}>
-                            <Ionicons name="settings" size={24} color="#0B4F6C" />
+                            <Ionicons name="settings" size={24} color={Colors.hex0B4F6C} />
                         </View>
                         <View style={styles.headerTextContainer}>
                             <Text style={pagesStyles.brand}>SISTEMA E PREFERÊNCIAS</Text>
@@ -120,7 +121,7 @@ export default function Configurations() {
                                     {loadingUser ? "Carregando..." : userEmail || "Usuário PalletCore"}
                                 </Text>
                                 <View style={styles.badgeAdmin}>
-                                    <Ionicons name="shield-checkmark" size={12} color="#166534" />
+                                    <Ionicons name="shield-checkmark" size={12} color={Colors.hex166534} />
                                     <Text style={styles.badgeAdminText}>Administrador</Text>
                                 </View>
                             </View>
@@ -140,7 +141,7 @@ export default function Configurations() {
                     {/* PREFERÊNCIAS */}
                     <View style={styles.section}>
                         <View style={styles.sectionHeader}>
-                            <Ionicons name="options-outline" size={17} color="#0B4F6C" />
+                            <Ionicons name="options-outline" size={17} color={Colors.hex0B4F6C} />
                             <Text style={styles.sectionTitle}>Preferências do Aplicativo</Text>
                         </View>
 
@@ -155,8 +156,8 @@ export default function Configurations() {
                                 <Switch
                                     value={notificacoes}
                                     onValueChange={setNotificacoes}
-                                    thumbColor={notificacoes ? "#0B4F6C" : "#D9E3EA"}
-                                    trackColor={{ false: "#D9E3EA", true: "#BAE6FD" }}
+                                    thumbColor={notificacoes ? Colors.hex0B4F6C : Colors.hexD9E3EA}
+                                    trackColor={{ false: Colors.hexD9E3EA, true: Colors.hexBAE6FD }}
                                 />
                             </View>
 
@@ -172,8 +173,8 @@ export default function Configurations() {
                                 <Switch
                                     value={atualizacoesAuto}
                                     onValueChange={setAtualizacoesAuto}
-                                    thumbColor={atualizacoesAuto ? "#0B4F6C" : "#D9E3EA"}
-                                    trackColor={{ false: "#D9E3EA", true: "#BAE6FD" }}
+                                    thumbColor={atualizacoesAuto ? Colors.hex0B4F6C : Colors.hexD9E3EA}
+                                    trackColor={{ false: Colors.hexD9E3EA, true: Colors.hexBAE6FD }}
                                 />
                             </View>
                         </View>
@@ -182,7 +183,7 @@ export default function Configurations() {
                     {/* DADOS DO PROJETO DE TCC */}
                     <View style={styles.section}>
                         <View style={styles.sectionHeader}>
-                            <Ionicons name="school-outline" size={17} color="#0B4F6C" />
+                            <Ionicons name="school-outline" size={17} color={Colors.hex0B4F6C} />
                             <Text style={styles.sectionTitle}>Informações do Projeto (TCC)</Text>
                         </View>
 
@@ -220,7 +221,7 @@ export default function Configurations() {
                     {/* AÇÕES DE CONTA */}
                     <View style={styles.section}>
                         <View style={styles.sectionHeader}>
-                            <Ionicons name="key-outline" size={17} color="#0B4F6C" />
+                            <Ionicons name="key-outline" size={17} color={Colors.hex0B4F6C} />
                             <Text style={styles.sectionTitle}>Ações da Conta</Text>
                         </View>
 
@@ -233,7 +234,7 @@ export default function Configurations() {
                                 ]}
                             >
                                 <View style={styles.actionIconContainer}>
-                                    <Ionicons name="lock-closed-outline" size={18} color="#0B4F6C" />
+                                    <Ionicons name="lock-closed-outline" size={18} color={Colors.hex0B4F6C} />
                                 </View>
                                 <View style={styles.actionTextContainer}>
                                     <Text style={styles.actionTitle}>Alterar Senha de Acesso</Text>
@@ -241,7 +242,7 @@ export default function Configurations() {
                                         Receba um link de redefinição no seu e-mail
                                     </Text>
                                 </View>
-                                <Ionicons name="chevron-forward" size={18} color="#94A3B8" />
+                                <Ionicons name="chevron-forward" size={18} color={Colors.hex94A3B8} />
                             </Pressable>
 
                             <Pressable
@@ -253,7 +254,7 @@ export default function Configurations() {
                                 ]}
                             >
                                 <View style={styles.actionIconContainerDestructive}>
-                                    <Ionicons name="log-out-outline" size={18} color="#DC2626" />
+                                    <Ionicons name="log-out-outline" size={18} color={Colors.hexDC2626} />
                                 </View>
                                 <View style={styles.actionTextContainer}>
                                     <Text style={styles.actionTitleDestructive}>
@@ -264,9 +265,9 @@ export default function Configurations() {
                                     </Text>
                                 </View>
                                 {loggingOut ? (
-                                    <ActivityIndicator size="small" color="#DC2626" />
+                                    <ActivityIndicator size="small" color={Colors.hexDC2626} />
                                 ) : (
-                                    <Ionicons name="chevron-forward" size={18} color="#F87171" />
+                                    <Ionicons name="chevron-forward" size={18} color={Colors.hexF87171} />
                                 )}
                             </Pressable>
                         </View>
@@ -295,7 +296,7 @@ const styles = StyleSheet.create({
         width: 48,
         height: 48,
         borderRadius: 12,
-        backgroundColor: "#E8F1F5",
+        backgroundColor: Colors.hexE8F1F5,
         alignItems: "center",
         justifyContent: "center",
         marginTop: 2,
@@ -309,7 +310,7 @@ const styles = StyleSheet.create({
     },
     divider: {
         height: 1,
-        backgroundColor: "#DDE8EF",
+        backgroundColor: Colors.hexDDE8EF,
         marginVertical: 20,
     },
     profileSection: {
@@ -317,19 +318,19 @@ const styles = StyleSheet.create({
         alignItems: "center",
         gap: 16,
         padding: 16,
-        backgroundColor: "#F8FAFC",
+        backgroundColor: Colors.hexF8FAFC,
         borderRadius: 16,
         borderWidth: 1,
-        borderColor: "#DDE8EF",
+        borderColor: Colors.hexDDE8EF,
     },
     avatar: {
         width: 54,
         height: 54,
         borderRadius: 27,
-        backgroundColor: "#0B4F6C",
+        backgroundColor: Colors.hex0B4F6C,
         alignItems: "center",
         justifyContent: "center",
-        shadowColor: "#0B4F6C",
+        shadowColor: Colors.hex0B4F6C,
         shadowOffset: { width: 0, height: 3 },
         shadowOpacity: 0.25,
         shadowRadius: 6,
@@ -338,7 +339,7 @@ const styles = StyleSheet.create({
     avatarText: {
         fontSize: 18,
         fontFamily: "WorksansBold",
-        color: "#FFFDF9",
+        color: Colors.hexFFFDF9,
     },
     profileInfo: {
         flex: 1,
@@ -353,7 +354,7 @@ const styles = StyleSheet.create({
     profileName: {
         fontSize: 16,
         fontFamily: "WorksansBold",
-        color: "#0F172A",
+        color: Colors.hex0F172A,
     },
     badgeAdmin: {
         flexDirection: "row",
@@ -362,24 +363,24 @@ const styles = StyleSheet.create({
         paddingHorizontal: 8,
         paddingVertical: 3,
         borderRadius: 6,
-        backgroundColor: "#DCFCE7",
+        backgroundColor: Colors.hexDCFCE7,
         borderWidth: 1,
-        borderColor: "#BBF7D0",
+        borderColor: Colors.hexBBF7D0,
     },
     badgeAdminText: {
         fontSize: 11,
         fontFamily: "WorksansSemiBold",
-        color: "#166534",
+        color: Colors.hex166534,
     },
     profileSubtext: {
         fontSize: 13,
         fontFamily: "WorksansRegular",
-        color: "#475569",
+        color: Colors.hex475569,
     },
     profileId: {
         fontSize: 11,
         fontFamily: "WorksansRegular",
-        color: "#94A3B8",
+        color: Colors.hex94A3B8,
     },
     section: {
         marginTop: 22,
@@ -393,15 +394,15 @@ const styles = StyleSheet.create({
     sectionTitle: {
         fontSize: 14,
         fontFamily: "WorksansSemiBold",
-        color: "#0F172A",
+        color: Colors.hex0F172A,
         textTransform: "uppercase",
         letterSpacing: 0.5,
     },
     prefList: {
-        backgroundColor: "#F8FAFC",
+        backgroundColor: Colors.hexF8FAFC,
         borderRadius: 14,
         borderWidth: 1,
-        borderColor: "#DDE8EF",
+        borderColor: Colors.hexDDE8EF,
         paddingHorizontal: 16,
     },
     prefItem: {
@@ -413,7 +414,7 @@ const styles = StyleSheet.create({
     },
     prefDivider: {
         height: 1,
-        backgroundColor: "#E2ECF2",
+        backgroundColor: Colors.hexE2ECF2,
     },
     prefTextContainer: {
         flex: 1,
@@ -422,18 +423,18 @@ const styles = StyleSheet.create({
     prefTitle: {
         fontSize: 14,
         fontFamily: "WorksansSemiBold",
-        color: "#0F172A",
+        color: Colors.hex0F172A,
     },
     prefDescription: {
         fontSize: 12,
         fontFamily: "WorksansRegular",
-        color: "#475569",
+        color: Colors.hex475569,
     },
     tccGrid: {
-        backgroundColor: "#F8FAFC",
+        backgroundColor: Colors.hexF8FAFC,
         borderRadius: 14,
         borderWidth: 1,
-        borderColor: "#DDE8EF",
+        borderColor: Colors.hexDDE8EF,
         padding: 16,
         gap: 12,
     },
@@ -443,13 +444,13 @@ const styles = StyleSheet.create({
     tccLabel: {
         fontSize: 10,
         fontFamily: "WorksansSemiBold",
-        color: "#0891B2",
+        color: Colors.hex0891B2,
         letterSpacing: 0.6,
     },
     tccValue: {
         fontSize: 13,
         fontFamily: "WorksansMedium",
-        color: "#0F172A",
+        color: Colors.hex0F172A,
     },
     tccRow: {
         flexDirection: "row",
@@ -460,7 +461,7 @@ const styles = StyleSheet.create({
         width: 8,
         height: 8,
         borderRadius: 4,
-        backgroundColor: "#16A34A",
+        backgroundColor: Colors.hex16A34A,
     },
     actionsContainer: {
         gap: 10,
@@ -469,20 +470,20 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         gap: 12,
-        backgroundColor: "#F8FAFC",
+        backgroundColor: Colors.hexF8FAFC,
         borderRadius: 14,
         borderWidth: 1,
-        borderColor: "#DDE8EF",
+        borderColor: Colors.hexDDE8EF,
         padding: 14,
     },
     actionButtonPressed: {
-        backgroundColor: "#E5EEF3",
+        backgroundColor: Colors.hexE5EEF3,
     },
     actionIconContainer: {
         width: 36,
         height: 36,
         borderRadius: 10,
-        backgroundColor: "#E8F1F5",
+        backgroundColor: Colors.hexE8F1F5,
         alignItems: "center",
         justifyContent: "center",
     },
@@ -493,42 +494,42 @@ const styles = StyleSheet.create({
     actionTitle: {
         fontSize: 14,
         fontFamily: "WorksansSemiBold",
-        color: "#0F172A",
+        color: Colors.hex0F172A,
     },
     actionSubtitle: {
         fontSize: 12,
         fontFamily: "WorksansRegular",
-        color: "#475569",
+        color: Colors.hex475569,
     },
     actionButtonDestructive: {
         flexDirection: "row",
         alignItems: "center",
         gap: 12,
-        backgroundColor: "#FEF2F2",
+        backgroundColor: Colors.hexFEF2F2,
         borderRadius: 14,
         borderWidth: 1,
-        borderColor: "#FECACA",
+        borderColor: Colors.hexFECACA,
         padding: 14,
     },
     actionButtonDestructivePressed: {
-        backgroundColor: "#FEE2E2",
+        backgroundColor: Colors.hexFEE2E2,
     },
     actionIconContainerDestructive: {
         width: 36,
         height: 36,
         borderRadius: 10,
-        backgroundColor: "#FEE2E2",
+        backgroundColor: Colors.hexFEE2E2,
         alignItems: "center",
         justifyContent: "center",
     },
     actionTitleDestructive: {
         fontSize: 14,
         fontFamily: "WorksansSemiBold",
-        color: "#DC2626",
+        color: Colors.hexDC2626,
     },
     actionSubtitleDestructive: {
         fontSize: 12,
         fontFamily: "WorksansRegular",
-        color: "#991B1B",
+        color: Colors.hex991B1B,
     },
 });

@@ -1,3 +1,4 @@
+import { Colors } from "@/src/theme/colors";
 import { Ionicons } from "@expo/vector-icons";
 import { supabase } from "@/src/lib/supabase";
 import React, { useEffect, useState } from "react";
@@ -29,9 +30,9 @@ type Order = {
 };
 
 const STATUS_OPTIONS = [
-    { value: "P", label: "Pendente", icon: "time-outline" as const, color: "#92400E", bg: "#FEF3C7", border: "#FDE68A" },
-    { value: "E", label: "Entregue", icon: "checkmark-circle-outline" as const, color: "#166534", bg: "#DCFCE7", border: "#BBF7D0" },
-    { value: "C", label: "Cancelado", icon: "close-circle-outline" as const, color: "#991B1B", bg: "#FEE2E2", border: "#FECACA" },
+    { value: "P", label: "Pendente", icon: "time-outline" as const, color: Colors.hex92400E, bg: Colors.hexFEF3C7, border: Colors.hexFDE68A },
+    { value: "E", label: "Entregue", icon: "checkmark-circle-outline" as const, color: Colors.hex166534, bg: Colors.hexDCFCE7, border: Colors.hexBBF7D0 },
+    { value: "C", label: "Cancelado", icon: "close-circle-outline" as const, color: Colors.hex991B1B, bg: Colors.hexFEE2E2, border: Colors.hexFECACA },
 ];
 
 export function EditOrderCard({
@@ -114,7 +115,7 @@ export function EditOrderCard({
     if (loading) {
         return (
             <View style={[pagesStyles.card, styles.loadingCard, { maxWidth: maxCardWidth }]}>
-                <ActivityIndicator color="#0B4F6C" size="large" />
+                <ActivityIndicator color={Colors.hex0B4F6C} size="large" />
                 <Text style={styles.loadingText}>Carregando pedido...</Text>
             </View>
         );
@@ -123,7 +124,7 @@ export function EditOrderCard({
     if (!pedido) {
         return (
             <View style={[pagesStyles.card, styles.emptyCard, { maxWidth: maxCardWidth }]}>
-                <Ionicons name="alert-circle-outline" size={36} color="#DC2626" />
+                <Ionicons name="alert-circle-outline" size={36} color={Colors.hexDC2626} />
                 <Text style={styles.emptyTitle}>Pedido não encontrado</Text>
                 <Text style={pagesStyles.description}>
                     O pedido #{idPedido} não existe ou foi excluído.
@@ -148,12 +149,12 @@ export function EditOrderCard({
 
                 <View style={styles.headerBadges}>
                     <View style={styles.idBadge}>
-                        <Ionicons name="receipt-outline" size={14} color="#0891B2" />
+                        <Ionicons name="receipt-outline" size={14} color={Colors.hex0891B2} />
                         <Text style={styles.idBadgeText}>#{pedido.id}</Text>
                     </View>
 
                     <View style={styles.dateBox}>
-                        <Ionicons name="calendar-outline" size={13} color="#475569" />
+                        <Ionicons name="calendar-outline" size={13} color={Colors.hex475569} />
                         <Text style={styles.dateText}>{pedido.data_pedido}</Text>
                     </View>
                 </View>
@@ -162,7 +163,7 @@ export function EditOrderCard({
             {/* SELEÇÃO DE STATUS */}
             <View style={styles.section}>
                 <View style={styles.sectionHeader}>
-                    <Ionicons name="flag-outline" size={16} color="#0B4F6C" />
+                    <Ionicons name="flag-outline" size={16} color={Colors.hex0B4F6C} />
                     <Text style={styles.sectionTitle}>Status do Pedido</Text>
                 </View>
 
@@ -184,7 +185,7 @@ export function EditOrderCard({
                                 <Ionicons
                                     name={opt.icon}
                                     size={16}
-                                    color={isSelected ? opt.color : "#475569"}
+                                    color={isSelected ? opt.color : Colors.hex475569}
                                 />
                                 <Text
                                     style={[
@@ -203,7 +204,7 @@ export function EditOrderCard({
             {/* CAMPOS DO PEDIDO */}
             <View style={styles.section}>
                 <View style={styles.sectionHeader}>
-                    <Ionicons name="cube-outline" size={16} color="#0B4F6C" />
+                    <Ionicons name="cube-outline" size={16} color={Colors.hex0B4F6C} />
                     <Text style={styles.sectionTitle}>Dados do Pedido</Text>
                 </View>
 
@@ -212,14 +213,14 @@ export function EditOrderCard({
                     <View style={[styles.field, isMobile && styles.fieldMobile]}>
                         <Text style={pagesStyles.label}>ID DO CLIENTE</Text>
                         <View style={styles.inputWrapper}>
-                            <Ionicons name="person-outline" size={18} color="#64748B" style={styles.inputIcon} />
+                            <Ionicons name="person-outline" size={18} color={Colors.hex64748B} style={styles.inputIcon} />
                             <TextInput
                                 value={idCliente}
                                 onChangeText={setIdCliente}
                                 keyboardType="numeric"
                                 style={styles.input}
                                 placeholder="Ex: 1"
-                                placeholderTextColor="#94A3B8"
+                                placeholderTextColor={Colors.hex94A3B8}
                             />
                         </View>
                     </View>
@@ -228,14 +229,14 @@ export function EditOrderCard({
                     <View style={[styles.field, isMobile && styles.fieldMobile]}>
                         <Text style={pagesStyles.label}>ID DO PRODUTO</Text>
                         <View style={styles.inputWrapper}>
-                            <Ionicons name="pricetag-outline" size={18} color="#64748B" style={styles.inputIcon} />
+                            <Ionicons name="pricetag-outline" size={18} color={Colors.hex64748B} style={styles.inputIcon} />
                             <TextInput
                                 value={idProduto}
                                 onChangeText={setIdProduto}
                                 keyboardType="numeric"
                                 style={styles.input}
                                 placeholder="Ex: 10"
-                                placeholderTextColor="#94A3B8"
+                                placeholderTextColor={Colors.hex94A3B8}
                             />
                         </View>
                     </View>
@@ -244,14 +245,14 @@ export function EditOrderCard({
                     <View style={[styles.field, isMobile && styles.fieldMobile]}>
                         <Text style={pagesStyles.label}>QUANTIDADE</Text>
                         <View style={styles.inputWrapper}>
-                            <Ionicons name="layers-outline" size={18} color="#64748B" style={styles.inputIcon} />
+                            <Ionicons name="layers-outline" size={18} color={Colors.hex64748B} style={styles.inputIcon} />
                             <TextInput
                                 value={qtde}
                                 onChangeText={setQtde}
                                 keyboardType="numeric"
                                 style={styles.input}
                                 placeholder="Ex: 5"
-                                placeholderTextColor="#94A3B8"
+                                placeholderTextColor={Colors.hex94A3B8}
                             />
                         </View>
                     </View>
@@ -260,13 +261,13 @@ export function EditOrderCard({
                     <View style={[styles.field, isMobile && styles.fieldMobile]}>
                         <Text style={pagesStyles.label}>CÓDIGO DO STATUS</Text>
                         <View style={styles.inputWrapper}>
-                            <Ionicons name="key-outline" size={18} color="#64748B" style={styles.inputIcon} />
+                            <Ionicons name="key-outline" size={18} color={Colors.hex64748B} style={styles.inputIcon} />
                             <TextInput
                                 value={status}
                                 onChangeText={setStatus}
                                 style={styles.input}
                                 placeholder="P, E ou C"
-                                placeholderTextColor="#94A3B8"
+                                placeholderTextColor={Colors.hex94A3B8}
                                 autoCapitalize="characters"
                             />
                         </View>
@@ -277,7 +278,7 @@ export function EditOrderCard({
             {/* ERRO */}
             {errorMessage ? (
                 <View style={styles.errorContainer}>
-                    <Ionicons name="alert-circle" size={18} color="#B91C1C" />
+                    <Ionicons name="alert-circle" size={18} color={Colors.hexB91C1C} />
                     <Text style={styles.errorText}>{errorMessage}</Text>
                 </View>
             ) : null}
@@ -287,7 +288,7 @@ export function EditOrderCard({
                 <AnimatedButton
                     title={
                         saving ? (
-                            <ActivityIndicator color="#FFFDF9" size="small" />
+                            <ActivityIndicator color={Colors.hexFFFDF9} size="small" />
                         ) : (
                             "Salvar Alterações"
                         )
@@ -314,7 +315,7 @@ const styles = StyleSheet.create({
         gap: 16,
         paddingBottom: 20,
         borderBottomWidth: 1,
-        borderBottomColor: "#DDE8EF",
+        borderBottomColor: Colors.hexDDE8EF,
     },
     headerMobile: {
         flexDirection: "column",
@@ -341,14 +342,14 @@ const styles = StyleSheet.create({
         paddingHorizontal: 10,
         paddingVertical: 6,
         borderRadius: 8,
-        backgroundColor: "#E8F1F5",
+        backgroundColor: Colors.hexE8F1F5,
         borderWidth: 1,
-        borderColor: "#D4E1E9",
+        borderColor: Colors.hexD4E1E9,
     },
     idBadgeText: {
         fontSize: 13,
         fontFamily: "WorksansSemiBold",
-        color: "#0B4F6C",
+        color: Colors.hex0B4F6C,
     },
     dateBox: {
         flexDirection: "row",
@@ -357,14 +358,14 @@ const styles = StyleSheet.create({
         paddingHorizontal: 10,
         paddingVertical: 6,
         borderRadius: 8,
-        backgroundColor: "#F8FAFC",
+        backgroundColor: Colors.hexF8FAFC,
         borderWidth: 1,
-        borderColor: "#DCE7EE",
+        borderColor: Colors.hexDCE7EE,
     },
     dateText: {
         fontSize: 12,
         fontFamily: "WorksansMedium",
-        color: "#475569",
+        color: Colors.hex475569,
     },
     section: {
         width: "100%",
@@ -379,7 +380,7 @@ const styles = StyleSheet.create({
     sectionTitle: {
         fontSize: 14,
         fontFamily: "WorksansSemiBold",
-        color: "#0F172A",
+        color: Colors.hex0F172A,
         textTransform: "uppercase",
         letterSpacing: 0.5,
     },
@@ -399,13 +400,13 @@ const styles = StyleSheet.create({
         paddingHorizontal: 12,
         borderRadius: 10,
         borderWidth: 1,
-        borderColor: "#CFDDE6",
-        backgroundColor: "#F8FAFC",
+        borderColor: Colors.hexCFDDE6,
+        backgroundColor: Colors.hexF8FAFC,
     },
     statusChipText: {
         fontSize: 13,
         fontFamily: "WorksansMedium",
-        color: "#475569",
+        color: Colors.hex475569,
     },
     fields: {
         width: "100%",
@@ -426,9 +427,9 @@ const styles = StyleSheet.create({
     inputWrapper: {
         flexDirection: "row",
         alignItems: "center",
-        backgroundColor: "#F8FAFC",
+        backgroundColor: Colors.hexF8FAFC,
         borderWidth: 1,
-        borderColor: "#CFDDE6",
+        borderColor: Colors.hexCFDDE6,
         borderRadius: 12,
         paddingHorizontal: 12,
     },
@@ -440,7 +441,7 @@ const styles = StyleSheet.create({
         minHeight: 46,
         fontSize: 15,
         fontFamily: "WorksansRegular",
-        color: "#0F172A",
+        color: Colors.hex0F172A,
     },
     errorContainer: {
         flexDirection: "row",
@@ -449,14 +450,14 @@ const styles = StyleSheet.create({
         marginTop: 18,
         paddingHorizontal: 14,
         paddingVertical: 10,
-        backgroundColor: "#FEF2F2",
+        backgroundColor: Colors.hexFEF2F2,
         borderRadius: 10,
         borderWidth: 1,
-        borderColor: "#FCA5A5",
+        borderColor: Colors.hexFCA5A5,
     },
     errorText: {
         flex: 1,
-        color: "#B91C1C",
+        color: Colors.hexB91C1C,
         fontSize: 13,
         fontFamily: "WorksansMedium",
     },
@@ -477,7 +478,7 @@ const styles = StyleSheet.create({
     loadingText: {
         fontSize: 14,
         fontFamily: "WorksansMedium",
-        color: "#475569",
+        color: Colors.hex475569,
     },
     emptyCard: {
         alignItems: "center",
@@ -488,7 +489,7 @@ const styles = StyleSheet.create({
     emptyTitle: {
         fontSize: 17,
         fontFamily: "WorksansBold",
-        color: "#0F172A",
+        color: Colors.hex0F172A,
         marginTop: 10,
         marginBottom: 4,
     },

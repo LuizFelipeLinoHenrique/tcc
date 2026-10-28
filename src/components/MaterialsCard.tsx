@@ -1,3 +1,4 @@
+import { Colors } from "@/src/theme/colors";
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
@@ -77,7 +78,7 @@ export function MaterialTableRow({
             <View style={styles.colName}>
                 <View style={styles.materialInfo}>
                     <View style={styles.materialIconBox}>
-                        <Ionicons name="layers-outline" size={17} color="#0B4F6C" />
+                        <Ionicons name="layers-outline" size={17} color={Colors.hex0B4F6C} />
                     </View>
                     <View style={styles.nameContainer}>
                         <Text style={styles.materialName} numberOfLines={1}>
@@ -91,7 +92,7 @@ export function MaterialTableRow({
             {/* Preço */}
             <View style={styles.colPrice}>
                 <View style={styles.priceBadge}>
-                    <Ionicons name="pricetag-outline" size={12} color="#0E7490" />
+                    <Ionicons name="pricetag-outline" size={12} color={Colors.hex0E7490} />
                     <Text style={styles.priceText}>{formatMoney(preco)}</Text>
                 </View>
             </View>
@@ -115,7 +116,7 @@ export function MaterialTableRow({
                         ]}
                         hitSlop={4}
                     >
-                        <Ionicons name="eye-outline" size={15} color="#0B4F6C" />
+                        <Ionicons name="eye-outline" size={15} color={Colors.hex0B4F6C} />
                         <Text style={styles.detailsBtnText}>Detalhes</Text>
                     </Pressable>
 
@@ -128,7 +129,7 @@ export function MaterialTableRow({
                         ]}
                         hitSlop={4}
                     >
-                        <Ionicons name="pencil-outline" size={15} color="#0E7490" />
+                        <Ionicons name="pencil-outline" size={15} color={Colors.hex0E7490} />
                         <Text style={styles.editBtnText}>Editar</Text>
                     </Pressable>
 
@@ -142,7 +143,7 @@ export function MaterialTableRow({
                             ]}
                             hitSlop={4}
                         >
-                            <Ionicons name="trash-outline" size={15} color="#A74E3C" />
+                            <Ionicons name="trash-outline" size={15} color={Colors.hexA74E3C} />
                             <Text style={styles.deleteBtnText}>Excluir</Text>
                         </Pressable>
                     ) : null}
@@ -159,17 +160,17 @@ const styles = StyleSheet.create({
     headerRow: {
         flexDirection: "row",
         alignItems: "center",
-        backgroundColor: "#E8F1F5",
+        backgroundColor: Colors.hexE8F1F5,
         paddingVertical: 12,
         paddingHorizontal: 16,
         borderBottomWidth: 1.5,
-        borderColor: "#CFDDE6",
+        borderColor: Colors.hexCFDDE6,
         minWidth: 840,
     },
     headerText: {
         fontSize: 11,
         fontFamily: "WorksansBold",
-        color: "#0B4F6C",
+        color: Colors.hex0B4F6C,
         letterSpacing: 0.8,
         textTransform: "uppercase",
     },
@@ -182,14 +183,14 @@ const styles = StyleSheet.create({
         paddingVertical: 10,
         paddingHorizontal: 16,
         borderBottomWidth: 1,
-        borderColor: "#E2EBF0",
+        borderColor: Colors.hexE2EBF0,
         minWidth: 840,
     },
     rowEven: {
-        backgroundColor: "#FFFFFF",
+        backgroundColor: Colors.white,
     },
     rowOdd: {
-        backgroundColor: "#F8FAFC",
+        backgroundColor: Colors.hexF8FAFC,
     },
 
     // Colunas
@@ -219,7 +220,7 @@ const styles = StyleSheet.create({
 
     // Células e textos
     idBadge: {
-        backgroundColor: "#E8F1F5",
+        backgroundColor: Colors.hexE8F1F5,
         paddingHorizontal: 8,
         paddingVertical: 4,
         borderRadius: 6,
@@ -228,7 +229,7 @@ const styles = StyleSheet.create({
     idBadgeText: {
         fontSize: 12,
         fontFamily: "WorksansBold",
-        color: "#0B4F6C",
+        color: Colors.hex0B4F6C,
     },
     materialInfo: {
         flexDirection: "row",
@@ -239,11 +240,11 @@ const styles = StyleSheet.create({
         width: 32,
         height: 32,
         borderRadius: 8,
-        backgroundColor: "#E8F1F5",
+        backgroundColor: Colors.hexE8F1F5,
         alignItems: "center",
         justifyContent: "center",
         borderWidth: 1,
-        borderColor: "#CFDDE6",
+        borderColor: Colors.hexCFDDE6,
     },
     nameContainer: {
         flex: 1,
@@ -251,34 +252,34 @@ const styles = StyleSheet.create({
     materialName: {
         fontSize: 13,
         fontFamily: "WorksansSemiBold",
-        color: "#0F172A",
+        color: Colors.hex0F172A,
     },
     materialSubtitle: {
         fontSize: 10,
         fontFamily: "WorksansRegular",
-        color: "#64748B",
+        color: Colors.hex64748B,
     },
     priceBadge: {
         flexDirection: "row",
         alignItems: "center",
         gap: 4,
-        backgroundColor: "#E0F2FE",
+        backgroundColor: Colors.hexE0F2FE,
         paddingHorizontal: 9,
         paddingVertical: 4,
         borderRadius: 6,
         alignSelf: "flex-start",
         borderWidth: 1,
-        borderColor: "#BAE6FD",
+        borderColor: Colors.hexBAE6FD,
     },
     priceText: {
         fontSize: 12,
         fontFamily: "WorksansBold",
-        color: "#0369A1",
+        color: Colors.hex0369A1,
     },
     descText: {
         fontSize: 12,
         fontFamily: "WorksansRegular",
-        color: "#475569",
+        color: Colors.hex475569,
         lineHeight: 17,
     },
 
@@ -302,30 +303,30 @@ const styles = StyleSheet.create({
         transform: [{ scale: 0.97 }],
     },
     detailsBtn: {
-        backgroundColor: "#E8F1F5",
-        borderColor: "#CFDDE6",
+        backgroundColor: Colors.hexE8F1F5,
+        borderColor: Colors.hexCFDDE6,
     },
     detailsBtnText: {
         fontSize: 12,
         fontFamily: "WorksansSemiBold",
-        color: "#0B4F6C",
+        color: Colors.hex0B4F6C,
     },
     editBtn: {
-        backgroundColor: "#E0F2FE",
-        borderColor: "#BAE6FD",
+        backgroundColor: Colors.hexE0F2FE,
+        borderColor: Colors.hexBAE6FD,
     },
     editBtnText: {
         fontSize: 12,
         fontFamily: "WorksansSemiBold",
-        color: "#0E7490",
+        color: Colors.hex0E7490,
     },
     deleteBtn: {
-        backgroundColor: "#FEE2E2",
-        borderColor: "#FECACA",
+        backgroundColor: Colors.hexFEE2E2,
+        borderColor: Colors.hexFECACA,
     },
     deleteBtnText: {
         fontSize: 12,
         fontFamily: "WorksansSemiBold",
-        color: "#A74E3C",
+        color: Colors.hexA74E3C,
     },
 });
