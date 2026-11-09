@@ -1,6 +1,7 @@
 import { Colors } from "@/src/theme/colors";
 import { Ionicons } from "@expo/vector-icons";
 import { supabase } from "@/src/lib/supabase";
+import { recordError, updateRecord } from "@/src/lib/tableActions";
 import React, { useEffect, useState } from "react";
 import {
     ActivityIndicator,
@@ -18,6 +19,7 @@ import { pagesStyles } from "./ScreensLayout";
 
 type EditOrderCardProps = {
     idPedido: number;
+    onSaveSuccess?: () => void;
 };
 
 type Order = {
@@ -37,6 +39,7 @@ const STATUS_OPTIONS = [
 
 export function EditOrderCard({
     idPedido,
+    onSaveSuccess,
 }: EditOrderCardProps) {
     const { isMobile, maxCardWidth } = useResponsive();
 
@@ -78,7 +81,7 @@ export function EditOrderCard({
     }
 
     async function salvarAlteracoes() {
-        if (!pedido) {
+        if (!pedido || saving) {
             return;
         }
 
@@ -87,29 +90,34 @@ export function EditOrderCard({
             return;
         }
 
+        if (![idCliente, idProduto, qtde].every(value => Number.isSafeInteger(Number(value)) && Number(value) > 0)) {
+            setErrorMessage("Informe IDs e quantidade com números inteiros maiores que zero.");
+            return;
+        }
+        if (!STATUS_OPTIONS.some(option => option.value === status)) {
+            setErrorMessage("Selecione um status válido.");
+            return;
+        }
         setSaving(true);
         setErrorMessage("");
 
-        const { error } = await supabase
-            .from("pedidos")
-            .update({
+        try {
+            await updateRecord("pedidos", idPedido, {
                 id_cliente: Number(idCliente),
                 qtde: Number(qtde),
                 id_produto: Number(idProduto),
                 status: status,
-            })
-            .eq("id", idPedido);
-
-        setSaving(false);
-
-        if (error) {
-            console.error("Erro ao atualizar pedido:", error);
-            Alert.alert("Erro", "Não foi possível salvar as alterações.");
+            });
+        } catch (cause) {
+            setErrorMessage(recordError(cause));
             return;
+        } finally {
+            setSaving(false);
         }
 
         Alert.alert("Sucesso", "Pedido atualizado com sucesso.");
-        buscarPedido();
+        if (onSaveSuccess) onSaveSuccess();
+        else buscarPedido();
     }
 
     if (loading) {
@@ -430,7 +438,7 @@ const styles = StyleSheet.create({
         backgroundColor: Colors.hexF8FAFC,
         borderWidth: 1,
         borderColor: Colors.hexCFDDE6,
-        borderRadius: 12,
+        borderRadius: 8,
         paddingHorizontal: 12,
     },
     inputIcon: {

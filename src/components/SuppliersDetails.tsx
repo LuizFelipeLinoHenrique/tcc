@@ -175,7 +175,7 @@ const styles = StyleSheet.create({
     iconCircle: {
         width: 48,
         height: 48,
-        borderRadius: 24,
+        borderRadius: 8,
         backgroundColor: Colors.hexEDF3F7,
         borderWidth: 1,
         borderColor: Colors.hexD4E1E9,
@@ -234,7 +234,7 @@ const styles = StyleSheet.create({
         backgroundColor: Colors.hexF8FAFC,
         borderWidth: 1,
         borderColor: Colors.hexD9E5EC,
-        borderRadius: 12,
+        borderRadius: 8,
         padding: 12,
         gap: 4,
     },

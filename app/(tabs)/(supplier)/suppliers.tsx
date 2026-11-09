@@ -1,9 +1,11 @@
+import { createPagination, mergeById } from "@/src/lib/pagination";
+import { RecordModal } from "@/src/components/RecordModal";
+import { useRecordDeletion } from "@/src/hooks/useRecordDeletion";
 import { Colors } from "@/src/theme/colors";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
     Alert,
     FlatList,
-    Modal,
     Pressable,
     ScrollView,
     StyleSheet,
@@ -37,14 +39,15 @@ export default function Suppliers() {
     const [tipoPesquisa, setTipoPesquisa] =
         useState<TipoPesquisaFornecedor>("NOME");
 
-    const [lastId, setLastId] = useState<number | null>(null);
+    const pagination = useRef(createPagination()).current;
     const [hasMore, setHasMore] = useState(true);
     const [loading, setLoading] = useState(false);
 
     const [fornecedorSelecionado, setFornecedorSelecionado] =
         useState<Fornecedor | null>(null);
-    const [fornecedorEditar, setFornecedorEditar] =
-        useState<Fornecedor | null>(null);
+    const [fornecedorEditar, setFornecedorEditar] = useState<Fornecedor | null>(
+        null,
+    );
 
     const [detalhesAberto, setDetalhesAberto] = useState(false);
     const [editarAberto, setEditarAberto] = useState(false);
@@ -53,12 +56,13 @@ export default function Suppliers() {
 
     const loadFornecedores = useCallback(
         async (reset = false) => {
-            if (loading && !reset) return;
+            const request = pagination.begin(reset);
+            if (!request) return;
 
             setLoading(true);
 
             try {
-                const cursor = reset ? null : lastId;
+                const cursor = request.cursor;
 
                 let query = supabase
                     .from("fornecedores")
@@ -78,7 +82,8 @@ export default function Suppliers() {
                         if (!Number.isNaN(id)) {
                             query = query.eq("id", id);
                         } else {
-                            setFornecedores(reset ? [] : fornecedores);
+                            pagination.accept(request, [], PAGE_SIZE);
+                            setFornecedores((prev) => (reset ? [] : prev));
                             setHasMore(false);
                             setLoading(false);
                             return;
@@ -95,11 +100,13 @@ export default function Suppliers() {
 
                 const { data, error } = await query;
 
+                if (!pagination.isCurrent(request)) return;
+
                 if (error) {
                     console.error("Erro ao carregar fornecedores:", error);
                     Alert.alert(
                         "Erro",
-                        "Não foi possível carregar os fornecedores."
+                        "Não foi possível carregar os fornecedores.",
                     );
                     return;
                 }
@@ -107,9 +114,11 @@ export default function Suppliers() {
                 const novosFornecedores = (data ?? []) as Fornecedor[];
 
                 if (reset) {
-                    setFornecedores(novosFornecedores);
+                    setFornecedores(mergeById([], novosFornecedores));
                 } else {
-                    setFornecedores((prev) => [...prev, ...novosFornecedores]);
+                    setFornecedores((prev) =>
+                        mergeById(prev, novosFornecedores),
+                    );
                 }
 
                 if (novosFornecedores.length < PAGE_SIZE) {
@@ -118,33 +127,33 @@ export default function Suppliers() {
                     setHasMore(true);
                 }
 
-                if (novosFornecedores.length > 0) {
-                    setLastId(
-                        novosFornecedores[novosFornecedores.length - 1].id
-                    );
-                } else if (reset) {
-                    setLastId(null);
-                }
+                pagination.accept(request, novosFornecedores, PAGE_SIZE);
             } finally {
-                setLoading(false);
+                if (pagination.isCurrent(request)) {
+                    pagination.finish(request);
+                    setLoading(false);
+                }
             }
         },
-        [fornecedores, lastId, loading, pesquisa, tipoPesquisa]
+        [pagination, pesquisa, tipoPesquisa],
     );
 
     useEffect(() => {
-        setLastId(null);
+        pagination.invalidate();
+        setLoading(false);
         setHasMore(true);
 
         const timer = setTimeout(() => {
             loadFornecedores(true);
         }, 300);
 
-        return () => clearTimeout(timer);
-    }, [pesquisa, tipoPesquisa, reloadFornecedores]);
+        return () => {
+            clearTimeout(timer);
+            pagination.invalidate();
+        };
+    }, [loadFornecedores, pagination, reloadFornecedores]);
 
     const handlePesquisa = () => {
-        setLastId(null);
         setHasMore(true);
         setReloadFornecedores((prev) => prev + 1);
     };
@@ -152,7 +161,6 @@ export default function Suppliers() {
     const limparPesquisa = () => {
         setPesquisa("");
         setTipoPesquisa("NOME");
-        setLastId(null);
         setHasMore(true);
         setReloadFornecedores((prev) => prev + 1);
     };
@@ -182,246 +190,163 @@ export default function Suppliers() {
         setEditarAberto(false);
         setFornecedorEditar(null);
 
-        setLastId(null);
         setHasMore(true);
         setReloadFornecedores((prev) => prev + 1);
     };
 
-    const confirmarExclusao = (fornecedor: Fornecedor) => {
-        Alert.alert(
-            "Excluir fornecedor",
-            `Deseja realmente excluir o fornecedor "${fornecedor.nome}"?`,
-            [
-                {
-                    text: "Cancelar",
-                    style: "cancel",
-                },
-                {
-                    text: "Excluir",
-                    style: "destructive",
-                    onPress: () => deleteFornecedor(fornecedor.id),
-                },
-            ]
-        );
-    };
+    const { requestDelete, deletionDialog } = useRecordDeletion("fornecedores", (id) => {
+        setFornecedores(prev => prev.filter(record => record.id !== id));
+    });
 
-    const deleteFornecedor = async (id: number) => {
-        const { error } = await supabase
-            .from("fornecedores")
-            .delete()
-            .eq("id", id);
+  return (
+      <PagesLayout
+          scroll={false}
+          noScrollContent={{
+              paddingVertical: 10,
+          }}
+      >
+          <View style={styles.container}>
+              <View style={styles.header}>
+                  <SuppliersFilters
+                      pesquisa={pesquisa}
+                      setPesquisa={setPesquisa}
+                      tipoPesquisa={tipoPesquisa}
+                      setTipoPesquisa={setTipoPesquisa}
+                      onSearch={handlePesquisa}
+                      onClear={limparPesquisa}
+                      isMobile={isMobile}
+                  />
+              </View>
 
-        if (error) {
-            console.error("Erro ao excluir fornecedor:", error);
-            Alert.alert(
-                "Erro",
-                "Não foi possível excluir o fornecedor."
-            );
-            return;
-        }
+              <ScrollView
+                  showsVerticalScrollIndicator={false}
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  style={styles.tableScroll}
+                  contentContainerStyle={styles.tableScrollContent}
+              >
+                  <View style={styles.tableContainer}>
+                      <FlatList
+                          showsHorizontalScrollIndicator={false}
+                          data={fornecedores}
+                          keyExtractor={(item) => item.id.toString()}
+                          ListHeaderComponent={<SupplierTableHeader />}
+                          showsVerticalScrollIndicator={false}
+                          renderItem={({ item, index }) => (
+                              <SupplierCard
+                                  index={index}
+                                  fornecedor={item}
+                                  iconDetails={() => abrirDetalhes(item)}
+                                  iconEdit={() => abrirEditar(item)}
+                                  iconDelete={() =>
+                                      requestDelete(item.id, item.nome)
+                                  }
+                              />
+                          )}
+                          onEndReached={carregarMais}
+                          onEndReachedThreshold={0.5}
+                          ListFooterComponent={
+                              loading ? (
+                                  <View style={styles.loadingContainer}>
+                                      <Text style={styles.loadingText}>
+                                          Carregando...
+                                      </Text>
+                                  </View>
+                              ) : hasMore && fornecedores.length > 0 ? (
+                                  <View style={styles.moreContainer}>
+                                      <Pressable
+                                          style={styles.moreButton}
+                                          onPress={carregarMais}
+                                      >
+                                          <Text style={styles.moreButtonText}>
+                                              Carregar mais
+                                          </Text>
+                                      </Pressable>
+                                  </View>
+                              ) : null
+                          }
+                          ListEmptyComponent={
+                              !loading ? (
+                                  <View style={styles.emptyContainer}>
+                                      <Text style={styles.emptyText}>
+                                          Nenhum fornecedor encontrado.
+                                      </Text>
+                                  </View>
+                              ) : null
+                          }
+                      />
+                  </View>
+              </ScrollView>
+          </View>
 
-        setFornecedores((prev) =>
-            prev.filter((fornecedor) => fornecedor.id !== id)
-        );
+          {/* Modal de Detalhes */}
+          <RecordModal
+              visible={detalhesAberto}
+              onClose={fecharDetalhes}
+              title="Detalhes"
+          >
+              {fornecedorSelecionado && (
+                  <SupplierDetailsCard
+                      data={[
+                          {
+                              label: "ID do Fornecedor",
+                              value: fornecedorSelecionado.id,
+                          },
+                          {
+                              label: "Nome / Razão Social",
+                              value: fornecedorSelecionado.nome,
+                          },
+                          {
+                              label: "CNPJ",
+                              value:
+                                  fornecedorSelecionado.cnpj || "Não informado",
+                          },
+                          {
+                              label: "E-mail",
+                              value:
+                                  fornecedorSelecionado.email ||
+                                  "Não informado",
+                          },
+                          {
+                              label: "Telefone",
+                              value: fornecedorSelecionado.telefone
+                                  ? String(fornecedorSelecionado.telefone)
+                                  : "Não informado",
+                          },
+                          {
+                              label: "Pessoa de Contato",
+                              value:
+                                  fornecedorSelecionado.contato ||
+                                  "Não informado",
+                          },
+                          {
+                              label: "Endereço",
+                              value:
+                                  fornecedorSelecionado.endereco ||
+                                  "Não informado",
+                              fullWidth: true,
+                          },
+                      ]}
+                  />
+              )}
+          </RecordModal>
 
-        setLastId(null);
-        setHasMore(true);
-    };
-
-    return (
-        <PagesLayout
-            scroll={false}
-            noScrollContent={{
-                paddingVertical: 10,
-            }}
-        >
-            <View style={styles.container}>
-                <View style={styles.header}>
-                    <SuppliersFilters
-                        pesquisa={pesquisa}
-                        setPesquisa={setPesquisa}
-                        tipoPesquisa={tipoPesquisa}
-                        setTipoPesquisa={setTipoPesquisa}
-                        onSearch={handlePesquisa}
-                        onClear={limparPesquisa}
-                        isMobile={isMobile}
-                    />
-                </View>
-
-                <ScrollView
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    style={styles.tableScroll}
-                    contentContainerStyle={styles.tableScrollContent}
-                >
-                    <View style={styles.tableContainer}>
-                        <FlatList
-                            data={fornecedores}
-                            keyExtractor={(item) => item.id.toString()}
-                            ListHeaderComponent={<SupplierTableHeader />}
-                            showsVerticalScrollIndicator={false}
-                            renderItem={({ item, index }) => (
-                                <SupplierCard
-                                    index={index}
-                                    fornecedor={item}
-                                    iconDetails={() => abrirDetalhes(item)}
-                                    iconEdit={() => abrirEditar(item)}
-                                    iconDelete={() => confirmarExclusao(item)}
-                                />
-                            )}
-                            onEndReached={carregarMais}
-                            onEndReachedThreshold={0.5}
-                            ListFooterComponent={
-                                loading ? (
-                                    <View style={styles.loadingContainer}>
-                                        <Text style={styles.loadingText}>Carregando...</Text>
-                                    </View>
-                                ) : hasMore && fornecedores.length > 0 ? (
-                                    <View style={styles.moreContainer}>
-                                        <Pressable style={styles.moreButton} onPress={carregarMais}>
-                                            <Text style={styles.moreButtonText}>Carregar mais</Text>
-                                        </Pressable>
-                                    </View>
-                                ) : null
-                            }
-                            ListEmptyComponent={
-                                !loading ? (
-                                    <View style={styles.emptyContainer}>
-                                        <Text style={styles.emptyText}>Nenhum fornecedor encontrado.</Text>
-                                    </View>
-                                ) : null
-                            }
-                        />
-                    </View>
-                </ScrollView>
-            </View>
-
-            {/* Modal de Detalhes */}
-            <Modal
-                visible={detalhesAberto}
-                transparent
-                animationType="fade"
-                onRequestClose={fecharDetalhes}
-            >
-                <View
-                    style={{
-                        flex: 1,
-                        justifyContent: "center",
-                        alignItems: "center",
-                        backgroundColor: Colors.overlayBlack50,
-                        padding: isMobile ? 8 : 20,
-                    }}
-                >
-                    <Pressable
-                        onPress={fecharDetalhes}
-                        style={{
-                            position: "absolute",
-                            top: 0,
-                            left: 0,
-                            right: 0,
-                            bottom: 0,
-                        }}
-                    />
-                    {fornecedorSelecionado && (
-                        <View
-                            style={{
-                                width: "100%",
-                                maxWidth: 900,
-                                maxHeight: isMobile ? "90%" : "100%",
-                            }}
-                        >
-                            <ScrollView
-                                showsVerticalScrollIndicator={false}
-                                contentContainerStyle={{ flexGrow: 1 }}
-                            >
-                                <SupplierDetailsCard
-                                    data={[
-                                        {
-                                            label: "ID do Fornecedor",
-                                            value: fornecedorSelecionado.id,
-                                        },
-                                        {
-                                            label: "Nome / Razão Social",
-                                            value: fornecedorSelecionado.nome,
-                                        },
-                                        {
-                                            label: "CNPJ",
-                                            value: fornecedorSelecionado.cnpj || "Não informado",
-                                        },
-                                        {
-                                            label: "E-mail",
-                                            value: fornecedorSelecionado.email || "Não informado",
-                                        },
-                                        {
-                                            label: "Telefone",
-                                            value: fornecedorSelecionado.telefone ? String(fornecedorSelecionado.telefone) : "Não informado",
-                                        },
-                                        {
-                                            label: "Pessoa de Contato",
-                                            value: fornecedorSelecionado.contato || "Não informado",
-                                        },
-                                        {
-                                            label: "Endereço",
-                                            value: fornecedorSelecionado.endereco || "Não informado",
-                                            fullWidth: true,
-                                        },
-                                    ]}
-                                />
-                            </ScrollView>
-                        </View>
-                    )}
-                </View>
-            </Modal>
-
-            {/* Modal de Edição */}
-            <Modal
-                visible={editarAberto}
-                transparent
-                animationType="fade"
-                onRequestClose={fecharEditar}
-            >
-                <View
-                    style={{
-                        flex: 1,
-                        justifyContent: "center",
-                        alignItems: "center",
-                        backgroundColor: Colors.overlayBlack50,
-                        padding: isMobile ? 8 : 20,
-                    }}
-                >
-                    <Pressable
-                        onPress={fecharEditar}
-                        style={{
-                            position: "absolute",
-                            top: 0,
-                            left: 0,
-                            right: 0,
-                            bottom: 0,
-                        }}
-                    />
-                    {fornecedorEditar && (
-                        <View
-                            style={{
-                                width: "100%",
-                                maxWidth: 900,
-                                maxHeight: isMobile ? "90%" : "100%",
-                            }}
-                        >
-                            <ScrollView
-                                showsVerticalScrollIndicator={false}
-                                contentContainerStyle={{ flexGrow: 1 }}
-                            >
-                                <EditSupplierCard
-                                    idFornecedor={fornecedorEditar.id}
-                                    onSaveSuccess={fecharEditar}
-                                />
-                            </ScrollView>
-                        </View>
-                    )}
-                </View>
-            </Modal>
-        </PagesLayout>
-    );
+          {/* Modal de Edição */}
+          <RecordModal
+              visible={editarAberto}
+              onClose={fecharEditar}
+              title="Editar registro"
+          >
+              {fornecedorEditar && (
+                  <EditSupplierCard
+                      idFornecedor={fornecedorEditar.id}
+                      onSaveSuccess={fecharEditar}
+                  />
+              )}
+          </RecordModal>
+          {deletionDialog}
+      </PagesLayout>
+  );
 }
 
 const styles = StyleSheet.create({
@@ -438,7 +363,7 @@ const styles = StyleSheet.create({
         minWidth: "100%",
         flex: 1,
         backgroundColor: Colors.white,
-        borderRadius: 14,
+        borderRadius: 8,
         borderWidth: 1,
         borderColor: Colors.hexDCE7EE,
         overflow: "hidden",

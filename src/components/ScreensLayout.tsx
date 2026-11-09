@@ -19,6 +19,8 @@ export function PagesLayout({ children, scroll, scrollContent, noScrollContent }
 
                 {scroll ? (
                     <ScrollView
+                        showsVerticalScrollIndicator={false}
+                        showsHorizontalScrollIndicator={false}
                         contentContainerStyle={[pagesStyles.scrollContent, scrollContent]}
                     >
                         {children}
@@ -58,11 +60,11 @@ export const pagesStyles = StyleSheet.create({
         backgroundColor: Colors.white,
         borderWidth: 1,
         borderColor: Colors.hexDCE7EE,
-        borderRadius: 20,
+        borderRadius: 8,
         padding: 24,
         shadowColor: Colors.hex082F42,
         shadowOffset: { width: 0, height: 6 },
-        shadowOpacity: 0.07,
+        shadowOpacity: 0.04,
         shadowRadius: 16,
         elevation: 2,
     },
@@ -111,7 +113,7 @@ export const pagesStyles = StyleSheet.create({
         minHeight: 48,
         borderWidth: 1,
         borderColor: Colors.hexCFDDE6,
-        borderRadius: 12,
+        borderRadius: 8,
         backgroundColor: Colors.hexF8FAFC,
         paddingHorizontal: 15,
         color: Colors.hex0F172A,
@@ -123,11 +125,11 @@ export const pagesStyles = StyleSheet.create({
         paddingHorizontal: 16,
         alignItems: "center",
         justifyContent: "center",
-        borderRadius: 12,
+        borderRadius: 8,
         backgroundColor: Colors.hex0B4F6C,
         shadowColor: Colors.hex0B4F6C,
         shadowOffset: { width: 0, height: 3 },
-        shadowOpacity: 0.2,
+        shadowOpacity: 0.04,
         shadowRadius: 6,
         elevation: 2,
     },
@@ -174,7 +176,7 @@ export const pagesStyles = StyleSheet.create({
     error: {
         borderWidth: 1,
         borderColor: Colors.hexF0CBC2,
-        borderRadius: 12,
+        borderRadius: 8,
         backgroundColor: Colors.hexFDF2EF,
         paddingHorizontal: 14,
         paddingVertical: 11
@@ -187,7 +189,7 @@ export const pagesStyles = StyleSheet.create({
     warning: {
         borderWidth: 1,
         borderColor: Colors.hexEADDC6,
-        borderRadius: 12,
+        borderRadius: 8,
         backgroundColor: Colors.hexFDF8F0,
         paddingHorizontal: 14,
         paddingVertical: 11
@@ -202,7 +204,7 @@ export const pagesStyles = StyleSheet.create({
         paddingHorizontal: 16,
         alignItems: "center",
         justifyContent: "center",
-        borderRadius: 12,
+        borderRadius: 8,
         borderWidth: 1.5,
         borderColor: Colors.hexCBD8E2,
         backgroundColor: Colors.white,

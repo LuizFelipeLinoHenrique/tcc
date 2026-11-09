@@ -1,11 +1,13 @@
+import { createPagination, mergeById } from "@/src/lib/pagination";
+import { RecordModal } from "@/src/components/RecordModal";
+import { useRecordDeletion } from "@/src/hooks/useRecordDeletion";
 import { Colors } from "@/src/theme/colors";
 // app/(tabs)/clients/Clients.tsx
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Alert,
   FlatList,
-  Modal,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -34,149 +36,148 @@ export default function Clients() {
   const [tipoPesquisa, setTipoPesquisa] =
     useState<TipoPesquisaCliente>("NOME");
 
-  const [lastId, setLastId] = useState<number | null>(null);
-  const [hasMore, setHasMore] = useState(true);
-  const [loading, setLoading] = useState(false);
+    const pagination = useRef(createPagination()).current;
+    const [hasMore, setHasMore] = useState(true);
+    const [loading, setLoading] = useState(false);
 
-  const [clienteSelecionado, setClienteSelecionado] =
-    useState<Cliente | null>(null);
-  const [clienteEditar, setClienteEditar] = useState<Cliente | null>(null);
+    const [clienteSelecionado, setClienteSelecionado] =
+      useState<Cliente | null>(null);
+    const [clienteEditar, setClienteEditar] = useState<Cliente | null>(null);
 
-  const [detalhesAberto, setDetalhesAberto] = useState(false);
-  const [editarAberto, setEditarAberto] = useState(false);
+    const [detalhesAberto, setDetalhesAberto] = useState(false);
+    const [editarAberto, setEditarAberto] = useState(false);
 
-  const [reloadClientes, setReloadClientes] = useState(0);
+    const [reloadClientes, setReloadClientes] = useState(0);
 
-  const loadClientes = useCallback(
-    async (reset = false) => {
-      if (loading && !reset) return;
+    const loadClientes = useCallback(
+      async (reset = false) => {
+        const request = pagination.begin(reset);
+        if (!request) return;
 
-      setLoading(true);
+        setLoading(true);
 
-      try {
-        const cursor = reset ? null : lastId;
+        try {
+          const cursor = request.cursor;
 
-        let query = supabase
-          .from("clientes")
-          .select("id, nome, endereco, email, telefone")
-          .order("id", { ascending: true })
-          .limit(PAGE_SIZE);
+          let query = supabase
+            .from("clientes")
+            .select("id, nome, endereco, email, telefone")
+            .order("id", { ascending: true })
+            .limit(PAGE_SIZE);
 
-        if (cursor !== null) {
-          query = query.gt("id", cursor);
-        }
+          if (cursor !== null) {
+            query = query.gt("id", cursor);
+          }
 
-        const texto = pesquisa.trim();
+          const texto = pesquisa.trim();
 
-        if (texto) {
-          if (tipoPesquisa === "ID") {
-            const id = Number(texto);
+          if (texto) {
+            if (tipoPesquisa === "ID") {
+              const id = Number(texto);
 
-            if (!Number.isNaN(id)) {
-              query = query.eq("id", id);
-            } else {
-              setClientes(reset ? [] : clientes);
-              setHasMore(false);
-              setLoading(false);
-              return;
+              if (!Number.isNaN(id)) {
+                query = query.eq("id", id);
+              } else {
+                pagination.accept(request, [], PAGE_SIZE);
+                setClientes((prev) => (reset ? [] : prev));
+                setHasMore(false);
+                setLoading(false);
+                return;
+              }
+            }
+
+            if (tipoPesquisa === "NOME") {
+              query = query.ilike("nome", `%${texto}%`);
+            }
+
+            if (tipoPesquisa === "EMAIL") {
+              query = query.ilike("email", `%${texto}%`);
+            }
+
+            if (tipoPesquisa === "TELEFONE") {
+              const telefone = Number(texto.replace(/\D/g, ""));
+
+              if (!Number.isNaN(telefone)) {
+                query = query.eq("telefone", telefone);
+              } else {
+                pagination.accept(request, [], PAGE_SIZE);
+                setClientes((prev) => (reset ? [] : prev));
+                setHasMore(false);
+                setLoading(false);
+                return;
+              }
             }
           }
 
-          if (tipoPesquisa === "NOME") {
-            query = query.ilike("nome", `%${texto}%`);
+          const { data, error } = await query;
+
+          if (!pagination.isCurrent(request)) return;
+
+          if (error) {
+            console.error("Erro ao carregar clientes:", error);
+
+            Alert.alert("Erro", "Não foi possível carregar os clientes.");
+
+            return;
           }
 
-          if (tipoPesquisa === "EMAIL") {
-            query = query.ilike("email", `%${texto}%`);
+          const novosClientes = (data ?? []) as Cliente[];
+
+          if (reset) {
+            setClientes(mergeById([], novosClientes));
+          } else {
+            setClientes((prev) => mergeById(prev, novosClientes));
           }
 
-          if (tipoPesquisa === "TELEFONE") {
-            const telefone = Number(
-              texto.replace(/\D/g, "")
-            );
+          if (novosClientes.length < PAGE_SIZE) {
+            setHasMore(false);
+          } else {
+            setHasMore(true);
+          }
 
-            if (!Number.isNaN(telefone)) {
-              query = query.eq("telefone", telefone);
-            } else {
-              setClientes(reset ? [] : clientes);
-              setHasMore(false);
-              setLoading(false);
-              return;
-            }
+          pagination.accept(request, novosClientes, PAGE_SIZE);
+        } finally {
+          if (pagination.isCurrent(request)) {
+            pagination.finish(request);
+            setLoading(false);
           }
         }
+      },
+      [pagination, pesquisa, tipoPesquisa],
+    );
 
-        const { data, error } = await query;
+    useEffect(() => {
+      pagination.invalidate();
+      setLoading(false);
+      setHasMore(true);
 
-        if (error) {
-          console.error("Erro ao carregar clientes:", error);
+      const timer = setTimeout(() => {
+        loadClientes(true);
+      }, 300);
 
-          Alert.alert(
-            "Erro",
-            "Não foi possível carregar os clientes."
-          );
+      return () => {
+        clearTimeout(timer);
+        pagination.invalidate();
+      };
+    }, [loadClientes, pagination, reloadClientes]);
 
-          return;
-        }
+    const handlePesquisa = () => {
+      setHasMore(true);
+      setReloadClientes((prev) => prev + 1);
+    };
 
-        const novosClientes = (data ?? []) as Cliente[];
+    const limparPesquisa = () => {
+      setPesquisa("");
+      setTipoPesquisa("NOME");
+      setHasMore(true);
+      setReloadClientes((prev) => prev + 1);
+    };
 
-        if (reset) {
-          setClientes(novosClientes);
-        } else {
-          setClientes((prev) => [...prev, ...novosClientes]);
-        }
-
-        if (novosClientes.length < PAGE_SIZE) {
-          setHasMore(false);
-        } else {
-          setHasMore(true);
-        }
-
-        if (novosClientes.length > 0) {
-          setLastId(
-            novosClientes[novosClientes.length - 1].id
-          );
-        } else if (reset) {
-          setLastId(null);
-        }
-      } finally {
-        setLoading(false);
+    const carregarMais = () => {
+      if (!loading && hasMore) {
+        loadClientes(false);
       }
-    },
-    [clientes, lastId, loading, pesquisa, tipoPesquisa]
-  );
-
-  useEffect(() => {
-    setLastId(null);
-    setHasMore(true);
-
-    const timer = setTimeout(() => {
-      loadClientes(true);
-    }, 300);
-
-    return () => clearTimeout(timer);
-  }, [pesquisa, tipoPesquisa, reloadClientes]);
-
-  const handlePesquisa = () => {
-    setLastId(null);
-    setHasMore(true);
-    setReloadClientes((prev) => prev + 1);
-  };
-
-  const limparPesquisa = () => {
-    setPesquisa("");
-    setTipoPesquisa("NOME");
-    setLastId(null);
-    setHasMore(true);
-    setReloadClientes((prev) => prev + 1);
-  };
-
-  const carregarMais = () => {
-    if (!loading && hasMore) {
-      loadClientes(false);
-    }
-  };
+    };
 
   const abrirDetalhes = (cliente: Cliente) => {
     setClienteSelecionado(cliente);
@@ -197,47 +198,13 @@ export default function Clients() {
     setEditarAberto(false);
     setClienteEditar(null);
 
-    setLastId(null);
     setHasMore(true);
     setReloadClientes((prev) => prev + 1);
   };
 
-  // const confirmarExclusao = (cliente: Cliente) => {
-  //   Alert.alert(
-  //     "Excluir cliente",
-  //     `Deseja realmente excluir o cliente "${cliente.nome}"?`,
-  //     [
-  //       {
-  //         text: "Cancelar",
-  //         style: "cancel",
-  //       },
-  //       {
-  //         text: "Excluir",
-  //         style: "destructive",
-  //         onPress: () => deleteCliente(cliente.id),
-  //       },
-  //     ]
-  //   );
-  // };
-
-  const deleteCliente = async (id: number) => {
-    const { error } = await supabase
-      .from("clientes")
-      .delete()
-      .eq("id", id);
-
-    if (error) {
-      console.error("Erro ao excluir cliente:", error);
-      return;
-    }
-
-    setClientes((prev) =>
-      prev.filter((cliente) => cliente.id !== id)
-    );
-
-    setLastId(null);
-    setHasMore(true);
-  };
+    const { requestDelete, deletionDialog } = useRecordDeletion("clientes", (id) => {
+        setClientes(prev => prev.filter(record => record.id !== id));
+    });
 
   return (
     <PagesLayout
@@ -248,7 +215,6 @@ export default function Clients() {
     >
       <View style={styles.container}>
         <View style={styles.header}>
-
           <ClientsFilters
             pesquisa={pesquisa}
             setPesquisa={setPesquisa}
@@ -261,6 +227,7 @@ export default function Clients() {
         </View>
 
         <ScrollView
+            showsVerticalScrollIndicator={false}
           horizontal
           showsHorizontalScrollIndicator={false}
           style={styles.tableScroll}
@@ -268,6 +235,7 @@ export default function Clients() {
         >
           <View style={styles.tableContainer}>
             <FlatList
+                showsHorizontalScrollIndicator={false}
               data={clientes}
               keyExtractor={(item) => item.id.toString()}
               ListHeaderComponent={<ClientTableHeader />}
@@ -278,7 +246,7 @@ export default function Clients() {
                   cliente={item}
                   iconDetails={() => abrirDetalhes(item)}
                   iconEdit={() => abrirEditar(item)}
-                  iconDelete={() => deleteCliente(item.id)}
+                  iconDelete={() => requestDelete(item.id, item.nome)}
                 />
               )}
               onEndReached={carregarMais}
@@ -299,7 +267,9 @@ export default function Clients() {
               ListEmptyComponent={
                 !loading ? (
                   <View style={styles.emptyContainer}>
-                    <Text style={styles.emptyText}>Nenhum cliente encontrado.</Text>
+                    <Text style={styles.emptyText}>
+                      Nenhum cliente encontrado.
+                    </Text>
                   </View>
                 ) : null
               }
@@ -308,99 +278,53 @@ export default function Clients() {
         </ScrollView>
       </View>
 
-      <Modal
+      <RecordModal
         visible={detalhesAberto}
-        transparent
-        animationType="fade"
-        onRequestClose={fecharDetalhes}
+        onClose={fecharDetalhes}
+        title="Detalhes"
       >
-        <View style={{
-          flex: 1,
-          justifyContent: "center",
-          alignItems: "center",
-          backgroundColor:
-            Colors.overlayBlack50,
-        }}>
-          <Pressable
-            onPress={fecharDetalhes}
-            style={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-            }}
+        {clienteSelecionado && (
+          <ClientDetailsCard
+            data={[
+              {
+                label: "ID do Cliente",
+                value: clienteSelecionado.id,
+              },
+              {
+                label: "Nome",
+                value: clienteSelecionado.nome,
+              },
+              {
+                label: "E-mail",
+                value: clienteSelecionado.email,
+              },
+              {
+                label: "Telefone",
+                value: clienteSelecionado.telefone,
+              },
+              {
+                label: "Endereço",
+                value: clienteSelecionado.endereco,
+                fullWidth: true,
+              },
+            ]}
           />
-          {clienteSelecionado && (
-            <View
-              style={{
-                width: "100%",
-                maxWidth: 900,
-                maxHeight: isMobile
-                  ? "90%"
-                  : "100%",
-              }}
-            >
-              <ClientDetailsCard
-                data={[
-                  {
-                    label: "ID do Cliente",
-                    value: clienteSelecionado.id,
-                  },
-                  {
-                    label: "Nome",
-                    value: clienteSelecionado.nome,
-                  },
-                  {
-                    label: "E-mail",
-                    value: clienteSelecionado.email,
-                  },
-                  {
-                    label: "Telefone",
-                    value: clienteSelecionado.telefone,
-                  },
-                  {
-                    label: "Endereço",
-                    value: clienteSelecionado.endereco,
-                    fullWidth: true,
-                  },
-                ]}
-              />
-            </View>
-          )}
-        </View>
-      </Modal>
+        )}
+      </RecordModal>
 
-      <Modal
+      <RecordModal
         visible={editarAberto}
-        transparent
-        animationType="fade"
-        onRequestClose={fecharEditar}
+        onClose={fecharEditar}
+        title="Editar registro"
       >
-        <View style={{
-          flex: 1,
-          justifyContent: "center",
-          alignItems: "center",
-          backgroundColor:
-            Colors.overlayBlack50,
-        }}>
-          <Pressable
-            onPress={fecharEditar}
-            style={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-            }}
+        {clienteEditar && (
+          <EditClientCard
+            idCliente={clienteEditar.id}
+            onSaveSuccess={fecharEditar}
           />
-          {clienteEditar && (
-            <EditClientCard
-              idCliente={clienteEditar.id}
-            />
-          )}
-        </View>
-      </Modal>
+        )}
+      </RecordModal>
+      {deletionDialog}
     </PagesLayout>
   );
 }
@@ -419,7 +343,7 @@ const styles = StyleSheet.create({
     minWidth: "100%",
     flex: 1,
     backgroundColor: Colors.white,
-    borderRadius: 14,
+    borderRadius: 8,
     borderWidth: 1,
     borderColor: Colors.hexDCE7EE,
     overflow: "hidden",

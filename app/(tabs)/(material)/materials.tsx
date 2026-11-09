@@ -1,9 +1,11 @@
+import { createPagination, mergeById } from "@/src/lib/pagination";
+import { RecordModal } from "@/src/components/RecordModal";
+import { useRecordDeletion } from "@/src/hooks/useRecordDeletion";
 import { Colors } from "@/src/theme/colors";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
     Alert,
     FlatList,
-    Modal,
     Pressable,
     ScrollView,
     StyleSheet,
@@ -43,7 +45,7 @@ export default function Materials() {
     const [tipoPesquisa, setTipoPesquisa] =
         useState<TipoPesquisaMaterial>("NOME");
 
-    const [lastId, setLastId] = useState<number | null>(null);
+    const pagination = useRef(createPagination()).current;
     const [hasMore, setHasMore] = useState(true);
     const [loading, setLoading] = useState(false);
 
@@ -58,12 +60,13 @@ export default function Materials() {
 
     const loadMateriais = useCallback(
         async (reset = false) => {
-            if (loading && !reset) return;
+            const request = pagination.begin(reset);
+            if (!request) return;
 
             setLoading(true);
 
             try {
-                const cursor = reset ? null : lastId;
+                const cursor = request.cursor;
 
                 const buildQuery = (colDesc: "descricao" | "descrição") => {
                     let q = supabase
@@ -98,7 +101,8 @@ export default function Materials() {
 
                 const initialQuery = buildQuery("descricao");
                 if (initialQuery === null) {
-                    setMateriais(reset ? [] : materiais);
+                    pagination.accept(request, [], PAGE_SIZE);
+                    setMateriais((prev) => (reset ? [] : prev));
                     setHasMore(false);
                     setLoading(false);
                     return;
@@ -116,11 +120,13 @@ export default function Materials() {
                     }
                 }
 
+                if (!pagination.isCurrent(request)) return;
+
                 if (error) {
                     console.error("Erro ao carregar materiais:", error);
                     Alert.alert(
                         "Erro",
-                        "Não foi possível carregar os materiais."
+                        "Não foi possível carregar os materiais.",
                     );
                     return;
                 }
@@ -128,9 +134,9 @@ export default function Materials() {
                 const novosMateriais = (data ?? []) as Material[];
 
                 if (reset) {
-                    setMateriais(novosMateriais);
+                    setMateriais(mergeById([], novosMateriais));
                 } else {
-                    setMateriais((prev) => [...prev, ...novosMateriais]);
+                    setMateriais((prev) => mergeById(prev, novosMateriais));
                 }
 
                 if (novosMateriais.length < PAGE_SIZE) {
@@ -139,33 +145,33 @@ export default function Materials() {
                     setHasMore(true);
                 }
 
-                if (novosMateriais.length > 0) {
-                    setLastId(
-                        novosMateriais[novosMateriais.length - 1].id
-                    );
-                } else if (reset) {
-                    setLastId(null);
-                }
+                pagination.accept(request, novosMateriais, PAGE_SIZE);
             } finally {
-                setLoading(false);
+                if (pagination.isCurrent(request)) {
+                    pagination.finish(request);
+                    setLoading(false);
+                }
             }
         },
-        [materiais, lastId, loading, pesquisa, tipoPesquisa]
+        [pagination, pesquisa, tipoPesquisa],
     );
 
     useEffect(() => {
-        setLastId(null);
+        pagination.invalidate();
+        setLoading(false);
         setHasMore(true);
 
         const timer = setTimeout(() => {
             loadMateriais(true);
         }, 300);
 
-        return () => clearTimeout(timer);
-    }, [pesquisa, tipoPesquisa, reloadMateriais]);
+        return () => {
+            clearTimeout(timer);
+            pagination.invalidate();
+        };
+    }, [loadMateriais, pagination, reloadMateriais]);
 
     const handlePesquisa = () => {
-        setLastId(null);
         setHasMore(true);
         setReloadMateriais((prev) => prev + 1);
     };
@@ -173,7 +179,6 @@ export default function Materials() {
     const limparPesquisa = () => {
         setPesquisa("");
         setTipoPesquisa("NOME");
-        setLastId(null);
         setHasMore(true);
         setReloadMateriais((prev) => prev + 1);
     };
@@ -203,243 +208,147 @@ export default function Materials() {
         setEditarAberto(false);
         setMaterialEditar(null);
 
-        setLastId(null);
         setHasMore(true);
         setReloadMateriais((prev) => prev + 1);
     };
 
-    const confirmarExclusao = (material: Material) => {
-        Alert.alert(
-            "Excluir material",
-            `Deseja realmente excluir o material "${material.nome}"?`,
-            [
-                {
-                    text: "Cancelar",
-                    style: "cancel",
-                },
-                {
-                    text: "Excluir",
-                    style: "destructive",
-                    onPress: () => deleteMaterial(material.id),
-                },
-            ]
-        );
-    };
+    const { requestDelete, deletionDialog } = useRecordDeletion("produtos", (id) => {
+        setMateriais(prev => prev.filter(record => record.id !== id));
+    });
 
-    const deleteMaterial = async (id: number) => {
-        const { error } = await supabase
-            .from("produtos")
-            .delete()
-            .eq("id", id);
+  return (
+      <PagesLayout
+          scroll={false}
+          noScrollContent={{
+              paddingVertical: 10,
+          }}
+      >
+          <View style={styles.container}>
+              <View style={styles.header}>
+                  <MaterialsFilters
+                      pesquisa={pesquisa}
+                      setPesquisa={setPesquisa}
+                      tipoPesquisa={tipoPesquisa}
+                      setTipoPesquisa={setTipoPesquisa}
+                      onSearch={handlePesquisa}
+                      onClear={limparPesquisa}
+                      isMobile={isMobile}
+                  />
+              </View>
 
-        if (error) {
-            console.error("Erro ao excluir material:", error);
-            Alert.alert(
-                "Erro",
-                "Não foi possível excluir o material. Verifique se ele não está vinculado a pedidos existentes."
-            );
-            return;
-        }
+              <ScrollView
+                  showsVerticalScrollIndicator={false}
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  style={styles.tableScroll}
+                  contentContainerStyle={styles.tableScrollContent}
+              >
+                  <View style={styles.tableContainer}>
+                      <FlatList
+                          showsHorizontalScrollIndicator={false}
+                          data={materiais}
+                          keyExtractor={(item) => item.id.toString()}
+                          ListHeaderComponent={<MaterialTableHeader />}
+                          showsVerticalScrollIndicator={false}
+                          renderItem={({ item, index }) => (
+                              <MaterialCard
+                                  index={index}
+                                  material={item}
+                                  iconDetails={() => abrirDetalhes(item)}
+                                  iconEdit={() => abrirEditar(item)}
+                                  iconDelete={() =>
+                                      requestDelete(item.id, item.nome)
+                                  }
+                              />
+                          )}
+                          onEndReached={carregarMais}
+                          onEndReachedThreshold={0.5}
+                          ListFooterComponent={
+                              loading ? (
+                                  <View style={styles.loadingContainer}>
+                                      <Text style={styles.loadingText}>
+                                          Carregando...
+                                      </Text>
+                                  </View>
+                              ) : hasMore && materiais.length > 0 ? (
+                                  <View style={styles.moreContainer}>
+                                      <Pressable
+                                          style={styles.moreButton}
+                                          onPress={carregarMais}
+                                      >
+                                          <Text style={styles.moreButtonText}>
+                                              Carregar mais
+                                          </Text>
+                                      </Pressable>
+                                  </View>
+                              ) : null
+                          }
+                          ListEmptyComponent={
+                              !loading ? (
+                                  <View style={styles.emptyContainer}>
+                                      <Text style={styles.emptyText}>
+                                          Nenhum material encontrado.
+                                      </Text>
+                                  </View>
+                              ) : null
+                          }
+                      />
+                  </View>
+              </ScrollView>
+          </View>
 
-        setMateriais((prev) =>
-            prev.filter((material) => material.id !== id)
-        );
+          {/* Modal de Detalhes */}
+          <RecordModal
+              visible={detalhesAberto}
+              onClose={fecharDetalhes}
+              title="Detalhes"
+          >
+              {materialSelecionado && (
+                  <MaterialDetailsCard
+                      data={[
+                          {
+                              label: "ID do Material",
+                              value: materialSelecionado.id,
+                          },
+                          {
+                              label: "Nome",
+                              value: materialSelecionado.nome,
+                          },
+                          {
+                              label: "Preço",
+                              value: formatMoney(
+                                  getMaterialPreco(materialSelecionado),
+                              ),
+                              fullWidth: true,
+                          },
+                          {
+                              label: "Descrição",
+                              value:
+                                  getMaterialDescricao(materialSelecionado) ||
+                                  "Sem descrição cadastrada.",
+                              fullWidth: true,
+                          },
+                      ]}
+                  />
+              )}
+          </RecordModal>
 
-        setLastId(null);
-        setHasMore(true);
-    };
-
-    return (
-        <PagesLayout
-            scroll={false}
-            noScrollContent={{
-                paddingVertical: 10,
-            }}
-        >
-            <View style={styles.container}>
-                <View style={styles.header}>
-                    <MaterialsFilters
-                        pesquisa={pesquisa}
-                        setPesquisa={setPesquisa}
-                        tipoPesquisa={tipoPesquisa}
-                        setTipoPesquisa={setTipoPesquisa}
-                        onSearch={handlePesquisa}
-                        onClear={limparPesquisa}
-                        isMobile={isMobile}
-                    />
-                </View>
-
-                <ScrollView
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    style={styles.tableScroll}
-                    contentContainerStyle={styles.tableScrollContent}
-                >
-                    <View style={styles.tableContainer}>
-                        <FlatList
-                            data={materiais}
-                            keyExtractor={(item) => item.id.toString()}
-                            ListHeaderComponent={<MaterialTableHeader />}
-                            showsVerticalScrollIndicator={false}
-                            renderItem={({ item, index }) => (
-                                <MaterialCard
-                                    index={index}
-                                    material={item}
-                                    iconDetails={() => abrirDetalhes(item)}
-                                    iconEdit={() => abrirEditar(item)}
-                                    iconDelete={() => confirmarExclusao(item)}
-                                />
-                            )}
-                            onEndReached={carregarMais}
-                            onEndReachedThreshold={0.5}
-                            ListFooterComponent={
-                                loading ? (
-                                    <View style={styles.loadingContainer}>
-                                        <Text style={styles.loadingText}>Carregando...</Text>
-                                    </View>
-                                ) : hasMore && materiais.length > 0 ? (
-                                    <View style={styles.moreContainer}>
-                                        <Pressable style={styles.moreButton} onPress={carregarMais}>
-                                            <Text style={styles.moreButtonText}>Carregar mais</Text>
-                                        </Pressable>
-                                    </View>
-                                ) : null
-                            }
-                            ListEmptyComponent={
-                                !loading ? (
-                                    <View style={styles.emptyContainer}>
-                                        <Text style={styles.emptyText}>Nenhum material encontrado.</Text>
-                                    </View>
-                                ) : null
-                            }
-                        />
-                    </View>
-                </ScrollView>
-            </View>
-
-            {/* Modal de Detalhes */}
-            <Modal
-                visible={detalhesAberto}
-                transparent
-                animationType="fade"
-                onRequestClose={fecharDetalhes}
-            >
-                <View
-                    style={{
-                        flex: 1,
-                        justifyContent: "center",
-                        alignItems: "center",
-                        backgroundColor: Colors.overlayBlack50,
-                        padding: isMobile ? 8 : 20,
-                    }}
-                >
-                    <Pressable
-                        onPress={fecharDetalhes}
-                        style={{
-                            position: "absolute",
-                            top: 0,
-                            left: 0,
-                            right: 0,
-                            bottom: 0,
-                        }}
-                    />
-                    {materialSelecionado && (
-                        <View
-                            style={{
-                                width: "100%",
-                                maxWidth: 900,
-                                maxHeight: isMobile ? "90%" : "100%",
-                            }}
-                        >
-                            <ScrollView
-                                showsVerticalScrollIndicator={false}
-                                contentContainerStyle={{ flexGrow: 1 }}
-                            >
-                                <MaterialDetailsCard
-                                    data={[
-                                        {
-                                            label: "ID do Material",
-                                            value: materialSelecionado.id,
-                                        },
-                                        {
-                                            label: "Nome",
-                                            value: materialSelecionado.nome,
-                                        },
-                                        {
-                                            label: "Preço",
-                                            value: formatMoney(
-                                                getMaterialPreco(
-                                                    materialSelecionado
-                                                )
-                                            ),
-                                            fullWidth: true,
-                                        },
-                                        {
-                                            label: "Descrição",
-                                            value:
-                                                getMaterialDescricao(
-                                                    materialSelecionado
-                                                ) ||
-                                                "Sem descrição cadastrada.",
-                                            fullWidth: true,
-                                        },
-                                    ]}
-                                />
-                            </ScrollView>
-                        </View>
-                    )}
-                </View>
-            </Modal>
-
-            {/* Modal de Edição */}
-            <Modal
-                visible={editarAberto}
-                transparent
-                animationType="fade"
-                onRequestClose={fecharEditar}
-            >
-                <View
-                    style={{
-                        flex: 1,
-                        justifyContent: "center",
-                        alignItems: "center",
-                        backgroundColor: Colors.overlayBlack50,
-                        padding: isMobile ? 8 : 20,
-                    }}
-                >
-                    <Pressable
-                        onPress={fecharEditar}
-                        style={{
-                            position: "absolute",
-                            top: 0,
-                            left: 0,
-                            right: 0,
-                            bottom: 0,
-                        }}
-                    />
-                    {materialEditar && (
-                        <View
-                            style={{
-                                width: "100%",
-                                maxWidth: 900,
-                                maxHeight: isMobile ? "90%" : "100%",
-                            }}
-                        >
-                            <ScrollView
-                                showsVerticalScrollIndicator={false}
-                                contentContainerStyle={{ flexGrow: 1 }}
-                            >
-                                <EditMaterialCard
-                                    idMaterial={materialEditar.id}
-                                    onSaveSuccess={fecharEditar}
-                                />
-                            </ScrollView>
-                        </View>
-                    )}
-                </View>
-            </Modal>
-        </PagesLayout>
-    );
+          {/* Modal de Edição */}
+          <RecordModal
+              visible={editarAberto}
+              onClose={fecharEditar}
+              title="Editar registro"
+          >
+              {materialEditar && (
+                  <EditMaterialCard
+                      idMaterial={materialEditar.id}
+                      onSaveSuccess={fecharEditar}
+                  />
+              )}
+          </RecordModal>
+          {deletionDialog}
+      </PagesLayout>
+  );
 }
 
 const styles = StyleSheet.create({
@@ -456,7 +365,7 @@ const styles = StyleSheet.create({
         minWidth: "100%",
         flex: 1,
         backgroundColor: Colors.white,
-        borderRadius: 14,
+        borderRadius: 8,
         borderWidth: 1,
         borderColor: Colors.hexDCE7EE,
         overflow: "hidden",

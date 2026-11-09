@@ -1,5 +1,5 @@
 import ConfirmationCard from "@/src/components/ConfirmationCard";
-import SpeedDial from "@/src/components/SpeedDialMenu";
+import { ErpShell } from "@/src/components/ErpShell";
 import { supabase } from "@/src/lib/supabase";
 import {
     FugazOne_400Regular
@@ -58,52 +58,14 @@ export default function clients() {
 
         <View style={styles.container}>
             {!confirmationCard ?
-                <View style={styles.container}>
+                <ErpShell onSignOut={() => setConfirmationCard(true)}>
                     <Stack
                         screenOptions={{
                             headerShown: false
                         }}
                     />
-                    <SpeedDial
-                        actions={[
-                            {
-                                icon: "home-outline",
-                                label: "Início",
-                                onPress: () => router.replace("/(tabs)/(home)/homeScreen"),
-                            },
-                            {
-                                icon: "settings-outline",
-                                label: "Configurações",
-                                onPress: () => router.replace("/(tabs)/(configs)/configurations"),
-                            },
-                            {
-                                icon: "cube-outline",
-                                label: "Pedidos",
-                                onPress: () => router.replace("/(tabs)/(order)/orders"),
-                            },
-                            {
-                                icon: "person-outline",
-                                label: "Clientes",
-                                onPress: () => router.replace("/(tabs)/(client)/clients"),
-                            },
-                            {
-                                icon: "business-outline",
-                                label: "Fornecedores",
-                                onPress: () => router.replace("/(tabs)/(supplier)/suppliers"),
-                            },
-                            {
-                                icon: "layers-outline",
-                                label: "Materiais",
-                                onPress: () => router.replace("/(tabs)/(material)/materials"),
-                            },
-                            {
-                                icon: "exit-outline",
-                                label: "Sair",
-                                onPress: () => setConfirmationCard(true),
-                            },
-                        ]}
-                    />
-                </View>
+
+                </ErpShell>
                 :
                 <ConfirmationCard
                     action={logOff}

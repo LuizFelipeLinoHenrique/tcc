@@ -342,7 +342,7 @@ const styles = StyleSheet.create({
     headerIcon: {
         width: 48,
         height: 48,
-        borderRadius: 12,
+        borderRadius: 8,
         backgroundColor: Colors.hexE8F1F5,
         alignItems: "center",
         justifyContent: "center",
@@ -369,7 +369,7 @@ const styles = StyleSheet.create({
         backgroundColor: Colors.hexF8FAFC,
         borderWidth: 1,
         borderColor: Colors.hexCFDDE6,
-        borderRadius: 12,
+        borderRadius: 8,
         paddingHorizontal: 12,
     },
     inputWrapperMultiline: {
@@ -418,7 +418,7 @@ const styles = StyleSheet.create({
         borderColor: Colors.hexBBF7D0,
         paddingHorizontal: 14,
         paddingVertical: 12,
-        borderRadius: 12,
+        borderRadius: 8,
     },
     successBoxText: {
         fontSize: 14,

@@ -358,8 +358,8 @@ export default function HomeScreen() {
         <PagesLayout scroll={true}>
             {/* Cabeçalho do Dashboard */}
             <View style={styles.dashboardHeader}>
-                <Text style={pagesStyles.brand}>PAINEL DE GESTÃO • TCC</Text>
-                <Text style={styles.dashboardTitle}>Dashboard de Pedidos & Operações</Text>
+                <Text style={pagesStyles.brand}>VISÃO GERAL</Text>
+                <Text style={styles.dashboardTitle}>Painel de operações</Text>
                 <Text style={styles.dashboardSubtitle}>
                     Métricas consolidadas de faturamento, fluxo de pedidos, materiais e parceiros
                 </Text>
@@ -664,7 +664,7 @@ const styles = StyleSheet.create({
         flex: 1,
         minWidth: 155,
         backgroundColor: Colors.white,
-        borderRadius: 16,
+        borderRadius: 8,
         padding: 16,
         borderWidth: 1,
         borderColor: Colors.hexDCE7EE,
@@ -687,7 +687,7 @@ const styles = StyleSheet.create({
     kpiIconWrapper: {
         width: 46,
         height: 46,
-        borderRadius: 12,
+        borderRadius: 8,
         alignItems: "center",
         justifyContent: "center",
     },
@@ -725,7 +725,7 @@ const styles = StyleSheet.create({
         flex: 1,
         minWidth: 110,
         padding: 12,
-        borderRadius: 14,
+        borderRadius: 8,
         borderWidth: 1,
     },
     statusCardPending: {
@@ -801,7 +801,7 @@ const styles = StyleSheet.create({
     buttonContainer: {
         flexDirection: "row",
         backgroundColor: Colors.hexD9E5EC,
-        borderRadius: 12,
+        borderRadius: 8,
         padding: 4,
         gap: 4,
         marginBottom: 12,
@@ -817,7 +817,7 @@ const styles = StyleSheet.create({
         backgroundColor: Colors.white,
         shadowColor: Colors.hex082F42,
         shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
+        shadowOpacity: 0.04,
         shadowRadius: 4,
         elevation: 2,
     },
@@ -902,7 +902,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "space-between",
         backgroundColor: Colors.hexF8FAFC,
-        borderRadius: 12,
+        borderRadius: 8,
         borderWidth: 1,
         borderColor: Colors.hexDDE8EF,
         paddingVertical: 14,

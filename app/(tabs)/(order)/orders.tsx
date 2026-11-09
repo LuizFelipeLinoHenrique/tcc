@@ -1,3 +1,7 @@
+import { createPagination, mergeById } from "@/src/lib/pagination";
+import { RecordModal } from "@/src/components/RecordModal";
+import { useRecordDeletion } from "@/src/hooks/useRecordDeletion";
+import { getOrderDetails, recordError } from "@/src/lib/tableActions";
 import { Colors } from "@/src/theme/colors";
 import { AnimatedButton } from "@/src/components/AnimatedButton";
 import { OrderCard, OrderTableHeader } from "@/src/components/OrdersCard";
@@ -14,12 +18,11 @@ import {
 import useResponsive from "@/src/hooks/useResponsive";
 import { supabase } from "@/src/lib/supabase";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import {
     ActivityIndicator,
     FlatList,
-    Modal,
     Pressable,
     ScrollView,
     StyleSheet,
@@ -67,199 +70,130 @@ export default function Orders() {
 
     const [pesquisa, setPesquisa] = useState<string>("");
 
-    const [tipoPesquisa, setTipoPesquisa] =
-        useState<TipoPesquisa>("PEDIDO");
+    const [tipoPesquisa, setTipoPesquisa] = useState<TipoPesquisa>("PEDIDO");
 
-    const [statusFiltro, setStatusFiltro] =
-        useState<StatusFiltro>("TODOS");
+    const [statusFiltro, setStatusFiltro] = useState<StatusFiltro>("TODOS");
 
-    const [periodoFiltro, setPeriodoFiltro] =
-        useState<PeriodoFiltro>("TODOS");
+    const [periodoFiltro, setPeriodoFiltro] = useState<PeriodoFiltro>("TODOS");
 
     const [pedidos, setPedidos] = useState<Pedido[]>([]);
 
     const [pedidoSelecionado, setPedidoSelecionado] =
         useState<PedidoDetalhes | null>(null);
 
-    const [pedidoEditar, setPedidoEditar] =
-        useState<number | null>(null);
+    const [pedidoEditar, setPedidoEditar] = useState<number | null>(null);
 
-    const [loadingDetalhes, setLoadingDetalhes] =
-        useState<boolean>(false);
+    const [loadingDetalhes, setLoadingDetalhes] = useState<boolean>(false);
 
-    const [detalhesAberto, setDetalhesAberto] =
-        useState<boolean>(false);
+    const [detalhesAberto, setDetalhesAberto] = useState<boolean>(false);
 
-    const [editarAberto, setEditarAberto] =
-        useState<boolean>(false);
+    const [editarAberto, setEditarAberto] = useState<boolean>(false);
 
-    const [loading, setLoading] =
-        useState<boolean>(false);
+    const [loading, setLoading] = useState<boolean>(false);
 
-    const [reloadPage, setReloadPage] =
-        useState<boolean>(false);
+    const [reloadOrders, setReloadOrders] = useState<number>(0);
 
-    const [reloadOrders, setReloadOrders] =
-        useState<number>(0);
+    const pagination = useRef(createPagination()).current;
 
-    const [deleting, setDeleting] =
-        useState<boolean>(false);
-
-    const [lastId, setLastId] =
-        useState<number | null>(null);
+    const detailsRequest = useRef(0);
+    const detailsOrderId = useRef<number | null>(null);
+    const [detailsError, setDetailsError] = useState("");
+    const { requestDelete, deletionDialog } = useRecordDeletion(
+        "pedidos",
+        (id) => {
+            setPedidos((prev) => prev.filter((record) => record.id !== id));
+        },
+    );
 
     const loadOrders = useCallback(
-
         async (reset = false) => {
-
-            if (loading) {
-                return;
-            };
-
-            if (!reset && !hasMore) {
-                return;
-            };
-
+            const request = pagination.begin(reset);
+            if (!request) return;
             setLoading(true);
+            try {
+                let query = supabase.from("pedidos").select("*");
 
-            let query = supabase
-                .from("pedidos")
-                .select("*");
+                const textoPesquisa = pesquisa.trim();
 
-            const textoPesquisa = pesquisa.trim();
+                if (textoPesquisa) {
+                    const numero = Number(textoPesquisa);
 
-            if (textoPesquisa) {
-                const numero = Number(textoPesquisa);
+                    if (!isNaN(numero)) {
+                        if (tipoPesquisa === "PEDIDO") {
+                            query = query.eq("id", numero);
+                        }
 
-                if (!isNaN(numero)) {
-                    if (tipoPesquisa === "PEDIDO") {
-                        query = query.eq("id", numero);
-                    };
+                        if (tipoPesquisa === "CLIENTE") {
+                            query = query.eq("id_cliente", numero);
+                        }
 
-                    if (tipoPesquisa === "CLIENTE") {
-                        query = query.eq(
-                            "id_cliente",
-                            numero
-                        );
-                    };
-
-                    if (tipoPesquisa === "MATERIAL") {
-                        query = query.eq(
-                            "id_produto",
-                            numero
-                        );
-                    };
-                };
-            };
-
-            if (statusFiltro !== "TODOS") {
-                query = query.eq(
-                    "status",
-                    statusFiltro
-                );
-            };
-
-            if (periodoFiltro !== "TODOS") {
-                const agora = new Date();
-                const inicio = new Date(agora);
-
-                if (periodoFiltro === "HOJE") {
-                    inicio.setHours(0, 0, 0, 0);
-                };
-
-                if (periodoFiltro === "7_DIAS") {
-                    inicio.setDate(
-                        inicio.getDate() - 7
-                    );
-                };
-
-                if (periodoFiltro === "30_DIAS") {
-                    inicio.setDate(
-                        inicio.getDate() - 30
-                    );
-                };
-
-                query = query.gte(
-                    "data_pedido",
-                    inicio.toISOString()
-                );
-            };
-
-            if (!reset && lastId !== null) {
-                query = query.gt("id", lastId);
-            };
-
-            query = query.order("id", {
-                ascending: true,
-            });
-
-            query = query.limit(PAGE_SIZE);
-
-            const { data, error } = await query;
-
-            if (error) {
-                console.error(
-                    "Erro ao carregar pedidos:",
-                    error
-                );
-
-                setLoading(false);
-                return;
-            };
-
-            if (!data || data.length === 0) {
-                if (reset) {
-                    setPedidos([]);
-                    setLastId(null);
+                        if (tipoPesquisa === "MATERIAL") {
+                            query = query.eq("id_produto", numero);
+                        }
+                    }
                 }
 
-                setHasMore(false);
-                setLoading(false);
+                if (statusFiltro !== "TODOS") {
+                    query = query.eq("status", statusFiltro);
+                }
 
-                return;
-            };
+                if (periodoFiltro !== "TODOS") {
+                    const agora = new Date();
+                    const inicio = new Date(agora);
 
-            if (reset) {
-                setPedidos(data);
+                    if (periodoFiltro === "HOJE") {
+                        inicio.setHours(0, 0, 0, 0);
+                    }
 
-                setLastId(
-                    data[data.length - 1].id
-                );
-            } else {
+                    if (periodoFiltro === "7_DIAS") {
+                        inicio.setDate(inicio.getDate() - 7);
+                    }
 
-                setPedidos((prev) => [
-                    ...prev,
-                    ...data,
-                ]);
+                    if (periodoFiltro === "30_DIAS") {
+                        inicio.setDate(inicio.getDate() - 30);
+                    }
 
-                setLastId(
-                    data[data.length - 1].id
-                );
-            };
+                    query = query.gte("data_pedido", inicio.toISOString());
+                }
 
-            if (data.length < PAGE_SIZE) {
-                setHasMore(false);
-            } else {
-                setHasMore(true);
-            };
+                if (request.cursor !== null) {
+                    query = query.gt("id", request.cursor);
+                }
 
-            setLoading(false);
+                query = query.order("id", {
+                    ascending: true,
+                });
+
+                query = query.limit(PAGE_SIZE);
+
+                const { data, error } = await query;
+                if (!pagination.isCurrent(request)) return;
+
+                if (error) {
+                    console.error("Erro ao carregar pedidos:", error);
+
+                    setLoading(false);
+                    return;
+                }
+
+                const rows = (data ?? []) as Pedido[];
+                pagination.accept(request, rows, PAGE_SIZE);
+                setPedidos((prev) => mergeById(reset ? [] : prev, rows));
+                setHasMore(rows.length === PAGE_SIZE);
+            } finally {
+                if (pagination.isCurrent(request)) {
+                    pagination.finish(request);
+                    setLoading(false);
+                }
+            }
         },
-        [
-            loading,
-            hasMore,
-            pesquisa,
-            tipoPesquisa,
-            statusFiltro,
-            periodoFiltro,
-            lastId,
-        ]
+        [pagination, pesquisa, tipoPesquisa, statusFiltro, periodoFiltro],
     );
 
     useEffect(() => {
+        pagination.invalidate();
+        setLoading(false);
         const timeout = setTimeout(() => {
-            setLastId(null);
-
             setHasMore(true);
 
             loadOrders(true);
@@ -267,6 +201,7 @@ export default function Orders() {
 
         return () => {
             clearTimeout(timeout);
+            pagination.invalidate();
         };
     }, [
         pesquisa,
@@ -274,14 +209,15 @@ export default function Orders() {
         statusFiltro,
         periodoFiltro,
         reloadOrders,
+        loadOrders,
+        pagination,
     ]);
 
     function handlePesquisa() {
-        setLastId(null);
         setHasMore(true);
 
         loadOrders(true);
-    };
+    }
 
     function limparFiltros() {
         setPesquisa("");
@@ -289,180 +225,99 @@ export default function Orders() {
         setStatusFiltro("TODOS");
         setPeriodoFiltro("TODOS");
 
-        setLastId(null);
         setHasMore(true);
-    };
+    }
 
-    async function abrirDetalhes(
-        idPedido: number
-    ) {
-        console.log(
-            "Abrindo detalhes do pedido:",
-            idPedido
-        );
-
+    async function abrirDetalhes(idPedido: number) {
+        detailsOrderId.current = idPedido;
+        const request = ++detailsRequest.current;
         setDetalhesAberto(true);
         setLoadingDetalhes(true);
+        setDetailsError("");
         setPedidoSelecionado(null);
-
-        const {
-            data,
-            error,
-        } = await supabase.rpc(
-            "get_orders_details",
-            {
-                id_order_detail: idPedido,
-            }
-        );
-
-        if (error) {
-            console.error(
-                "Erro ao buscar detalhes do pedido:",
-                error
-            );
-
-            setLoadingDetalhes(false);
-            return;
-        };
-
-        if (!data || data.length === 0) {
-            console.warn(
-                "A RPC não retornou nenhum pedido para o ID:",
-                idPedido
-            );
-
-            setLoadingDetalhes(false);
-            return;
-        };
-
-        setPedidoSelecionado(data[0]);
-        setLoadingDetalhes(false);
-    };
-
-    async function deleteOrder(
-        idDelete: number
-    ) {
-        setDeleting(true);
-
-        const {
-            error,
-        } = await supabase
-            .from("pedidos")
-            .delete()
-            .eq("id", idDelete);
-
-        if (error) {
-            console.error(
-                "Erro ao deletar pedido:",
-                error
-            );
-
-            setDeleting(false);
-            return;
-        };
-
-        setPedidos((prev) =>
-            prev.filter(
-                (pedido) =>
-                    pedido.id !== idDelete
-            )
-        );
-
-        setDeleting(false);
-    };
+        try {
+            const data = await getOrderDetails(idPedido);
+            if (request === detailsRequest.current) setPedidoSelecionado(data);
+        } catch (cause) {
+            if (request === detailsRequest.current)
+                setDetailsError(recordError(cause));
+        } finally {
+            if (request === detailsRequest.current) setLoadingDetalhes(false);
+        }
+    }
 
     function fecharDetalhes() {
+        detailsRequest.current += 1;
         setDetalhesAberto(false);
         setPedidoSelecionado(null);
-    };
+    }
 
     function abrirEditar(idPedido: number) {
         setPedidoEditar(null);
         setPedidoEditar(idPedido);
         setEditarAberto(true);
-    };
+    }
 
     function fecharEditar() {
-        setReloadPage(true);
-
-        setReloadOrders(
-            (prev) => prev + 1
-        );
-
         setEditarAberto(false);
         setPedidoEditar(null);
+        setReloadOrders((prev) => prev + 1);
+    }
 
-        setTimeout(() => {
-            setReloadPage(false);
-        }, 1000);
-    };
-
-    const detalhes: OrderDetail[] =
-        pedidoSelecionado
-            ? [
-                {
-                    label: "ID do Pedido",
-                    value:
-                        pedidoSelecionado.id_pedido,
-                },
-                {
-                    label: "Cliente",
-                    value:
-                        pedidoSelecionado.nome_cliente,
-                },
-                {
-                    label: "Telefone",
-                    value:
-                        pedidoSelecionado.telefone_cliente,
-                },
-                {
-                    label: "Endereço",
-                    value:
-                        pedidoSelecionado.endereco_cliente,
-                    fullWidth: true,
-                },
-                {
-                    label: "Material",
-                    value:
-                        pedidoSelecionado.nome_material,
-                },
-                {
-                    label:
-                        "Descrição do Material",
-                    value:
-                        pedidoSelecionado.descricao_material,
-                    fullWidth: true,
-                },
-                {
-                    label: "Preço Unitário",
-                    value: `R$ ${Number(
-                        pedidoSelecionado.preco_unit
-                    ).toFixed(2)}`,
-                },
-                {
-                    label: "Quantidade Pedida",
-                    value:
-                        pedidoSelecionado.qtde_pedido,
-                },
-                {
-                    label: "Preço Total",
-                    value: `R$ ${Number(
-                        pedidoSelecionado.preco_total
-                    ).toFixed(2)}`,
-                },
-                {
-                    label: "Data do Pedido",
-                    value:
-                        pedidoSelecionado.data_pedido,
-                },
-                {
-                    label: "Status",
-                    value:
-                        pedidoSelecionado.status,
-                },
-            ]
-            :
-            [];
+    const detalhes: OrderDetail[] = pedidoSelecionado
+        ? [
+              {
+                  label: "ID do Pedido",
+                  value: pedidoSelecionado.id_pedido,
+              },
+              {
+                  label: "Cliente",
+                  value: pedidoSelecionado.nome_cliente,
+              },
+              {
+                  label: "Telefone",
+                  value: pedidoSelecionado.telefone_cliente,
+              },
+              {
+                  label: "Endereço",
+                  value: pedidoSelecionado.endereco_cliente,
+                  fullWidth: true,
+              },
+              {
+                  label: "Material",
+                  value: pedidoSelecionado.nome_material,
+              },
+              {
+                  label: "Descrição do Material",
+                  value: pedidoSelecionado.descricao_material,
+                  fullWidth: true,
+              },
+              {
+                  label: "Preço Unitário",
+                  value: `R$ ${Number(pedidoSelecionado.preco_unit).toFixed(
+                      2,
+                  )}`,
+              },
+              {
+                  label: "Quantidade Pedida",
+                  value: pedidoSelecionado.qtde_pedido,
+              },
+              {
+                  label: "Preço Total",
+                  value: `R$ ${Number(pedidoSelecionado.preco_total).toFixed(
+                      2,
+                  )}`,
+              },
+              {
+                  label: "Data do Pedido",
+                  value: pedidoSelecionado.data_pedido,
+              },
+              {
+                  label: "Status",
+                  value: pedidoSelecionado.status,
+              },
+          ]
+        : [];
 
     return (
         <PagesLayout
@@ -471,11 +326,7 @@ export default function Orders() {
                 paddingVertical: 10,
             }}
         >
-            <View
-                style={styles.container}
-            >
-
-
+            <View style={styles.container}>
                 <OrdersFilters
                     pesquisa={pesquisa}
                     setPesquisa={setPesquisa}
@@ -491,6 +342,7 @@ export default function Orders() {
                 />
 
                 <ScrollView
+                    showsVerticalScrollIndicator={false}
                     horizontal
                     showsHorizontalScrollIndicator={false}
                     style={styles.tableScroll}
@@ -498,6 +350,7 @@ export default function Orders() {
                 >
                     <View style={styles.tableContainer}>
                         <FlatList
+                            showsHorizontalScrollIndicator={false}
                             data={pedidos}
                             ListHeaderComponent={<OrderTableHeader />}
                             keyExtractor={(item) => item.id.toString()}
@@ -507,7 +360,12 @@ export default function Orders() {
                                     pedido={item}
                                     iconDetails={() => abrirDetalhes(item.id)}
                                     iconEdit={() => abrirEditar(item.id)}
-                                    iconDelete={() => deleteOrder(item.id)}
+                                    iconDelete={() =>
+                                        requestDelete(
+                                            item.id,
+                                            `Pedido #${item.id}`,
+                                        )
+                                    }
                                 />
                             )}
                             showsVerticalScrollIndicator={false}
@@ -521,13 +379,28 @@ export default function Orders() {
                                 >
                                     {hasMore ? (
                                         <AnimatedButton
-                                            stylesPressable={[pagesStyles.primaryButton, { minWidth: !isMobile ? 200 : 100 }]}
-                                            stylesText={pagesStyles.primaryButtonText}
+                                            stylesPressable={[
+                                                pagesStyles.primaryButton,
+                                                {
+                                                    minWidth: !isMobile
+                                                        ? 200
+                                                        : 100,
+                                                },
+                                            ]}
+                                            stylesText={
+                                                pagesStyles.primaryButtonText
+                                            }
                                             title={
                                                 loading ? (
-                                                    <ActivityIndicator color={Colors.hexF7F4EE} />
+                                                    <ActivityIndicator
+                                                        color={Colors.hexF7F4EE}
+                                                    />
                                                 ) : (
-                                                    <Text style={pagesStyles.primaryButtonText}>
+                                                    <Text
+                                                        style={
+                                                            pagesStyles.primaryButtonText
+                                                        }
+                                                    >
                                                         Carregar mais
                                                     </Text>
                                                 )
@@ -541,202 +414,54 @@ export default function Orders() {
                     </View>
                 </ScrollView>
 
-                <Modal
-                    visible={reloadPage}
-                    transparent
-                    animationType="fade"
-                >
-                    <View
-                        style={{
-                            flex: 1,
-                            backgroundColor:
-                                Colors.overlayBlack50,
-                            justifyContent:
-                                "center",
-                            alignItems:
-                                "center",
-                            padding: isMobile ? 8 : 20,
-                        }}
-                    >
-                        <View
-                            style={{
-                                backgroundColor:
-                                    Colors.hexF7F4EE,
-                                borderRadius: 12,
-                                padding: 30,
-                            }}
-                        >
-                            <ActivityIndicator
-                                color={Colors.hex0B4F6C}
-                            />
-                        </View>
-                    </View>
-                </Modal>
-
-                <Modal
-                    visible={deleting}
-                    transparent
-                    animationType="fade"
-                >
-                    <View
-                        style={{
-                            flex: 1,
-                            backgroundColor:
-                                Colors.overlayBlack50,
-                            justifyContent:
-                                "center",
-                            alignItems:
-                                "center",
-                            padding: isMobile ? 8 : 20,
-                        }}
-                    >
-                        <View
-                            style={{
-                                backgroundColor:
-                                    Colors.hexF7F4EE,
-                                borderRadius: 12,
-                                padding: 30,
-                            }}
-                        >
-                            <ActivityIndicator
-                                size="large"
-                                color={Colors.hex0B4F6C}
-                            />
-                        </View>
-                    </View>
-                </Modal>
-
-                <Modal
+                <RecordModal
                     visible={detalhesAberto}
-                    transparent
-                    animationType="fade"
-                    onRequestClose={fecharDetalhes}
+                    onClose={fecharDetalhes}
+                    title="Detalhes do pedido"
                 >
-                    <View
-                        style={{
-                            flex: 1,
-                            backgroundColor:
-                                Colors.overlayBlack50,
-                            justifyContent: "center",
-                            alignItems: "center",
-                            padding: isMobile ? 8 : 20,
-                        }}
-                    >
-                        <Pressable
-                            onPress={fecharDetalhes}
-                            style={{
-                                position: "absolute",
-                                top: 0,
-                                left: 0,
-                                right: 0,
-                                bottom: 0,
-                            }}
+                    {loadingDetalhes ? (
+                        <ActivityIndicator
+                            size="large"
+                            color={Colors.hex0B4F6C}
                         />
-
-                        {loadingDetalhes ? (
-                            <View
-                                style={{
-                                    backgroundColor: Colors.hexF7F4EE,
-                                    borderRadius: 12,
-                                    padding: 30,
+                    ) : detailsError ? (
+                        <View style={{ padding: 20, gap: 16 }}>
+                            <Text accessibilityRole="alert">
+                                {detailsError}
+                            </Text>
+                            <AnimatedButton
+                                title="Tentar novamente"
+                                stylesPressable={pagesStyles.primaryButton}
+                                stylesText={pagesStyles.primaryButtonText}
+                                onPress={() => {
+                                    if (detailsOrderId.current !== null)
+                                        abrirDetalhes(detailsOrderId.current);
                                 }}
-                            >
-                                <ActivityIndicator
-                                    size="large"
-                                    color={Colors.hex0B4F6C}
-                                />
-                            </View>
-                        ) : pedidoSelecionado ? (
-                            <View
-                                style={{
-                                    width: "100%",
-                                    maxWidth: 900,
-                                    maxHeight: isMobile
-                                        ? "90%"
-                                        : "100%",
-                                }}
-                            >
-                                <ScrollView
-                                    style={{
-                                        width: "100%",
-                                    }}
-                                    contentContainerStyle={{
-                                        flexGrow: 1,
-                                    }}
-                                    showsVerticalScrollIndicator={
-                                        false
-                                    }
-                                    keyboardShouldPersistTaps="handled"
-                                >
-                                    <OrderDetailsCard
-                                        title={`Pedido #${pedidoSelecionado.id_pedido}`}
-                                        data={detalhes}
-                                    />
-                                </ScrollView>
-                            </View>
-                        ) : null}
-                    </View>
-                </Modal>
+                            />
+                        </View>
+                    ) : pedidoSelecionado ? (
+                        <OrderDetailsCard
+                            title={`Pedido #${pedidoSelecionado.id_pedido}`}
+                            data={detalhes}
+                        />
+                    ) : null}
+                </RecordModal>
 
-                <Modal
+                <RecordModal
                     visible={editarAberto}
-                    transparent
-                    animationType="fade"
-                    onRequestClose={fecharEditar}
+                    onClose={fecharEditar}
+                    title="Editar pedido"
                 >
-                    <View
-                        style={{
-                            flex: 1,
-                            backgroundColor:
-                                Colors.overlayBlack50,
-                            justifyContent: "center",
-                            alignItems: "center",
-                            padding: isMobile ? 8 : 20,
-                        }}
-                    >
-                        <Pressable
-                            onPress={fecharEditar}
-                            style={{
-                                position: "absolute",
-                                top: 0,
-                                left: 0,
-                                right: 0,
-                                bottom: 0,
-                            }}
+                    {pedidoEditar !== null && (
+                        <EditOrderCard
+                            idPedido={pedidoEditar}
+                            onSaveSuccess={fecharEditar}
                         />
-
-                        {pedidoEditar != null ? (
-                            <View
-                                style={{
-                                    width: "100%",
-                                    maxWidth: 900,
-                                    maxHeight: isMobile
-                                        ? "90%"
-                                        : "100%",
-                                }}
-                            >
-                                <ScrollView
-                                    style={{
-                                        width: "100%",
-                                    }}
-                                    contentContainerStyle={{
-                                        flexGrow: 1,
-                                    }}
-                                    showsVerticalScrollIndicator={
-                                        false
-                                    }
-                                    keyboardShouldPersistTaps="handled"
-                                >
-                                    <EditOrderCard
-                                        idPedido={pedidoEditar}
-                                    />
-                                </ScrollView>
-                            </View>
-                        ) : null}
-                    </View>
-                </Modal>
-            </View >
-        </PagesLayout >
+                    )}
+                </RecordModal>
+                {deletionDialog}
+            </View>
+        </PagesLayout>
     );
 }
 
@@ -758,7 +483,7 @@ const styles = StyleSheet.create({
         minWidth: "100%",
         flex: 1,
         backgroundColor: Colors.white,
-        borderRadius: 14,
+        borderRadius: 8,
         borderWidth: 1,
         borderColor: Colors.hexDCE7EE,
         overflow: "hidden",

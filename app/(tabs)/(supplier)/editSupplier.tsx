@@ -192,7 +192,7 @@ import { Colors } from "@/src/theme/colors";
 //     headerIcon: {
 //         width: 48,
 //         height: 48,
-//         borderRadius: 12,
+//         borderRadius: 8,
 //         backgroundColor: Colors.hexE8F1F5,
 //         alignItems: "center",
 //         justifyContent: "center",
@@ -219,7 +219,7 @@ import { Colors } from "@/src/theme/colors";
 //         backgroundColor: Colors.hexF8FAFC,
 //         borderWidth: 1,
 //         borderColor: Colors.hexCFDDE6,
-//         borderRadius: 12,
+//         borderRadius: 8,
 //         paddingHorizontal: 12,
 //     },
 //     inputIcon: {

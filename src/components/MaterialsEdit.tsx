@@ -1,4 +1,5 @@
 import { Colors } from "@/src/theme/colors";
+import { materialValues, recordError, updateRecord } from "@/src/lib/tableActions";
 import { supabase } from "@/src/lib/supabase";
 import { useEffect, useState } from "react";
 import {
@@ -66,7 +67,7 @@ export function EditMaterialCard({
     }
 
     async function salvar() {
-        if (!material) {
+        if (!material || saving) {
             return;
         }
 
@@ -76,7 +77,7 @@ export function EditMaterialCard({
         }
 
         const precoNumero = Number(preco.trim().replace(",", "."));
-        if (isNaN(precoNumero) || precoNumero < 0) {
+        if (!Number.isFinite(precoNumero) || precoNumero < 0) {
             setError("Informe um preço válido.");
             return;
         }
@@ -84,52 +85,18 @@ export function EditMaterialCard({
         setSaving(true);
         setError("");
 
-        // Tentar atualizar com "descrição" e "preco"
-        let updateResult = await supabase
-            .from("produtos")
-            .update({
-                nome: nome.trim(),
-                "descrição": descricao.trim(),
-                preco: precoNumero,
-            })
-            .eq("id", material.id);
-
-        if (updateResult.error) {
-            // Tentar com "descricao" sem acento
-            updateResult = await supabase
-                .from("produtos")
-                .update({
-                    nome: nome.trim(),
-                    descricao: descricao.trim(),
-                    preco: precoNumero,
-                })
-                .eq("id", material.id);
-        }
-
-        if (updateResult.error) {
-            // Tentar com "preço" com cedilha
-            updateResult = await supabase
-                .from("produtos")
-                .update({
-                    nome: nome.trim(),
-                    descricao: descricao.trim(),
-                    "preço": precoNumero,
-                })
-                .eq("id", material.id);
-        }
-
-        if (updateResult.error) {
-            console.error("Erro ao atualizar material:", updateResult.error);
-            setError("Não foi possível salvar as alterações.");
-            setSaving(false);
+        try {
+            await updateRecord("produtos", material.id, materialValues(material, nome.trim(), descricao.trim(), precoNumero));
+        } catch (cause) {
+            setError(recordError(cause));
             return;
+        } finally {
+            setSaving(false);
         }
 
         setMaterial({
             ...material,
-            nome: nome.trim(),
-            descricao: descricao.trim(),
-            preco: precoNumero,
+            ...materialValues(material, nome.trim(), descricao.trim(), precoNumero),
         });
 
         setSaving(false);

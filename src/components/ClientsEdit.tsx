@@ -1,5 +1,6 @@
 import { Colors } from "@/src/theme/colors";
 import { supabase } from "@/src/lib/supabase";
+import { recordError, updateRecord } from "@/src/lib/tableActions";
 
 import { useEffect, useState } from "react";
 
@@ -19,6 +20,7 @@ import { pagesStyles } from "./ScreensLayout";
 
 type ClientEditProps = {
     idCliente: number;
+    onSaveSuccess?: () => void;
 };
 
 type Cliente = {
@@ -31,6 +33,7 @@ type Cliente = {
 
 export function EditClientCard({
     idCliente,
+    onSaveSuccess,
 }: ClientEditProps) {
     const { isMobile, maxCardWidth } = useResponsive();
 
@@ -93,7 +96,7 @@ export function EditClientCard({
     }
 
     async function salvar() {
-        if (!cliente) {
+        if (!cliente || saving) {
             return;
         }
 
@@ -117,38 +120,25 @@ export function EditClientCard({
             telefone.replace(/\D/g, "")
         );
 
-        if (isNaN(telefoneNumero)) {
+        if (!telefone.replace(/\D/g, "") || !Number.isSafeInteger(telefoneNumero) || telefoneNumero <= 0) {
             setError("Telefone inválido.");
             setSaving(false);
 
             return;
         }
 
-        const {
-            error,
-        } = await supabase
-            .from("clientes")
-            .update({
+        try {
+            await updateRecord("clientes", cliente.id, {
                 nome: nome.trim(),
                 endereco: endereco.trim(),
                 email: email.trim(),
                 telefone: telefoneNumero,
-            })
-            .eq("id", cliente.id);
-
-        if (error) {
-            console.error(
-                "Erro ao atualizar cliente:",
-                error
-            );
-
-            setError(
-                "Não foi possível salvar as alterações."
-            );
-
-            setSaving(false);
-
+            });
+        } catch (cause) {
+            setError(recordError(cause));
             return;
+        } finally {
+            setSaving(false);
         }
 
         setCliente({
@@ -165,6 +155,7 @@ export function EditClientCard({
             "Sucesso",
             "Cliente atualizado com sucesso."
         );
+        onSaveSuccess?.();
     }
 
     if (loading) {

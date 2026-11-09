@@ -480,7 +480,7 @@ const styles = StyleSheet.create({
     headerIcon: {
         width: 48,
         height: 48,
-        borderRadius: 12,
+        borderRadius: 8,
         backgroundColor: Colors.hexE8F1F5,
         alignItems: "center",
         justifyContent: "center",
@@ -507,7 +507,7 @@ const styles = StyleSheet.create({
         backgroundColor: Colors.hexF8FAFC,
         borderWidth: 1,
         borderColor: Colors.hexCFDDE6,
-        borderRadius: 12,
+        borderRadius: 8,
         paddingHorizontal: 12,
     },
     inputWrapperError: {
@@ -570,7 +570,7 @@ const styles = StyleSheet.create({
         paddingVertical: 12,
         borderWidth: 1,
         borderColor: Colors.hexFDE68A,
-        borderRadius: 12,
+        borderRadius: 8,
         backgroundColor: Colors.hexFEF3C7,
     },
     statusIcon: {
@@ -613,7 +613,7 @@ const styles = StyleSheet.create({
         gap: 10,
         paddingHorizontal: 14,
         paddingVertical: 12,
-        borderRadius: 12,
+        borderRadius: 8,
         backgroundColor: Colors.hexF0FDF4,
         borderWidth: 1,
         borderColor: Colors.hexBBF7D0,

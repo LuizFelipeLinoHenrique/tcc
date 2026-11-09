@@ -116,8 +116,8 @@ const styles = StyleSheet.create({
     container: {
         flexDirection: "row",
         width: "100%",
-        backgroundColor: Colors.hexD9E5EC,
-        borderRadius: 14,
+        backgroundColor: Colors.white,
+        borderRadius: 8,
         padding: 4,
         gap: 4,
     },
@@ -131,10 +131,10 @@ const styles = StyleSheet.create({
         gap: 6,
     },
     activeTab: {
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.hexE0F2FE,
         shadowColor: Colors.hex082F42,
         shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.12,
+        shadowOpacity: 0.04,
         shadowRadius: 5,
         elevation: 2,
     },

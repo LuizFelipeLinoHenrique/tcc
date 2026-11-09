@@ -310,7 +310,7 @@ const styles = StyleSheet.create({
         backgroundColor: Colors.white,
         borderWidth: 1,
         borderColor: Colors.hexDCE7EE,
-        borderRadius: 18,
+        borderRadius: 8,
         shadowColor: Colors.hex082F42,
         shadowOffset: { width: 0, height: 3 },
         shadowOpacity: 0.05,
@@ -324,7 +324,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "space-between",
         paddingHorizontal: 16,
-        borderRadius: 12,
+        borderRadius: 8,
     },
 
     headerPressed: {
@@ -384,7 +384,7 @@ const styles = StyleSheet.create({
         borderColor: Colors.hex0B4F6C,
         shadowColor: Colors.hex0B4F6C,
         shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.15,
+        shadowOpacity: 0.04,
         shadowRadius: 4,
         elevation: 2,
     },
@@ -419,7 +419,7 @@ const styles = StyleSheet.create({
     botaoPesquisar: {
         minHeight: 44,
         paddingHorizontal: 16,
-        borderRadius: 12,
+        borderRadius: 8,
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "center",

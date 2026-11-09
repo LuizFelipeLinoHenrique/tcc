@@ -1,3 +1,17 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Hide web scrollbars while preserving scrolling by mouse, touch and keyboard. */
+@media screen {
+  * {
+    scrollbar-width: none !important;
+    -ms-overflow-style: none;
+  }
+
+  *::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+  }
+}

@@ -12,6 +12,11 @@ export type LineGraphProps = {
     maxValue: number;
     spacing: number;
     noOfSections: number;
+    yAxisLabelWidth?: number;
+    formatYLabel?: (label: string) => string;
+    /** Altura total do traçado, incluindo a região abaixo do saldo zero. */
+    plotHeight?: number;
+    showHeader?: boolean;
 };
 
 export function LineGraph({
@@ -22,16 +27,20 @@ export function LineGraph({
     maxValue,
     spacing,
     noOfSections,
+    yAxisLabelWidth = 24,
+    formatYLabel,
+    plotHeight,
+    showHeader = true,
 }: LineGraphProps) {
     if (!data || data.length === 0) {
         return (
             <View style={styles.container}>
-                <View style={styles.header}>
+                {showHeader && <View style={styles.header}>
                     <View style={styles.titleContainer}>
                         <Text style={styles.title}>{title}</Text>
                         {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
                     </View>
-                </View>
+                </View>}
                 <View style={styles.emptyContainer}>
                     <Ionicons name="analytics-outline" size={32} color={Colors.hex94A3B8} />
                     <Text style={styles.emptyText}>Nenhum pedido registrado no período selecionado</Text>
@@ -42,6 +51,12 @@ export function LineGraph({
 
     const safeSpacing = data.length > 1 ? Math.max(spacing, 20) : 50;
     const safeInitialSpacing = data.length === 1 ? Math.max((width - 60) / 2, 20) : 14;
+    const mostNegativeValue = Math.min(0, ...data.map(item => item.value ?? 0));
+    const negativeSections = Math.ceil(-mostNegativeValue / ((maxValue || 10) / noOfSections));
+    // Gifted Charts soma a altura negativa à prop height, que define só a região positiva.
+    const positiveHeight = plotHeight === undefined
+        ? undefined
+        : plotHeight * noOfSections / (noOfSections + negativeSections);
 
     // Custom data point para Web que evita passar 'onPressOut' para elementos SVG <circle> nativos do DOM
     const renderCustomPoint = () => (
@@ -50,7 +65,7 @@ export function LineGraph({
 
     return (
         <View style={styles.container}>
-            <View style={styles.header}>
+            {showHeader && <View style={styles.header}>
                 <View style={styles.titleContainer}>
                     <Text style={styles.title}>{title}</Text>
                     {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
@@ -59,17 +74,20 @@ export function LineGraph({
                     <Ionicons name="trending-up" size={14} color={Colors.hex0B4F6C} />
                     <Text style={styles.badgeText}>Métricas</Text>
                 </View>
-            </View>
+            </View>}
 
-            <View style={styles.chartWrapper}>
+            <View style={styles.chartWrapper} testID="line-graph-plot">
                 <LineChart
                     isAnimated
                     curved={data.length > 1}
                     areaChart
                     rotateLabel={false}
                     width={width}
+                    height={positiveHeight}
+                    noOfSectionsBelowXAxis={plotHeight === undefined ? undefined : negativeSections}
                     data={data}
                     maxValue={maxValue || 10}
+                    mostNegativeValue={mostNegativeValue}
                     color={Colors.hex0B4F6C}
                     thickness={3}
                     startFillColor={Colors.hex0B4F6C}
@@ -93,7 +111,8 @@ export function LineGraph({
                     rulesType="dashed"
                     initialSpacing={safeInitialSpacing}
                     yAxisThickness={0}
-                    yAxisLabelWidth={24}
+                    yAxisLabelWidth={yAxisLabelWidth}
+                    formatYLabel={formatYLabel}
                     xAxisThickness={1}
                     xAxisColor={Colors.hexCBD8E2}
                     xAxisLabelTextStyle={styles.axisText}
@@ -171,7 +190,7 @@ const styles = StyleSheet.create({
         borderColor: Colors.white,
         shadowColor: Colors.hex082F42,
         shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.15,
+        shadowOpacity: 0.04,
         shadowRadius: 2,
         elevation: 1,
     },

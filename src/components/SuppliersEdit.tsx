@@ -1,5 +1,6 @@
 import { Colors } from "@/src/theme/colors";
 import { supabase } from "@/src/lib/supabase";
+import { recordError, updateRecord } from "@/src/lib/tableActions";
 import { useEffect, useState } from "react";
 import {
     ActivityIndicator,
@@ -95,7 +96,7 @@ export function EditSupplierCard({
     }
 
     async function salvar() {
-        if (!fornecedor) return;
+        if (!fornecedor || saving) return;
 
         setError("");
         setMensagemSucesso(null);
@@ -115,24 +116,20 @@ export function EditSupplierCard({
 
         setSaving(true);
 
-        const { error: updateError } = await supabase
-            .from("fornecedores")
-            .update({
+        try {
+            await updateRecord("fornecedores", fornecedor.id, {
                 nome: nome.trim(),
                 cnpj: cnpj.trim() || null,
                 email: email.trim() ? email.trim().toLowerCase() : null,
                 telefone: telefone.trim() || null,
                 contato: contato.trim() || null,
                 endereco: endereco.trim() || null,
-            })
-            .eq("id", fornecedor.id);
-
-        setSaving(false);
-
-        if (updateError) {
-            console.error("Erro ao atualizar fornecedor:", updateError);
-            setError("Não foi possível salvar as alterações.");
+            });
+        } catch (cause) {
+            setError(recordError(cause));
             return;
+        } finally {
+            setSaving(false);
         }
 
         setMensagemSucesso("Fornecedor atualizado com sucesso!");

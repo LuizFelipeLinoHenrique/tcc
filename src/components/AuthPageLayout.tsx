@@ -12,6 +12,7 @@ export function AuthPageLayout({ children }: PropsWithChildren) {
         style={styles.flex}
       >
         <ScrollView
+            showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.scrollContent}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
@@ -23,14 +24,14 @@ export function AuthPageLayout({ children }: PropsWithChildren) {
             </View>
             <View style={styles.brandTextContainer}>
               <Text style={styles.brandAppTitle}>PALLETCORE</Text>
-              <Text style={styles.brandSubtitle}>SISTEMA INTEGRADO • TCC</Text>
+              <Text style={styles.brandSubtitle}>GESTÃO EMPRESARIAL</Text>
             </View>
           </View>
 
           <View style={styles.card}>{children}</View>
 
           <View style={styles.bottomWatermark}>
-            <Text style={styles.bottomWatermarkText}>Ambiente Seguro Supabase • v1.0</Text>
+            <Text style={styles.bottomWatermarkText}>PalletCore • Gestão integrada</Text>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -61,13 +62,13 @@ export const authStyles = StyleSheet.create({
   brandIconContainer: {
     width: 54,
     height: 54,
-    borderRadius: 16,
+    borderRadius: 8,
     backgroundColor: Colors.hex0B4F6C,
     alignItems: "center",
     justifyContent: "center",
     shadowColor: Colors.hex0B4F6C,
     shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.04,
     shadowRadius: 10,
     elevation: 4,
   },
@@ -93,12 +94,12 @@ export const authStyles = StyleSheet.create({
     backgroundColor: Colors.white,
     borderWidth: 1,
     borderColor: Colors.hexDCE7EE,
-    borderRadius: 24,
+    borderRadius: 8,
     paddingHorizontal: 28,
     paddingVertical: 32,
     shadowColor: Colors.hex0A3B52,
     shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.08,
+    shadowOpacity: 0.04,
     shadowRadius: 20,
     elevation: 4,
   },
@@ -139,7 +140,7 @@ export const authStyles = StyleSheet.create({
     minHeight: 50,
     borderWidth: 1,
     borderColor: Colors.hexCFDDE6,
-    borderRadius: 12,
+    borderRadius: 8,
     backgroundColor: Colors.hexF8FAFC,
     paddingHorizontal: 16,
     color: Colors.hex0F172A,
@@ -150,7 +151,7 @@ export const authStyles = StyleSheet.create({
     minHeight: 50,
     alignItems: "center",
     justifyContent: "center",
-    borderRadius: 12,
+    borderRadius: 8,
     backgroundColor: Colors.hex0B4F6C,
     marginTop: 6,
     shadowColor: Colors.hex0B4F6C,
@@ -193,7 +194,7 @@ export const authStyles = StyleSheet.create({
   error: {
     borderWidth: 1,
     borderColor: Colors.hexF0CBC2,
-    borderRadius: 12,
+    borderRadius: 8,
     backgroundColor: Colors.hexFDF2EF,
     paddingHorizontal: 14,
     paddingVertical: 12,
@@ -210,7 +211,7 @@ export const authStyles = StyleSheet.create({
   warning: {
     borderWidth: 1,
     borderColor: Colors.hexEADDC6,
-    borderRadius: 12,
+    borderRadius: 8,
     backgroundColor: Colors.hexFDF8F0,
     paddingHorizontal: 14,
     paddingVertical: 12,
@@ -228,7 +229,7 @@ export const authStyles = StyleSheet.create({
     minHeight: 46,
     alignItems: "center",
     justifyContent: "center",
-    borderRadius: 12,
+    borderRadius: 8,
     borderWidth: 1,
     borderColor: Colors.hexCBD8E2,
     backgroundColor: Colors.white,
