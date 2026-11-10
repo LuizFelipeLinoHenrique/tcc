@@ -9,6 +9,13 @@ export function recordError(error: unknown): string {
     if (code === "23505") return "Já existe um registro com esses dados.";
     if (code === "42501")
         return "Você não tem permissão para realizar esta ação.";
+    if (code === "PGRST301" || code === "PGRST302" || code === "PGRST303")
+        return "Sua sessão expirou. Entre novamente para continuar.";
+    if (code?.startsWith("22") || code === "23502" || code === "23514")
+        return "Os dados informados são inválidos. Revise os campos e tente novamente.";
+    const message = (error as { message?: string } | null)?.message ?? "";
+    if (/fetch|network|timeout|connection|conexão|rede/i.test(message))
+        return "Falha de conexão. Verifique sua internet e tente novamente.";
     if (error instanceof Error) return error.message;
     return "Não foi possível concluir a ação. Verifique sua conexão e tente novamente.";
 }

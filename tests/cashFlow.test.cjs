@@ -42,8 +42,9 @@ test("actual balances use settlement dates and never count pending or cancelled 
 test("projection includes overdue pending on first day, future entries on due dates, excludes cancellations", () => {
   const records = [entry({ status: "paid", paid_date: "2026-11-08", amount_cents: 10000 }), entry({ type: "expense", due_date: "2026-11-01", amount_cents: 2000 }), entry({ due_date: "2026-11-10", amount_cents: 5000 }), entry({ due_date: "2027-01-01", amount_cents: 99999 }), entry({ status: "cancelled", amount_cents: 99999 })];
   const points = projectCash(records, 2, "2026-11-09");
-  assert.equal(points[0].balance, 10000);
-  assert.equal(points[1].balance, 8000);
+  assert.equal(points.length, 3);
+  assert.equal(points[0].balance, 8000);
+  assert.equal(points[1].balance, 13000);
   assert.equal(points[2].balance, 13000);
   assert.equal(points.at(-1).date, "2026-11-11");
   assert.equal(points.at(-1).balance, 13000);
@@ -62,4 +63,21 @@ test("CSV quotes delimiters, escapes quotes, protects spreadsheet formulas, and 
   assert.ok(csv.includes('"100,00"'));
   assert.ok(csv.includes('"Uma ""nota""; teste"'));
   assert.ok(cashCsv([entry({ description: "  =1+2" })]).includes('"\'  =1+2"'));
+});
+
+ test("projection has one point per day and applies today and overdue entries once", () => {
+  const records = [
+    entry({ status: "paid", paid_date: "2026-11-09", amount_cents: 10000 }),
+    entry({ due_date: "2026-11-09", amount_cents: 3000 }),
+    entry({ due_date: "2026-11-08", type: "expense", amount_cents: 2000 }),
+    entry({ due_date: "2026-11-10", amount_cents: 5000 }),
+  ];
+  for (const days of [0, 1, 30, 60, 90]) {
+    const points = projectCash(records, days, "2026-11-09");
+    assert.equal(points.length, days + 1);
+    assert.equal(new Set(points.map(point => point.date)).size, days + 1);
+    assert.equal(points[0].balance, 11000);
+    assert.equal(points.at(-1).balance, days ? 16000 : 11000);
+  }
+  assert.equal(summarizeCash(records, "2026-11-09", "2026-11-09", "2026-11-09").current, 10000);
 });

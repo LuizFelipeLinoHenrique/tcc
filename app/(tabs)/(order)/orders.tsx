@@ -1,4 +1,5 @@
 import { createPagination, mergeById } from "@/src/lib/pagination";
+import { parsePositiveInteger } from "@/src/lib/orderValidation";
 import { RecordModal } from "@/src/components/RecordModal";
 import { useRecordDeletion } from "@/src/hooks/useRecordDeletion";
 import { getOrderDetails, recordError } from "@/src/lib/tableActions";
@@ -98,6 +99,8 @@ export default function Orders() {
     const detailsRequest = useRef(0);
     const detailsOrderId = useRef<number | null>(null);
     const [detailsError, setDetailsError] = useState("");
+    const [listError, setListError] = useState("");
+    const [invalidSearch, setInvalidSearch] = useState(false);
     const { requestDelete, deletionDialog } = useRecordDeletion(
         "pedidos",
         (id) => {
@@ -110,26 +113,32 @@ export default function Orders() {
             const request = pagination.begin(reset);
             if (!request) return;
             setLoading(true);
+            setListError("");
+            setInvalidSearch(false);
             try {
+                const textoPesquisa = pesquisa.trim();
+                const numero = parsePositiveInteger(textoPesquisa);
+                if (textoPesquisa && numero === null) {
+                    pagination.accept(request, [], PAGE_SIZE);
+                    setPedidos([]);
+                    setHasMore(false);
+                    setInvalidSearch(true);
+                    setListError("Informe um identificador válido: um número inteiro positivo.");
+                    return;
+                }
                 let query = supabase.from("pedidos").select("*");
 
-                const textoPesquisa = pesquisa.trim();
+                if (numero !== null) {
+                    if (tipoPesquisa === "PEDIDO") {
+                        query = query.eq("id", numero);
+                    }
 
-                if (textoPesquisa) {
-                    const numero = Number(textoPesquisa);
+                    if (tipoPesquisa === "CLIENTE") {
+                        query = query.eq("id_cliente", numero);
+                    }
 
-                    if (!isNaN(numero)) {
-                        if (tipoPesquisa === "PEDIDO") {
-                            query = query.eq("id", numero);
-                        }
-
-                        if (tipoPesquisa === "CLIENTE") {
-                            query = query.eq("id_cliente", numero);
-                        }
-
-                        if (tipoPesquisa === "MATERIAL") {
-                            query = query.eq("id_produto", numero);
-                        }
+                    if (tipoPesquisa === "MATERIAL") {
+                        query = query.eq("id_produto", numero);
                     }
                 }
 
@@ -169,17 +178,17 @@ export default function Orders() {
                 const { data, error } = await query;
                 if (!pagination.isCurrent(request)) return;
 
-                if (error) {
-                    console.error("Erro ao carregar pedidos:", error);
-
-                    setLoading(false);
-                    return;
-                }
+                if (error) throw error;
 
                 const rows = (data ?? []) as Pedido[];
                 pagination.accept(request, rows, PAGE_SIZE);
                 setPedidos((prev) => mergeById(reset ? [] : prev, rows));
                 setHasMore(rows.length === PAGE_SIZE);
+            } catch (cause) {
+                if (pagination.isCurrent(request)) {
+                    if (reset) setPedidos([]);
+                    setListError(recordError(cause));
+                }
             } finally {
                 if (pagination.isCurrent(request)) {
                     pagination.finish(request);
@@ -341,6 +350,20 @@ export default function Orders() {
                     isMobile={isMobile}
                 />
 
+                {!!listError && (
+                    <View style={{ padding: 16, gap: 12 }}>
+                        <Text accessibilityRole="alert">{listError}</Text>
+                        {!invalidSearch && (
+                            <AnimatedButton
+                                title="Tentar novamente"
+                                stylesPressable={pagesStyles.primaryButton}
+                                stylesText={pagesStyles.primaryButtonText}
+                                disabled={loading}
+                                onPress={() => loadOrders(true)}
+                            />
+                        )}
+                    </View>
+                )}
                 <ScrollView
                     showsVerticalScrollIndicator={false}
                     horizontal

@@ -1,5 +1,7 @@
 import { Colors } from "@/src/theme/colors";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { parsePositiveInteger } from "@/src/lib/orderValidation";
+import { recordError } from "@/src/lib/tableActions";
 import {
     ActivityIndicator,
     StyleSheet,
@@ -16,7 +18,7 @@ import { supabase } from "@/src/lib/supabase";
 
 type ValidationState = "idle" | "loading" | "success" | "error";
 
-export default function ordersManager() {
+export default function OrdersManager() {
     const { maxCardWidth } = useResponsive();
 
     const [idCliente, setIdCliente] = useState("");
@@ -35,14 +37,15 @@ export default function ordersManager() {
 
     const [loading, setLoading] = useState(false);
     const [mensagemSucesso, setMensagemSucesso] = useState<string | null>(null);
+    const [submitError, setSubmitError] = useState<string | null>(null);
+    const clienteRequest = useRef(0);
+    const produtoRequest = useRef(0);
+    const submitting = useRef(false);
 
-    function obterDataAtual() {
-        const hoje = new Date();
-        const ano = hoje.getFullYear();
-        const mes = String(hoje.getMonth() + 1).padStart(2, "0");
-        const dia = String(hoje.getDate()).padStart(2, "0");
-        return `${ano}-${mes}-${dia}`;
-    }
+    useEffect(() => () => {
+        clienteRequest.current += 1;
+        produtoRequest.current += 1;
+    }, []);
 
     function limparMensagemSucesso() {
         if (mensagemSucesso) {
@@ -51,6 +54,7 @@ export default function ordersManager() {
     }
 
     async function verificarCliente(valor?: string) {
+        const request = ++clienteRequest.current;
         const id = (valor ?? idCliente).trim();
 
         setNomeCliente(null);
@@ -62,9 +66,9 @@ export default function ordersManager() {
             return false;
         }
 
-        const idNumerico = Number(id);
+        const idNumerico = parsePositiveInteger(id);
 
-        if (!Number.isInteger(idNumerico) || idNumerico <= 0) {
+        if (idNumerico === null) {
             setClienteStatus("error");
             setClienteErro("Informe um ID de cliente válido.");
             return false;
@@ -72,31 +76,36 @@ export default function ordersManager() {
 
         setClienteStatus("loading");
 
-        const { data, error } = await supabase
-            .from("clientes")
-            .select("id, nome")
-            .eq("id", idNumerico)
-            .maybeSingle();
+        try {
+            const { data, error } = await supabase
+                .from("clientes")
+                .select("id, nome")
+                .eq("id", idNumerico)
+                .maybeSingle();
+            if (request !== clienteRequest.current) return false;
 
-        if (error) {
-            console.log("Erro ao consultar cliente:", error);
-            setClienteStatus("error");
-            setClienteErro("Não foi possível consultar o cliente.");
+            if (error) throw error;
+
+            if (!data) {
+                setClienteStatus("error");
+                setClienteErro("Nenhum cliente encontrado com esse ID.");
+                return false;
+            }
+
+            setNomeCliente(data.nome);
+            setClienteStatus("success");
+            return true;
+        } catch (cause) {
+            if (request === clienteRequest.current) {
+                setClienteStatus("error");
+                setClienteErro(recordError(cause));
+            }
             return false;
         }
-
-        if (!data) {
-            setClienteStatus("error");
-            setClienteErro("Nenhum cliente encontrado com esse ID.");
-            return false;
-        }
-
-        setNomeCliente(data.nome);
-        setClienteStatus("success");
-        return true;
     }
 
     async function verificarProduto(valor?: string) {
+        const request = ++produtoRequest.current;
         const id = (valor ?? idProduto).trim();
 
         setNomeProduto(null);
@@ -108,9 +117,9 @@ export default function ordersManager() {
             return false;
         }
 
-        const idNumerico = Number(id);
+        const idNumerico = parsePositiveInteger(id);
 
-        if (!Number.isInteger(idNumerico) || idNumerico <= 0) {
+        if (idNumerico === null) {
             setProdutoStatus("error");
             setProdutoErro("Informe um ID de material válido.");
             return false;
@@ -118,28 +127,32 @@ export default function ordersManager() {
 
         setProdutoStatus("loading");
 
-        const { data, error } = await supabase
-            .from("produtos")
-            .select("id, nome")
-            .eq("id", idNumerico)
-            .maybeSingle();
+        try {
+            const { data, error } = await supabase
+                .from("produtos")
+                .select("id, nome")
+                .eq("id", idNumerico)
+                .maybeSingle();
+            if (request !== produtoRequest.current) return false;
 
-        if (error) {
-            console.log("Erro ao consultar material:", error);
-            setProdutoStatus("error");
-            setProdutoErro("Não foi possível consultar o material.");
+            if (error) throw error;
+
+            if (!data) {
+                setProdutoStatus("error");
+                setProdutoErro("Nenhum material encontrado com esse ID.");
+                return false;
+            }
+
+            setNomeProduto(data.nome);
+            setProdutoStatus("success");
+            return true;
+        } catch (cause) {
+            if (request === produtoRequest.current) {
+                setProdutoStatus("error");
+                setProdutoErro(recordError(cause));
+            }
             return false;
         }
-
-        if (!data) {
-            setProdutoStatus("error");
-            setProdutoErro("Nenhum material encontrado com esse ID.");
-            return false;
-        }
-
-        setNomeProduto(data.nome);
-        setProdutoStatus("success");
-        return true;
     }
 
     function validarQuantidade() {
@@ -152,8 +165,8 @@ export default function ordersManager() {
 
         const quantidadeNumerica = Number(valor);
 
-        if (!Number.isFinite(quantidadeNumerica)) {
-            setQuantidadeErro("Informe uma quantidade válida.");
+        if (!Number.isSafeInteger(quantidadeNumerica)) {
+            setQuantidadeErro("Informe uma quantidade inteira válida.");
             return false;
         }
 
@@ -167,57 +180,64 @@ export default function ordersManager() {
     }
 
     async function addOrders() {
-        setMensagemSucesso(null);
-
-        const clienteValido = await verificarCliente();
-        const produtoValido = await verificarProduto();
-        const quantidadeValida = validarQuantidade();
-
-        if (!clienteValido || !produtoValido || !quantidadeValida) {
-            return;
-        }
-
-        const idClienteNumerico = Number(idCliente);
-        const idProdutoNumerico = Number(idProduto);
-        const quantidadeNumerica = Number(qtde.trim().replace(",", "."));
-
+        if (submitting.current) return;
+        submitting.current = true;
         setLoading(true);
+        setSubmitError(null);
+        setMensagemSucesso(null);
+        try {
+            const [clienteValido, produtoValido] = await Promise.all([
+                verificarCliente(), verificarProduto(),
+            ]);
+            const quantidadeValida = validarQuantidade();
 
-        const { data, error } = await supabase
-            .from("pedidos")
-            .insert({
-                id_cliente: idClienteNumerico,
-                qtde: quantidadeNumerica,
-                id_produto: idProdutoNumerico,
-                status: "P",
-            })
-            .select()
-            .single();
+            if (!clienteValido || !produtoValido || !quantidadeValida) {
+                return;
+            }
 
-        setLoading(false);
+            const idClienteNumerico = Number(idCliente);
+            const idProdutoNumerico = Number(idProduto);
+            const quantidadeNumerica = Number(qtde.trim().replace(",", "."));
 
-        if (error) {
-            console.log("Erro ao adicionar pedido:", error);
-            setMensagemSucesso(null);
-            return;
-        }
+            const { data, error } = await supabase
+                .from("pedidos")
+                .insert({
+                    id_cliente: idClienteNumerico,
+                    qtde: quantidadeNumerica,
+                    id_produto: idProdutoNumerico,
+                    status: "P",
+                })
+                .select()
+                .single();
 
-        if (data) {
-            setMensagemSucesso(`Pedido #${data.id} cadastrado com sucesso!`);
-            setIdCliente("");
-            setIdProduto("");
-            setQtde("");
-            setNomeCliente("");
-            setNomeProduto("");
-            setClienteStatus("idle");
-            setProdutoStatus("idle");
-            setClienteErro(null);
-            setProdutoErro(null);
-            setQuantidadeErro(null);
+            if (error) throw error;
+            if (!data) throw new Error("O pedido não foi confirmado. Consulte a lista antes de tentar novamente.");
+
+            if (data) {
+                clienteRequest.current += 1;
+                produtoRequest.current += 1;
+                setMensagemSucesso(`Pedido #${data.id} cadastrado com sucesso!`);
+                setIdCliente("");
+                setIdProduto("");
+                setQtde("");
+                setNomeCliente("");
+                setNomeProduto("");
+                setClienteStatus("idle");
+                setProdutoStatus("idle");
+                setClienteErro(null);
+                setProdutoErro(null);
+                setQuantidadeErro(null);
+            }
+        } catch (cause) {
+            setSubmitError(recordError(cause));
+        } finally {
+            submitting.current = false;
+            setLoading(false);
         }
     }
 
     function alterarCliente(valor: string) {
+        clienteRequest.current += 1;
         const somenteNumeros = valor.replace(/\D/g, "");
         setIdCliente(somenteNumeros);
         setNomeCliente("");
@@ -227,6 +247,7 @@ export default function ordersManager() {
     }
 
     function alterarProduto(valor: string) {
+        produtoRequest.current += 1;
         const somenteNumeros = valor.replace(/\D/g, "");
         setIdProduto(somenteNumeros);
         setNomeProduto("");
@@ -401,7 +422,7 @@ export default function ordersManager() {
                                     onBlur={validarQuantidade}
                                     placeholder="Ex: 10"
                                     placeholderTextColor={Colors.hex94A3B8}
-                                    keyboardType="decimal-pad"
+                                    keyboardType="number-pad"
                                     returnKeyType="done"
                                     editable={!loading}
                                     style={styles.input}
@@ -434,6 +455,13 @@ export default function ordersManager() {
                             </View>
                         </View>
 
+                        {!!submitError && (
+                            <View style={styles.errorBox}>
+                                <Text accessibilityRole="alert" style={styles.errorBoxText}>
+                                    {submitError} Você pode tentar novamente pelo botão abaixo.
+                                </Text>
+                            </View>
+                        )}
                         {/* MENSAGEM DE SUCESSO */}
                         {mensagemSucesso !== null && (
                             <View style={styles.successMessage}>

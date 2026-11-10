@@ -75,8 +75,11 @@ export function projectCash(entries: CashEntry[], days: number, today = isoDate(
     const date = entry.due_date < today ? today : entry.due_date;
     changes.set(date, (changes.get(date) ?? 0) + signedAmount(entry));
   }
+  // A base continua sendo o saldo realizado; o ponto de hoje inclui os pendentes
+  // de hoje e os vencidos uma única vez, como saldo projetado ao fim do dia.
+  balance += changes.get(today) ?? 0;
   const points: { date: string; balance: number }[] = [{ date: today, balance }];
-  for (let offset = 0; offset <= days; offset++) {
+  for (let offset = 1; offset <= days; offset++) {
     const date = new Date(`${today}T12:00:00`);
     date.setDate(date.getDate() + offset);
     const key = isoDate(date);

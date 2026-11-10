@@ -4,6 +4,14 @@ const fs = require("node:fs");
 const path = require("node:path");
 const ts = require("typescript");
 
+test("user errors distinguish connection, validation and permission failures", () => {
+  const { recordError } = loadActions([]);
+  assert.match(recordError(new TypeError("Failed to fetch")), /conexão/);
+  assert.match(recordError({ code: "23514" }), /inválidos/);
+  assert.match(recordError({ code: "42501" }), /permissão/);
+  assert.match(recordError({ code: "PGRST301" }), /sessão expirou/);
+});
+
 // Exercise the actual data operations without touching production records.
 function loadActions(responses = []) {
   const queries = [];
