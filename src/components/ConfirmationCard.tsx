@@ -8,9 +8,11 @@ import { PagesLayout, pagesStyles } from "./ScreensLayout";
 type ConfirmationCardProps = {
     setCardConfirmation: React.Dispatch<React.SetStateAction<boolean>>;
     action: () => void;
+    busy?: boolean;
+    error?: string | null;
 }
 
-export default function ConfirmationCard({ action, setCardConfirmation }: ConfirmationCardProps) {
+export default function ConfirmationCard({ action, setCardConfirmation, busy = false, error }: ConfirmationCardProps) {
     return (
         <PagesLayout scroll={false}>
             <View style={styles.overlay}>
@@ -28,8 +30,10 @@ export default function ConfirmationCard({ action, setCardConfirmation }: Confir
                     </Text>
 
                     <View style={styles.containerButtons}>
+                        {error ? <Text accessibilityRole="alert" style={styles.description}>{error}</Text> : null}
                         <AnimatedButton
-                            title="Sim, sair do sistema"
+                            title={busy ? "Encerrando..." : "Sim, sair do sistema"}
+                            disabled={busy}
                             stylesPressable={[styles.confirmButton]}
                             stylesPressablePressed={styles.confirmButtonPressed}
                             stylesText={styles.confirmButtonText}
@@ -37,6 +41,7 @@ export default function ConfirmationCard({ action, setCardConfirmation }: Confir
                         />
                         <AnimatedButton
                             title="Continuar conectado"
+                            disabled={busy}
                             stylesPressable={[pagesStyles.secondaryButton, styles.cancelButton]}
                             stylesText={pagesStyles.secondaryButtonText}
                             onPress={() => setCardConfirmation(false)}

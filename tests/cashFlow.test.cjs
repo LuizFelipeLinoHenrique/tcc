@@ -7,8 +7,46 @@ const source = fs.readFileSync(path.join(__dirname, "../src/lib/cashFlow.ts"), "
 const { outputText } = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } });
 const mod = { exports: {} };
 new Function("module", "exports", outputText)(mod, mod.exports);
-const { parseMoney, parseDate, addMonths, summarizeCash, projectCash, cashCsv, effectiveDate } = mod.exports;
+const { parseMoney, parseDate, addMonths, summarizeCash, projectCash, cashMonthData, cashCsv, effectiveDate } = mod.exports;
 const entry = (overrides = {}) => ({ id: "1", user_id: "user", description: "Venda", amount_cents: 10000, type: "income", category: "Vendas", account: "Caixa", due_date: "2026-11-10", paid_date: null, status: "pending", notes: "", created_at: "", ...overrides });
+
+test("monthly cards and chart exclude other months and use settlement dates for paid entries", () => {
+  const records = [
+    entry({ status: "paid", paid_date: "2026-10-31", amount_cents: 90000 }),
+    entry({ status: "paid", due_date: "2026-10-20", paid_date: "2026-11-02", amount_cents: 20000 }),
+    entry({ status: "paid", type: "expense", paid_date: "2026-11-03", amount_cents: 3000 }),
+    entry({ due_date: "2026-11-05", amount_cents: 5000 }),
+    entry({ type: "expense", due_date: "2026-11-30", amount_cents: 2000 }),
+    entry({ due_date: "2026-10-01", amount_cents: 80000 }),
+    entry({ due_date: "2026-12-01", amount_cents: 70000 }),
+    entry({ status: "cancelled", due_date: "2026-11-10", amount_cents: 999999 }),
+  ];
+  const november = cashMonthData(records, "2026-11-01", "2026-11-30", "2026-12-09");
+  assert.equal(november.income, 20000);
+  assert.equal(november.expense, 3000);
+  assert.equal(november.balance, 17000);
+  assert.equal(november.receivable, 5000);
+  assert.equal(november.payable, 2000);
+  assert.equal(november.expected, 20000);
+  assert.equal(november.overdue, 2);
+  assert.equal(november.projection.length, 30);
+  assert.deepEqual(november.projection[0], { date: "2026-11-01", balance: 0 });
+  assert.deepEqual(november.projection[2], { date: "2026-11-03", balance: 17000 });
+  assert.deepEqual(november.projection.at(-1), { date: "2026-11-30", balance: november.expected });
+  const december = cashMonthData(records, "2026-12-01", "2026-12-31", "2026-12-09");
+  assert.equal(december.balance, 0);
+  assert.equal(december.receivable, 70000);
+  assert.equal(december.expected, 70000);
+  assert.equal(december.overdue, 1);
+  assert.equal(december.projection.length, 31);
+});
+
+test("a month without entries has zero cards and a zero daily chart, including leap February", () => {
+  const month = cashMonthData([entry()], "2024-02-01", "2024-02-29", "2026-11-09");
+  for (const key of ["income", "expense", "balance", "expected", "receivable", "payable", "overdue"]) assert.equal(month[key], 0, key);
+  assert.equal(month.projection.length, 29);
+  assert.ok(month.projection.every(point => point.balance === 0));
+});
 
 test("monetary input keeps cents exact and rejects invalid or ambiguous input", () => {
   assert.equal(parseMoney("R$ 1.234,56"), 123456);

@@ -13,7 +13,6 @@ export function CashEntryForm({ entry, initialType, onSaved, onBusy }: { entry?:
   const [type, setType] = useState(entry?.type ?? initialType);
   const [amount, setAmount] = useState(entry ? (entry.amount_cents / 100).toFixed(2).replace(".", ",") : "");
   const [category, setCategory] = useState(entry?.category ?? "Outros");
-  const [account, setAccount] = useState(entry?.account ?? "Caixa principal");
   const [dueDate, setDueDate] = useState(displayDate(entry?.due_date ?? isoDate()));
   const [status, setStatus] = useState(entry?.status ?? "pending");
   const [paidDate, setPaidDate] = useState(displayDate(entry?.paid_date ?? isoDate()));
@@ -29,14 +28,14 @@ export function CashEntryForm({ entry, initialType, onSaved, onBusy }: { entry?:
     if (saving.current) return;
     setError("");
     const cents = parseMoney(amount), due = parseDate(dueDate), paid = parseDate(paidDate), count = Number(repetitions);
-    if (!description.trim() || !category.trim() || !account.trim()) return setError("Preencha a descrição, a categoria e a conta.");
+    if (!description.trim() || !category.trim()) return setError("Preencha a descrição e a categoria.");
     if (!cents) return setError("Informe um valor positivo em reais, como 1.250,50 (até R$ 9.999.999.999,99).");
     if (!due) return setError("Informe um vencimento válido no formato DD/MM/AAAA.");
     if (status === "paid" && (!paid || paid > isoDate())) return setError("A data de pagamento deve ser válida e não pode estar no futuro.");
     if (!entry && (!/^\d+$/.test(repetitions) || !Number.isInteger(count) || count < 1 || count > 24)) return setError("Informe de 1 a 24 lançamentos mensais.");
     if (!entry && count > 1 && status !== "pending") return setError("Para repetir mensalmente, use o status Pendente. Registre cada pagamento quando acontecer.");
     if (!entry && Number(addMonths(due, count - 1).split("-")[0]) > 9999) return setError("Os vencimentos devem estar entre os anos 1900 e 9999.");
-    const drafts: CashDraft[] = Array.from({ length: entry ? 1 : count }, (_, index) => ({ description: description.trim(), type, amount_cents: cents, category: category.trim(), account: account.trim(), due_date: addMonths(due, index), status, paid_date: status === "paid" ? paid : null, notes: notes.trim() }));
+    const drafts: CashDraft[] = Array.from({ length: entry ? 1 : count }, (_, index) => ({ description: description.trim(), type, amount_cents: cents, category: category.trim(), account: entry?.account ?? "Caixa principal", due_date: addMonths(due, index), status, paid_date: status === "paid" ? paid : null, notes: notes.trim() }));
     saving.current = true; setBusy(true); onBusy(true);
     try { onSaved(await saveCashEntries(drafts, entry?.id)); }
     catch (cause) { setError(cashError(cause)); }
@@ -51,7 +50,6 @@ export function CashEntryForm({ entry, initialType, onSaved, onBusy }: { entry?:
     <Text style={styles.label}>Categoria *</Text>
     <CashChoices values={cashCategories.map(value => ({ value, label: value }))} value={category} onChange={setCategory} disabled={busy} />
     {field("Categoria personalizada", category, setCategory, "Categoria", 80)}
-    {field("Conta *", account, setAccount, "Ex.: Caixa principal ou Banco", 80)}
     {field("Vencimento *", dueDate, setDueDate, "DD/MM/AAAA", 10)}
     <Text style={styles.label}>Situação</Text>
     <CashChoices values={[{ value: "pending", label: "Pendente" }, { value: "paid", label: "Realizado" }, { value: "cancelled", label: "Cancelado" }]} value={status} onChange={setStatus} disabled={busy} />

@@ -1,6 +1,5 @@
-import ConfirmationCard from "@/src/components/ConfirmationCard";
+import SignOutConfirmation from "@/src/components/SignOutConfirmation";
 import { ErpShell } from "@/src/components/ErpShell";
-import { supabase } from "@/src/lib/supabase";
 import {
     FugazOne_400Regular
 } from "@expo-google-fonts/fugaz-one";
@@ -15,12 +14,12 @@ import {
     WorkSans_900Black
 } from "@expo-google-fonts/work-sans";
 import { useFonts } from "expo-font";
-import { router, Stack } from "expo-router";
+import { Stack } from "expo-router";
 import { useState } from "react";
 import { StyleSheet, View } from "react-native";
 import "../../global.css";
 
-export default function clients() {
+export default function TabsLayout() {
 
     const [confirmationCard, setConfirmationCard] = useState<boolean>(false)
     const [fontsLoaded] = useFonts({
@@ -42,36 +41,18 @@ export default function clients() {
         return null;
     }
 
-    async function logOff() {
-        const { error } = await supabase.auth.signOut();
-
-        if (error) {
-            console.log("Erro", error);
-            return;
-        };
-
-        router.replace("/(auth)/signIn")
-
-    };
-
     return (
 
         <View style={styles.container}>
-            {!confirmationCard ?
-                <ErpShell onSignOut={() => setConfirmationCard(true)}>
-                    <Stack
-                        screenOptions={{
-                            headerShown: false
-                        }}
-                    />
-
-                </ErpShell>
-                :
-                <ConfirmationCard
-                    action={logOff}
-                    setCardConfirmation={setConfirmationCard}
+            <ErpShell onSignOut={() => setConfirmationCard(true)}>
+                <Stack
+                    screenOptions={{
+                        headerShown: false
+                    }}
                 />
-            }
+
+            </ErpShell>
+            {confirmationCard && <SignOutConfirmation onClose={() => setConfirmationCard(false)} />}
         </View>
     );
 };

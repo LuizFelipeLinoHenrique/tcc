@@ -1,10 +1,11 @@
 import { Colors } from "@/src/theme/colors";
 import { AnimatedButton } from "@/src/components/AnimatedButton";
 import { AuthPageLayout, authStyles } from "@/src/components/AuthPageLayout";
+import { useLoginTransition } from "@/src/components/LoginTransitionProvider";
 import { Ionicons } from "@expo/vector-icons";
 import { Link, router } from "expo-router";
-import React, { useState } from "react";
-import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import React, { useRef, useState } from "react";
+import { ActivityIndicator, Keyboard, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { supabase } from "../../src/lib/supabase";
 
 export default function SignInPage() {
@@ -13,8 +14,11 @@ export default function SignInPage() {
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
+  const submitting = useRef(false);
+  const loginTransition = useLoginTransition();
 
   async function logIn() {
+    if (submitting.current) return;
     if (!email.trim() || !password.trim()) {
       setErrorMessage("Preencha todos os campos.");
       setTimeout(() => {
@@ -23,22 +27,37 @@ export default function SignInPage() {
       return;
     }
 
+    submitting.current = true;
     setLoading(true);
+    setErrorMessage("");
+    Keyboard.dismiss();
+    loginTransition.start();
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password
       });
 
       if (error) {
+        loginTransition.cancel();
         setErrorMessage(error.message === "Invalid login credentials" ? "Credenciais inválidas." : "Não foi possível entrar. Tente novamente.");
         setTimeout(() => {
           setErrorMessage("");
         }, 3000);
-      };
-
+        return;
+      }
+      if (data.session) {
+        loginTransition.succeed();
+      } else {
+        loginTransition.cancel();
+        setErrorMessage("Não foi possível entrar. Tente novamente.");
+      }
+    } catch {
+      loginTransition.cancel();
+      setErrorMessage("Não foi possível entrar. Verifique sua conexão e tente novamente.");
     } finally {
+      submitting.current = false;
       setLoading(false);
     }
   };
@@ -126,6 +145,7 @@ export default function SignInPage() {
           stylesPressablePressed={authStyles.primaryButtonPressed}
           stylesText={authStyles.primaryButtonText}
           onPress={logIn}
+          disabled={loading}
         />
       </View>
 

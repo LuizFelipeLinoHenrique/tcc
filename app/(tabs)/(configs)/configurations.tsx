@@ -1,10 +1,10 @@
+import SignOutConfirmation from "@/src/components/SignOutConfirmation";
 import { Colors } from "@/src/theme/colors";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
     ActivityIndicator,
-    Alert,
     Pressable,
     StyleSheet,
     Switch,
@@ -12,13 +12,12 @@ import {
     View,
 } from "react-native";
 
-import { AnimatedButton } from "@/src/components/AnimatedButton";
 import { PagesLayout, pagesStyles } from "@/src/components/ScreensLayout";
 import useResponsive from "@/src/hooks/useResponsive";
 import { supabase } from "@/src/lib/supabase";
 
 export default function Configurations() {
-    const { maxCardWidth, isMobile } = useResponsive();
+    const { maxCardWidth } = useResponsive();
 
     const [userEmail, setUserEmail] = useState<string | null>(null);
     const [userId, setUserId] = useState<string | null>(null);
@@ -27,60 +26,36 @@ export default function Configurations() {
 
     const [notificacoes, setNotificacoes] = useState(true);
     const [atualizacoesAuto, setAtualizacoesAuto] = useState(true);
-    const [loggingOut, setLoggingOut] = useState(false);
+    const [confirmationVisible, setConfirmationVisible] = useState(false);
 
     useEffect(() => {
+        async function carregarUsuario() {
+            setLoadingUser(true);
+            try {
+                const { data } = await supabase.auth.getUser();
+                if (data?.user) {
+                    setUserEmail(data.user.email ?? "Usuário PalletCore");
+                    setUserId(data.user.id);
+                    if (data.user.created_at) {
+                        const date = new Date(data.user.created_at);
+                        setCreatedAt(
+                            date.toLocaleDateString("pt-BR", {
+                                day: "2-digit",
+                                month: "2-digit",
+                                year: "numeric",
+                            })
+                        );
+                    }
+                }
+            } catch (e) {
+                console.log("Erro ao carregar usuário:", e);
+            } finally {
+                setLoadingUser(false);
+            }
+        }
+
         carregarUsuario();
     }, []);
-
-    async function carregarUsuario() {
-        setLoadingUser(true);
-        try {
-            const { data, error } = await supabase.auth.getUser();
-            if (data?.user) {
-                setUserEmail(data.user.email ?? "Usuário PalletCore");
-                setUserId(data.user.id);
-                if (data.user.created_at) {
-                    const date = new Date(data.user.created_at);
-                    setCreatedAt(
-                        date.toLocaleDateString("pt-BR", {
-                            day: "2-digit",
-                            month: "2-digit",
-                            year: "numeric",
-                        })
-                    );
-                }
-            }
-        } catch (e) {
-            console.log("Erro ao carregar usuário:", e);
-        } finally {
-            setLoadingUser(false);
-        }
-    }
-
-    async function handleLogoff() {
-        Alert.alert(
-            "Encerrar Sessão",
-            "Deseja realmente sair da sua conta?",
-            [
-                { text: "Cancelar", style: "cancel" },
-                {
-                    text: "Sair",
-                    style: "destructive",
-                    onPress: async () => {
-                        setLoggingOut(true);
-                        const { error } = await supabase.auth.signOut();
-                        setLoggingOut(false);
-                        if (error) {
-                            Alert.alert("Erro", "Não foi possível desconectar.");
-                            return;
-                        }
-                        router.replace("/(auth)/signIn");
-                    },
-                },
-            ]
-        );
-    }
 
     function getInitials(email?: string | null) {
         if (!email) return "PC";
@@ -246,8 +221,8 @@ export default function Configurations() {
                             </Pressable>
 
                             <Pressable
-                                onPress={handleLogoff}
-                                disabled={loggingOut}
+                                onPress={() => setConfirmationVisible(true)}
+                                disabled={confirmationVisible}
                                 style={({ pressed }) => [
                                     styles.actionButtonDestructive,
                                     pressed && styles.actionButtonDestructivePressed,
@@ -258,13 +233,13 @@ export default function Configurations() {
                                 </View>
                                 <View style={styles.actionTextContainer}>
                                     <Text style={styles.actionTitleDestructive}>
-                                        {loggingOut ? "Encerrando..." : "Desconectar da Conta"}
+                                        {confirmationVisible ? "Encerrando..." : "Desconectar da Conta"}
                                     </Text>
                                     <Text style={styles.actionSubtitleDestructive}>
                                         Sair com segurança deste dispositivo
                                     </Text>
                                 </View>
-                                {loggingOut ? (
+                                {confirmationVisible ? (
                                     <ActivityIndicator size="small" color={Colors.hexDC2626} />
                                 ) : (
                                     <Ionicons name="chevron-forward" size={18} color={Colors.hexF87171} />
@@ -274,6 +249,7 @@ export default function Configurations() {
                     </View>
                 </View>
             </View>
+            {confirmationVisible && <SignOutConfirmation onClose={() => setConfirmationVisible(false)} />}
         </PagesLayout>
     );
 }

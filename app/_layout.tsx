@@ -1,5 +1,6 @@
 import { isSigningUp } from "@/src/lib/authFlow";
 import { supabase } from "@/src/lib/supabase";
+import { LoginTransitionProvider } from "@/src/components/LoginTransitionProvider";
 
 import {
     FugazOne_400Regular
@@ -124,7 +125,7 @@ export default function MainLayout() {
     }
 
     return (
-        <View className="flex-1">
+        <LoginTransitionProvider>
 
             <Stack screenOptions={{ headerShown: false }}>
 
@@ -138,6 +139,6 @@ export default function MainLayout() {
 
             </Stack>
 
-        </View>
+        </LoginTransitionProvider>
     );
 };
