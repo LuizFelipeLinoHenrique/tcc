@@ -16,6 +16,21 @@ export type CashEntry = {
 export const cashCategories = ["Vendas", "Serviços", "Aportes", "Saldo inicial", "Materiais", "Fornecedores", "Salários", "Aluguel", "Impostos", "Transporte", "Outros"];
 export const money = (cents: number) => (cents / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 export const isoDate = (date = new Date()) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+const cashDateFormatter = new Intl.DateTimeFormat("en-CA", {
+  timeZone: "America/Sao_Paulo",
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+});
+
+export function cashToday(now = new Date()): string {
+  const parts = cashDateFormatter.formatToParts(now);
+  const year = parts.find(part => part.type === "year")?.value;
+  const month = parts.find(part => part.type === "month")?.value;
+  const day = parts.find(part => part.type === "day")?.value;
+  return `${year}-${month}-${day}`;
+}
+
 export const displayDate = (date: string) => date.split("-").reverse().join("/");
 
 export function parseDate(value: string): string | null {
@@ -44,17 +59,19 @@ export function addMonths(date: string, count: number): string {
 export const signedAmount = (entry: CashEntry) => entry.type === "income" ? entry.amount_cents : -entry.amount_cents;
 export const effectiveDate = (entry: CashEntry) => entry.status === "paid" ? entry.paid_date! : entry.due_date;
 
-export function cashMonthData(entries: CashEntry[], start: string, end: string, today = isoDate()) {
+export function cashMonthData(entries: CashEntry[], start: string, end: string, today = cashToday()) {
   const monthlyEntries = entries.filter(entry => {
     const date = effectiveDate(entry);
     return date >= start && date <= end;
   });
-  const totals = summarizeCash(monthlyEntries, start, end, today);
+  const totals = summarizeCash(entries, start, end, today);
   const balance = totals.income - totals.expense;
   const changes = new Map<string, number>();
+  let overdue = 0;
   for (const entry of monthlyEntries) {
     if (entry.status === "cancelled") continue;
     const date = effectiveDate(entry);
+    if (entry.status === "pending" && date < today) overdue++;
     changes.set(date, (changes.get(date) ?? 0) + signedAmount(entry));
   }
   let projected = 0;
@@ -66,10 +83,10 @@ export function cashMonthData(entries: CashEntry[], start: string, end: string, 
     projection.push({ date: key, balance: projected });
     date.setDate(date.getDate() + 1);
   }
-  return { entries: monthlyEntries, ...totals, balance, expected: balance + totals.receivable - totals.payable, projection };
+  return { entries: monthlyEntries, ...totals, overdue, balance, expected: balance + totals.receivable - totals.payable, projection };
 }
 
-export function summarizeCash(entries: CashEntry[], start: string, end: string, today = isoDate()) {
+export function summarizeCash(entries: CashEntry[], start: string, end: string, today = cashToday()) {
   let opening = 0, income = 0, expense = 0, receivable = 0, payable = 0, current = 0, overdue = 0;
   for (const entry of entries) {
     if (entry.status === "cancelled") continue;
@@ -91,7 +108,7 @@ export function summarizeCash(entries: CashEntry[], start: string, end: string, 
   return { opening, income, expense, receivable, payable, current, overdue, closing: opening + income - expense };
 }
 
-export function projectCash(entries: CashEntry[], days: number, today = isoDate()) {
+export function projectCash(entries: CashEntry[], days: number, today = cashToday()) {
   let balance = summarizeCash(entries, today, today, today).current;
   const changes = new Map<string, number>();
   for (const entry of entries) {
