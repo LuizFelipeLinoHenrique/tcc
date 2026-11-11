@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
-import { CashEntry, addMonths, cashCategories, displayDate, isoDate, parseDate, parseMoney } from "@/src/lib/cashFlow";
+import { CashEntry, addMonths, cashCategories, displayDate, cashToday, parseDate, parseMoney } from "@/src/lib/cashFlow";
 import { CashDraft, cashError, saveCashEntries } from "@/src/lib/cashFlowRepository";
 import { Colors } from "@/src/theme/colors";
 
@@ -13,9 +13,9 @@ export function CashEntryForm({ entry, initialType, onSaved, onBusy }: { entry?:
   const [type, setType] = useState(entry?.type ?? initialType);
   const [amount, setAmount] = useState(entry ? (entry.amount_cents / 100).toFixed(2).replace(".", ",") : "");
   const [category, setCategory] = useState(entry?.category ?? "Outros");
-  const [dueDate, setDueDate] = useState(displayDate(entry?.due_date ?? isoDate()));
+  const [dueDate, setDueDate] = useState(displayDate(entry?.due_date ?? cashToday()));
   const [status, setStatus] = useState(entry?.status ?? "pending");
-  const [paidDate, setPaidDate] = useState(displayDate(entry?.paid_date ?? isoDate()));
+  const [paidDate, setPaidDate] = useState(displayDate(entry?.paid_date ?? cashToday()));
   const [notes, setNotes] = useState(entry?.notes ?? "");
   const [repetitions, setRepetitions] = useState("1");
   const [error, setError] = useState("");
@@ -31,7 +31,7 @@ export function CashEntryForm({ entry, initialType, onSaved, onBusy }: { entry?:
     if (!description.trim() || !category.trim()) return setError("Preencha a descrição e a categoria.");
     if (!cents) return setError("Informe um valor positivo em reais, como 1.250,50 (até R$ 9.999.999.999,99).");
     if (!due) return setError("Informe um vencimento válido no formato DD/MM/AAAA.");
-    if (status === "paid" && (!paid || paid > isoDate())) return setError("A data de pagamento deve ser válida e não pode estar no futuro.");
+    if (status === "paid" && (!paid || paid > cashToday())) return setError("A data de pagamento deve ser válida e não pode estar no futuro.");
     if (!entry && (!/^\d+$/.test(repetitions) || !Number.isInteger(count) || count < 1 || count > 24)) return setError("Informe de 1 a 24 lançamentos mensais.");
     if (!entry && count > 1 && status !== "pending") return setError("Para repetir mensalmente, use o status Pendente. Registre cada pagamento quando acontecer.");
     if (!entry && Number(addMonths(due, count - 1).split("-")[0]) > 9999) return setError("Os vencimentos devem estar entre os anos 1900 e 9999.");

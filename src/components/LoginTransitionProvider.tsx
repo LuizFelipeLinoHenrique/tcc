@@ -1,9 +1,10 @@
-import React, { createContext, PropsWithChildren, useCallback, useContext, useMemo, useState } from "react";
+import React, { createContext, PropsWithChildren, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { LoginTruckAnimation } from "@/src/components/LoginTruckAnimation";
 
 type LoginTransition = {
-  start: () => void;
+  start: () => boolean;
+  slow: boolean;
   succeed: () => void;
   cancel: () => void;
 };
@@ -12,12 +13,36 @@ const LoginTransitionContext = createContext<LoginTransition | null>(null);
 
 // Lives above the navigator so signing in cannot unmount the animation mid-trip.
 export function LoginTransitionProvider({ children }: PropsWithChildren) {
-  const [phase, setPhase] = useState<"loading" | "success" | null>(null);
-  const start = useCallback(() => setPhase("loading"), []);
-  const succeed = useCallback(() => setPhase(current => current === "loading" ? "success" : current), []);
-  const cancel = useCallback(() => setPhase(null), []);
-  const value = useMemo(() => ({ start, succeed, cancel }), [start, succeed, cancel]);
-  const active = phase !== null;
+  const [phase, setPhase] = useState<"loading" | "slow" | "success" | null>(null);
+  const pending = useRef(false);
+  const waitTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const clearWaitTimer = useCallback(() => {
+    if (waitTimer.current !== null) clearTimeout(waitTimer.current);
+    waitTimer.current = null;
+  }, []);
+  useEffect(() => clearWaitTimer, [clearWaitTimer]);
+
+  const start = useCallback(() => {
+    if (pending.current) return false;
+    pending.current = true;
+    setPhase("loading");
+    waitTimer.current = setTimeout(() => setPhase("slow"), 6000);
+    return true;
+  }, []);
+  const dismiss = useCallback(() => setPhase(null), []);
+  const cancel = useCallback(() => {
+    pending.current = false;
+    clearWaitTimer();
+    dismiss();
+  }, [clearWaitTimer, dismiss]);
+  const succeed = useCallback(() => {
+    pending.current = false;
+    clearWaitTimer();
+    setPhase(current => current === "loading" ? "success" : null);
+  }, [clearWaitTimer]);
+  const slow = phase === "slow";
+  const value = useMemo(() => ({ start, succeed, cancel, slow }), [start, succeed, cancel, slow]);
+  const active = phase === "loading" || phase === "success";
 
   return (
     <LoginTransitionContext.Provider value={value}>
@@ -30,7 +55,7 @@ export function LoginTransitionProvider({ children }: PropsWithChildren) {
         >
           {children}
         </View>
-        {active && <LoginTruckAnimation ready={phase === "success"} onComplete={cancel} />}
+        {active && <LoginTruckAnimation ready={phase === "success"} onComplete={dismiss} />}
       </View>
     </LoginTransitionContext.Provider>
   );

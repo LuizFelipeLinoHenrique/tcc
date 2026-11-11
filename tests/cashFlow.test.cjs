@@ -7,10 +7,10 @@ const source = fs.readFileSync(path.join(__dirname, "../src/lib/cashFlow.ts"), "
 const { outputText } = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } });
 const mod = { exports: {} };
 new Function("module", "exports", outputText)(mod, mod.exports);
-const { parseMoney, parseDate, addMonths, summarizeCash, projectCash, cashMonthData, cashCsv, effectiveDate } = mod.exports;
+const { cashToday, parseMoney, parseDate, addMonths, summarizeCash, projectCash, cashMonthData, cashCsv, effectiveDate } = mod.exports;
 const entry = (overrides = {}) => ({ id: "1", user_id: "user", description: "Venda", amount_cents: 10000, type: "income", category: "Vendas", account: "Caixa", due_date: "2026-11-10", paid_date: null, status: "pending", notes: "", created_at: "", ...overrides });
 
-test("monthly cards and chart exclude other months and use settlement dates for paid entries", () => {
+test("monthly results use settlement dates and accumulated balances include prior months", () => {
   const records = [
     entry({ status: "paid", paid_date: "2026-10-31", amount_cents: 90000 }),
     entry({ status: "paid", due_date: "2026-10-20", paid_date: "2026-11-02", amount_cents: 20000 }),
@@ -25,6 +25,8 @@ test("monthly cards and chart exclude other months and use settlement dates for 
   assert.equal(november.income, 20000);
   assert.equal(november.expense, 3000);
   assert.equal(november.balance, 17000);
+  assert.equal(november.opening, 90000);
+  assert.equal(november.closing, 107000);
   assert.equal(november.receivable, 5000);
   assert.equal(november.payable, 2000);
   assert.equal(november.expected, 20000);
@@ -35,6 +37,8 @@ test("monthly cards and chart exclude other months and use settlement dates for 
   assert.deepEqual(november.projection.at(-1), { date: "2026-11-30", balance: november.expected });
   const december = cashMonthData(records, "2026-12-01", "2026-12-31", "2026-12-09");
   assert.equal(december.balance, 0);
+  assert.equal(december.opening, 107000);
+  assert.equal(december.closing, 107000);
   assert.equal(december.receivable, 70000);
   assert.equal(december.expected, 70000);
   assert.equal(december.overdue, 1);
@@ -118,4 +122,9 @@ test("CSV quotes delimiters, escapes quotes, protects spreadsheet formulas, and 
     assert.equal(points.at(-1).balance, days ? 16000 : 11000);
   }
   assert.equal(summarizeCash(records, "2026-11-09", "2026-11-09", "2026-11-09").current, 10000);
+});
+
+test("cash business day changes at midnight in São Paulo", () => {
+  assert.equal(cashToday(new Date("2026-12-01T02:59:59Z")), "2026-11-30");
+  assert.equal(cashToday(new Date("2026-12-01T03:00:00Z")), "2026-12-01");
 });
