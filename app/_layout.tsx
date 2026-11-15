@@ -31,7 +31,7 @@ import {
 
 import { Session } from "@supabase/supabase-js";
 import { useFonts } from "expo-font";
-import { router, Stack } from "expo-router";
+import { Stack } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { ActivityIndicator, View } from "react-native";
 
@@ -42,7 +42,7 @@ export default function MainLayout() {
     const [session, setSession] = useState<Session | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
 
-    const [fontsLoaded] = useFonts({
+    const [fontsLoaded, fontError] = useFonts({
         UbuntuLight: Ubuntu_300Light,
         UbuntuRegular: Ubuntu_400Regular,
         UbuntuBold: Ubuntu_700Bold,
@@ -65,58 +65,17 @@ export default function MainLayout() {
 
     useEffect(() => {
 
-        const verifSession = async () => {
-            const { data: sessionData } =
-                await supabase.auth.getSession();
-
-            if (!sessionData.session) {
-                setSession(null);
-                setLoading(false);
-                return;
-            }
-
-            const { data: userData, error } =
-                await supabase.auth.getUser();
-
-            if (error || !userData.user) {
-                await supabase.auth.signOut();
-
-                setSession(null);
-
-                router.replace("/(auth)/signIn");
-
-                setLoading(false);
-                return;
-            }
-
-            setSession(sessionData.session);
+        const { data: listener } = supabase.auth.onAuthStateChange((event, currentSession) => {
+            if (event === "SIGNED_IN" && isSigningUp) return;
+            setSession(currentSession);
             setLoading(false);
-        };
+        });
 
-        verifSession();
-
-        const { data: listener } =
-            supabase.auth.onAuthStateChange(
-                (event, session) => {
-
-                    if (
-                        event === "SIGNED_IN" &&
-                        isSigningUp
-                    ) {
-                        return;
-                    }
-
-                    setSession(session);
-                }
-            );
-
-        return () => {
-            listener.subscription.unsubscribe();
-        };
+        return () => listener.subscription.unsubscribe();
 
     }, []);
 
-    if (!fontsLoaded || loading) {
+    if ((!fontsLoaded && !fontError) || loading) {
         return (
             <View className="flex-1 justify-center items-center">
                 <ActivityIndicator />
@@ -136,6 +95,8 @@ export default function MainLayout() {
                 <Stack.Protected guard={!!session}>
                     <Stack.Screen name="(tabs)" />
                 </Stack.Protected>
+
+                <Stack.Screen name="(recovering)" />
 
             </Stack>
 
