@@ -5,6 +5,7 @@ import { LineGraph } from "@/src/components/LineGraph";
 import { PieGraph, PieGraphItem } from "@/src/components/PieGraph";
 import { PagesLayout, pagesStyles } from "@/src/components/ScreensLayout";
 import useResponsive from "@/src/hooks/useResponsive";
+import { buildTimelineData, loadDashboardRows } from "@/src/lib/dashboard";
 import { supabase } from "@/src/lib/supabase";
 import { Ionicons } from "@expo/vector-icons";
 import React, { useEffect, useState } from "react";
@@ -17,6 +18,8 @@ export default function HomeScreen() {
     const [ordersNum, setOrdersNum] = useState<lineDataItem[]>([]);
     const [revenueTimeline, setRevenueTimeline] = useState<lineDataItem[]>([]);
     const [loadingData, setLoadingData] = useState<boolean>(true);
+    const [loadError, setLoadError] = useState(false);
+    const [attempt, setAttempt] = useState(0);
     const [maxValue, setMaxValue] = useState<number>(10);
     const [maxRevenueValue, setMaxRevenueValue] = useState<number>(10);
 
@@ -53,39 +56,19 @@ export default function HomeScreen() {
         : Math.max(140, Math.floor((width - 40 - 28 - 96) / 3));
 
     useEffect(() => {
+        let current = true;
         async function loadAllMetrics() {
-            setLoadingData(true);
-
             try {
-                // 1. Carregar Pedidos
-                const { data: pedidos, error: pedidosError } = await supabase
-                    .from("pedidos")
-                    .select("*");
+                const [listaPedidos, listaProdutos, listaClientes, fornecedores] = await Promise.all([
+                    loadDashboardRows("pedidos", "*"),
+                    loadDashboardRows("produtos", "*"),
+                    loadDashboardRows("clientes", "id, nome"),
+                    supabase.from("fornecedores").select("id", { count: "exact", head: true }),
+                ]);
 
-                if (pedidosError) {
-                    console.error("Erro ao carregar pedidos no dashboard:", pedidosError);
-                }
-
-                const listaPedidos = pedidos ?? [];
-
-                // 2. Carregar Produtos / Materiais
-                const { data: produtos } = await supabase
-                    .from("produtos")
-                    .select("*");
-
-                const listaProdutos = produtos ?? [];
-
-                // 3. Carregar Clientes
-                const { data: clientes } = await supabase
-                    .from("clientes")
-                    .select("id, nome");
-
-                // 4. Carregar Fornecedores
-                const { count: countFornecedores } = await supabase
-                    .from("fornecedores")
-                    .select("*", { count: "exact", head: true });
-
-                const listaClientes = clientes ?? [];
+                if (!current) return;
+                if (fornecedores.error) throw fornecedores.error;
+                const countFornecedores = fornecedores.count ?? 0;
                 setTotalClientes(listaClientes.length);
                 setTotalFornecedores(countFornecedores || 0);
 
@@ -95,7 +78,7 @@ export default function HomeScreen() {
 
                 if (listaProdutos.length > 0) {
                     setTotalMateriais(listaProdutos.length);
-                    listaProdutos.forEach((p: any) => {
+                    listaProdutos.forEach((p) => {
                         const preco = Number(p.preco ?? p["preço"] ?? p.preco_unit ?? 0);
                         somaPrecos += preco;
                         produtosMap.set(p.id, {
@@ -122,7 +105,7 @@ export default function HomeScreen() {
                 const demandaPorCliente = new Map<number, number>();
                 const faturamentoPorPedido = new Map<number, number>();
 
-                listaPedidos.forEach((ped: any) => {
+                listaPedidos.forEach((ped) => {
                     const rawStatus = String(ped.status || "").trim().toUpperCase();
                     if (rawStatus === "E" || rawStatus.startsWith("ENTR")) {
                         countE++;
@@ -132,14 +115,10 @@ export default function HomeScreen() {
                         countP++;
                     }
 
-                    const qtde = Number(ped.qtde ?? ped.quantidade ?? 1);
+                    const qtde = Number(ped.qtde ?? ped.quantidade ?? 0);
                     const idProd = ped.id_produto ?? ped.id_material ?? ped.produto_id;
                     const prodInfo = idProd ? produtosMap.get(idProd) : undefined;
-                    const precoUnit = prodInfo
-                        ? prodInfo.preco
-                        : listaProdutos.length > 0
-                            ? Number(listaProdutos[0].preco ?? listaProdutos[0]["preço"] ?? 0)
-                            : 0;
+                    const precoUnit = prodInfo?.preco ?? 0;
 
                     const valorPedido = qtde * precoUnit;
                     faturamentoPorPedido.set(ped.id, rawStatus === "C" || rawStatus.startsWith("CANC") ? 0 : valorPedido);
@@ -183,39 +162,24 @@ export default function HomeScreen() {
                 const coresBarras = [Colors.hex0B4F6C, Colors.hex0E7490, Colors.hex145D7E, Colors.hex38BDF8];
                 const topBars: BarGraphItem[] = [];
 
-                if (listaProdutos.length > 0) {
-                    // Ordena produtos pela demanda dos pedidos (se houver) ou lista os cadastrados
-                    const sortedProds = [...listaProdutos].sort((a, b) => {
-                        const demA = demandaPorProduto.get(a.id) || 0;
-                        const demB = demandaPorProduto.get(b.id) || 0;
-                        return demB - demA;
-                    });
-
-                    sortedProds.slice(0, 4).forEach((prod, index) => {
-                        const dem = demandaPorProduto.get(prod.id) || 0;
-                        const nomeRaw = prod.nome ?? `Item #${prod.id}`;
-                        const label =
-                            nomeRaw.length > 8 ? nomeRaw.slice(0, 7) + "…" : nomeRaw;
-
+                [...demandaPorProduto]
+                    .filter(([, volume]) => volume > 0)
+                    .sort(([, volumeA], [, volumeB]) => volumeB - volumeA)
+                    .slice(0, 4)
+                    .forEach(([id, volume], index) => {
+                        const nome = produtosMap.get(id)?.nome ?? `Material #${id}`;
                         topBars.push({
-                            value: dem > 0 ? dem : somaQtde > 0 && index === 0 ? somaQtde : 1,
-                            label,
+                            value: volume,
+                            label: nome.length > 8 ? `${nome.slice(0, 7)}…` : nome,
                             frontColor: coresBarras[index % coresBarras.length],
                         });
                     });
-                } else if (listaPedidos.length > 0) {
-                    topBars.push({
-                        value: somaQtde > 0 ? somaQtde : 1,
-                        label: "Pedido #1",
-                        frontColor: Colors.hex0B4F6C,
-                    });
-                }
 
                 setTopMateriaisData(topBars);
 
                 // Ranking de clientes por unidades em pedidos ativos.
                 const coresClientes = [Colors.hex3B6998, Colors.hex0E7490, Colors.hex4A754D, Colors.hex9C773D];
-                const nomesClientes = new Map(listaClientes.map((cliente: any) => [cliente.id, cliente.nome]));
+                const nomesClientes = new Map(listaClientes.map((cliente) => [cliente.id, cliente.nome]));
                 const topClientes = [...demandaPorCliente.entries()]
                     .sort(([, volumeA], [, volumeB]) => volumeB - volumeA)
                     .slice(0, 4)
@@ -245,101 +209,22 @@ export default function HomeScreen() {
                 setRevenueTimeline(revenuePoints);
                 const maiorReceita = Math.max(...revenuePoints.map((p) => p.value ?? 0), 0);
                 setMaxRevenueValue(Math.max(Math.ceil(maiorReceita / 5) * 5, 5));
-            } catch (err) {
-                console.error("Erro geral ao processar métricas do dashboard:", err);
+                setLoadError(false);
+            } catch {
+                if (current) setLoadError(true);
             } finally {
-                setLoadingData(false);
+                if (current) setLoadingData(false);
             }
         }
 
-        loadAllMetrics();
-    }, [active]);
+        void loadAllMetrics();
+        return () => { current = false; };
+    }, [active, attempt]);
 
-    // Função para gerar os pontos mensais do gráfico de linha
-    function buildTimelineData(
-        pedidos: any[],
-        monthsCount: number,
-        getValue: (pedido: any) => number = () => 1,
-    ): lineDataItem[] {
-        const now = new Date();
-        const monthsList: { key: string; label: string; value: number }[] = [];
-
-        // Verifica a data do pedido mais recente caso todos os pedidos sejam de datas antigas
-        let referenceDate = now;
-        let temPedidoNoPeriodoPadrao = false;
-
-        const defaultKeys = new Set<string>();
-        for (let i = monthsCount - 1; i >= 0; i--) {
-            const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-            defaultKeys.add(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`);
-        }
-
-        let pedidoMaisRecente: Date | null = null;
-        pedidos.forEach((p) => {
-            const dateStr = p.data_pedido ?? p.created_at;
-            if (dateStr) {
-                const pDate = new Date(dateStr);
-                if (!isNaN(pDate.getTime())) {
-                    const key = `${pDate.getFullYear()}-${String(pDate.getMonth() + 1).padStart(2, "0")}`;
-                    if (defaultKeys.has(key)) {
-                        temPedidoNoPeriodoPadrao = true;
-                    }
-                    if (!pedidoMaisRecente || pDate > pedidoMaisRecente) {
-                        pedidoMaisRecente = pDate;
-                    }
-                }
-            }
-        });
-
-        // Se nenhum pedido cai nos últimos meses atuais, ancorar na data do pedido existente
-        if (!temPedidoNoPeriodoPadrao && pedidoMaisRecente && pedidos.length > 0) {
-            referenceDate = pedidoMaisRecente;
-        }
-
-        // Gera os meses da janela
-        for (let i = monthsCount - 1; i >= 0; i--) {
-            const d = new Date(referenceDate.getFullYear(), referenceDate.getMonth() - i, 1);
-            const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
-            const label = d.toLocaleDateString("pt-BR", {
-                month: "2-digit",
-                year: "2-digit",
-            });
-            monthsList.push({ key, label, value: 0 });
-        }
-
-        // Contabiliza pedidos nos meses correspondentes
-        let pedidosContabilizados = 0;
-        pedidos.forEach((p) => {
-            const dateStr = p.data_pedido ?? p.created_at;
-            let targetKey: string;
-
-            if (dateStr) {
-                const pDate = new Date(dateStr);
-                if (!isNaN(pDate.getTime())) {
-                    targetKey = `${pDate.getFullYear()}-${String(pDate.getMonth() + 1).padStart(2, "0")}`;
-                } else {
-                    targetKey = monthsList[monthsList.length - 1].key;
-                }
-            } else {
-                targetKey = monthsList[monthsList.length - 1].key;
-            }
-
-            const monthItem = monthsList.find((m) => m.key === targetKey);
-            if (monthItem) {
-                monthItem.value += getValue(p);
-                pedidosContabilizados++;
-            }
-        });
-
-        // Se houver pedidos no banco mas nenhum caiu nas chaves geradas, atribuir ao último mês
-        if (pedidosContabilizados === 0 && pedidos.length > 0) {
-            monthsList[monthsList.length - 1].value = pedidos.length;
-        }
-
-        return monthsList.map((m) => ({
-            value: m.value,
-            label: m.label,
-        }));
+    function changePeriod(months: number) {
+        if (months === active) return;
+        setLoadingData(true);
+        setActive(months);
     }
 
     function formatCurrency(val: number): string {
@@ -352,7 +237,7 @@ export default function HomeScreen() {
     const taxaEntrega =
         totalPedidos > 0 ? ((pedidosEntregues / totalPedidos) * 100).toFixed(0) : "0";
     const mediaUnidadesPorPedido =
-        totalPedidos > 0 ? (totalUnidades / totalPedidos).toFixed(1) : "0";
+        totalPedidos > pedidosCancelados ? (totalUnidades / (totalPedidos - pedidosCancelados)).toFixed(1) : "0";
 
     return (
         <PagesLayout scroll={true}>
@@ -365,7 +250,15 @@ export default function HomeScreen() {
                 </Text>
             </View>
 
-            {!loadingData ? (
+            {!loadingData && loadError ? (
+                <View style={[pagesStyles.card, { padding: 16, gap: 12 }]}>
+                    <Text accessibilityRole="alert">Não foi possível carregar os indicadores.</Text>
+                    <AnimatedButton title="Tentar novamente" onPress={() => {
+                        setLoadingData(true);
+                        setAttempt(previous => previous + 1);
+                    }} />
+                </View>
+            ) : !loadingData ? (
                 <>
                     {/* Linha 1 de KPIs: Faturamento, Total, Volume e Ticket Médio */}
                     <View style={styles.kpiContainer}>
@@ -375,11 +268,11 @@ export default function HomeScreen() {
                                 <Ionicons name="cash" size={22} color={Colors.hex0B4F6C} />
                             </View>
                             <View style={styles.kpiContent}>
-                                <Text style={styles.kpiLabel}>Faturamento dos Pedidos</Text>
+                                <Text style={styles.kpiLabel}>Faturamento estimado</Text>
                                 <Text style={[styles.kpiValue, styles.kpiValueLarge]} numberOfLines={1}>
                                     {formatCurrency(faturamentoEstimado)}
                                 </Text>
-                                <Text style={styles.kpiFootnote}>valor total movimentado</Text>
+                                <Text style={styles.kpiFootnote}>com base nos preços atuais</Text>
                             </View>
                         </View>
 
@@ -535,7 +428,7 @@ export default function HomeScreen() {
                                     styles.periodButtonText,
                                     active === 3 && styles.periodButtonTextActive,
                                 ]}
-                                onPress={() => setActive(3)}
+                                onPress={() => changePeriod(3)}
                             />
                             <AnimatedButton
                                 stylesAnimatedView={pagesStyles.animatedView}
@@ -548,7 +441,7 @@ export default function HomeScreen() {
                                     styles.periodButtonText,
                                     active === 6 && styles.periodButtonTextActive,
                                 ]}
-                                onPress={() => setActive(6)}
+                                onPress={() => changePeriod(6)}
                             />
                             <AnimatedButton
                                 stylesAnimatedView={pagesStyles.animatedView}
@@ -561,7 +454,7 @@ export default function HomeScreen() {
                                     styles.periodButtonText,
                                     active === 12 && styles.periodButtonTextActive,
                                 ]}
-                                onPress={() => setActive(12)}
+                                onPress={() => changePeriod(12)}
                             />
                         </View>
 
