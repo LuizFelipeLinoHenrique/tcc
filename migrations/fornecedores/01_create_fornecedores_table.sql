@@ -47,20 +47,11 @@ BEGIN
         WITH CHECK (true);
     END IF;
 
-    IF NOT EXISTS (
-        SELECT 1 FROM pg_policies 
-        WHERE tablename = 'fornecedores' AND policyname = 'Permitir leitura para anon'
-    ) THEN
-        CREATE POLICY "Permitir leitura para anon"
-        ON public.fornecedores
-        FOR SELECT
-        TO anon
-        USING (true);
-    END IF;
 END
 $$;
 
 -- Permissões para roles do Supabase
 GRANT ALL ON TABLE public.fornecedores TO authenticated;
 GRANT ALL ON TABLE public.fornecedores TO service_role;
-GRANT SELECT ON TABLE public.fornecedores TO anon;
+DROP POLICY IF EXISTS "Permitir leitura para anon" ON public.fornecedores;
+REVOKE ALL ON TABLE public.fornecedores FROM PUBLIC, anon;
