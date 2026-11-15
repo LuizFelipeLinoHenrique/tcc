@@ -4,7 +4,7 @@ import { AuthPageLayout, authStyles } from "@/src/components/AuthPageLayout";
 import { useLoginTransition } from "@/src/components/LoginTransitionProvider";
 import { Ionicons } from "@expo/vector-icons";
 import { Link, router } from "expo-router";
-import React, { useRef, useState } from "react";
+import React, { useState } from "react";
 import { ActivityIndicator, Keyboard, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { supabase } from "../../src/lib/supabase";
 
@@ -14,11 +14,10 @@ export default function SignInPage() {
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
-  const submitting = useRef(false);
   const loginTransition = useLoginTransition();
 
   async function logIn() {
-    if (submitting.current) return;
+    if (loading || loginTransition.slow) return;
     if (!email.trim() || !password.trim()) {
       setErrorMessage("Preencha todos os campos.");
       setTimeout(() => {
@@ -27,11 +26,10 @@ export default function SignInPage() {
       return;
     }
 
-    submitting.current = true;
+    if (!loginTransition.start()) return;
     setLoading(true);
     setErrorMessage("");
     Keyboard.dismiss();
-    loginTransition.start();
 
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
@@ -57,7 +55,6 @@ export default function SignInPage() {
       loginTransition.cancel();
       setErrorMessage("Não foi possível entrar. Verifique sua conexão e tente novamente.");
     } finally {
-      submitting.current = false;
       setLoading(false);
     }
   };
@@ -139,13 +136,19 @@ export default function SignInPage() {
           </View>
         ) : null}
 
+        {loginTransition.slow && (
+          <Text accessibilityLiveRegion="polite" style={authStyles.description}>
+            A conexão está demorando. A solicitação de acesso ainda está em andamento.
+          </Text>
+        )}
+
         <AnimatedButton
-          title={!loading ? "Entrar no Sistema" : <ActivityIndicator color={Colors.hexFFFDF9} />}
+          title={!loading && !loginTransition.slow ? "Entrar no Sistema" : <ActivityIndicator color={Colors.hexFFFDF9} />}
           stylesPressable={authStyles.primaryButton}
           stylesPressablePressed={authStyles.primaryButtonPressed}
           stylesText={authStyles.primaryButtonText}
           onPress={logIn}
-          disabled={loading}
+          disabled={loading || loginTransition.slow}
         />
       </View>
 
