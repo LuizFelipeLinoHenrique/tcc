@@ -12,6 +12,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { AnimatedButton } from "@/src/components/AnimatedButton";
 import { PagesLayout, pagesStyles } from "@/src/components/ScreensLayout";
 import useResponsive from "@/src/hooks/useResponsive";
+import { recordError } from "@/src/lib/tableActions";
 import { supabase } from "@/src/lib/supabase";
 
 export default function AddSupplier() {
@@ -50,6 +51,7 @@ export default function AddSupplier() {
     }
 
     async function handleCadastrar() {
+        if (loading) return;
         setErro(null);
         setMensagemSucesso(null);
 
@@ -68,35 +70,35 @@ export default function AddSupplier() {
 
         setLoading(true);
 
-        const { data, error } = await supabase
-            .from("fornecedores")
-            .insert({
-                nome: nome.trim(),
-                cnpj: cnpj.trim() || null,
-                email: email.trim() ? email.trim().toLowerCase() : null,
-                telefone: telefone.trim() || null,
-                contato: contato.trim() || null,
-                endereco: endereco.trim() || null,
-            })
-            .select()
-            .single();
+        try {
+            const { data, error } = await supabase
+                .from("fornecedores")
+                .insert({
+                    nome: nome.trim(),
+                    cnpj: cnpj.trim() || null,
+                    email: email.trim() ? email.trim().toLowerCase() : null,
+                    telefone: telefone.trim() || null,
+                    contato: contato.trim() || null,
+                    endereco: endereco.trim() || null,
+                })
+                .select()
+                .single();
 
-        setLoading(false);
+            if (error) throw error;
 
-        if (error) {
-            console.error("Erro ao cadastrar fornecedor:", error);
-            setErro("Não foi possível cadastrar o fornecedor. Tente novamente.");
-            return;
-        }
-
-        if (data) {
-            setMensagemSucesso(`Fornecedor "${data.nome}" cadastrado com sucesso! (ID: #${data.id})`);
-            setNome("");
-            setCnpj("");
-            setEmail("");
-            setTelefone("");
-            setContato("");
-            setEndereco("");
+            if (data) {
+                setMensagemSucesso(`Fornecedor "${data.nome}" cadastrado com sucesso! (ID: #${data.id})`);
+                setNome("");
+                setCnpj("");
+                setEmail("");
+                setTelefone("");
+                setContato("");
+                setEndereco("");
+            }
+        } catch (cause) {
+            setErro(recordError(cause));
+        } finally {
+            setLoading(false);
         }
     }
 
