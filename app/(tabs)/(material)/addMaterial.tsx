@@ -12,7 +12,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { AnimatedButton } from "@/src/components/AnimatedButton";
 import { PagesLayout, pagesStyles } from "@/src/components/ScreensLayout";
 import useResponsive from "@/src/hooks/useResponsive";
-import { supabase } from "@/src/lib/supabase";
+import { createMaterial, recordError } from "@/src/lib/tableActions";
 
 export default function AddMaterial() {
     const { maxCardWidth } = useResponsive();
@@ -34,6 +34,7 @@ export default function AddMaterial() {
     }
 
     async function handleCadastrar() {
+        if (loading) return;
         setErro(null);
         setMensagemSucesso(null);
 
@@ -48,69 +49,23 @@ export default function AddMaterial() {
         }
 
         const precoNumerico = Number(preco.trim().replace(",", "."));
-        if (isNaN(precoNumerico) || precoNumerico <= 0) {
+        if (!Number.isFinite(precoNumerico) || precoNumerico <= 0) {
             setErro("Informe um preço unitário válido maior que zero.");
             return;
         }
 
         setLoading(true);
 
-        // Tentativa 1: Coluna "descrição" e "preco"
-        let { data, error } = await supabase
-            .from("produtos")
-            .insert({
-                nome: nome.trim(),
-                "descrição": descricao.trim(),
-                preco: precoNumerico,
-            })
-            .select()
-            .single();
-
-        // Tentativa 2: Coluna "descricao" sem acento
-        if (error) {
-            const retry = await supabase
-                .from("produtos")
-                .insert({
-                    nome: nome.trim(),
-                    descricao: descricao.trim(),
-                    preco: precoNumerico,
-                })
-                .select()
-                .single();
-
-            data = retry.data;
-            error = retry.error;
-        }
-
-        // Tentativa 3: Coluna "preço" com cedilha
-        if (error) {
-            const retry = await supabase
-                .from("produtos")
-                .insert({
-                    nome: nome.trim(),
-                    descricao: descricao.trim(),
-                    "preço": precoNumerico,
-                })
-                .select()
-                .single();
-
-            data = retry.data;
-            error = retry.error;
-        }
-
-        setLoading(false);
-
-        if (error) {
-            console.error("Erro ao cadastrar material:", error);
-            setErro("Não foi possível cadastrar o material. Tente novamente.");
-            return;
-        }
-
-        if (data) {
+        try {
+            const data = await createMaterial(nome.trim(), descricao.trim(), precoNumerico);
             setMensagemSucesso(`Material "${data.nome}" cadastrado com sucesso! (ID: #${data.id})`);
             setNome("");
             setPreco("");
             setDescricao("");
+        } catch (cause) {
+            setErro(recordError(cause));
+        } finally {
+            setLoading(false);
         }
     }
 

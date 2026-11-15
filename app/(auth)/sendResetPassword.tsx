@@ -1,19 +1,21 @@
 import { Colors } from "@/src/theme/colors";
 import { AuthPageLayout, authStyles } from "@/src/components/AuthPageLayout";
 import { Ionicons } from "@expo/vector-icons";
+import { createURL } from "expo-linking";
 import { router } from "expo-router";
 import { useState } from "react";
 import { ActivityIndicator, StyleSheet, Text, TextInput, View } from "react-native";
 import { AnimatedButton } from "../../src/components/AnimatedButton";
 import { supabase } from "../../src/lib/supabase";
 
-export default function sendResetPassword() {
+export default function SendResetPasswordPage() {
   const [email, setEmail] = useState<string>("");
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [message, setMessage] = useState<string>("");
 
   async function resetPassword() {
+    if (loading) return;
     if (!email.trim()) {
       setErrorMessage("Informe seu endereço de e-mail.");
       setTimeout(() => {
@@ -23,11 +25,13 @@ export default function sendResetPassword() {
     };
 
     setLoading(true);
+    setErrorMessage("");
+    setMessage("");
 
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(
         email.trim(), {
-        redirectTo: "http://localhost:8081/resetPassword", // trocar pelo endereço de recuperação
+        redirectTo: createURL("/resetPassword"),
       });
 
       if (error) {
@@ -44,6 +48,8 @@ export default function sendResetPassword() {
         }, 3000);
       };
 
+    } catch {
+      setErrorMessage("Não foi possível enviar o e-mail. Verifique sua conexão e tente novamente.");
     } finally {
       setLoading(false);
     }
@@ -95,6 +101,7 @@ export default function sendResetPassword() {
           stylesPressablePressed={authStyles.primaryButtonPressed}
           stylesText={authStyles.primaryButtonText}
           onPress={resetPassword}
+          disabled={loading}
         />
 
         <AnimatedButton

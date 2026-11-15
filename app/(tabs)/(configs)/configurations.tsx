@@ -24,15 +24,17 @@ export default function Configurations() {
     const [createdAt, setCreatedAt] = useState<string | null>(null);
     const [loadingUser, setLoadingUser] = useState(true);
 
-    const [notificacoes, setNotificacoes] = useState(true);
-    const [atualizacoesAuto, setAtualizacoesAuto] = useState(true);
+    const [profileError, setProfileError] = useState(false);
+    const [profileAttempt, setProfileAttempt] = useState(0);
     const [confirmationVisible, setConfirmationVisible] = useState(false);
 
     useEffect(() => {
+        let current = true;
         async function carregarUsuario() {
-            setLoadingUser(true);
             try {
-                const { data } = await supabase.auth.getUser();
+                const { data, error } = await supabase.auth.getUser();
+                if (!current) return;
+                if (error || !data.user) throw error ?? new Error();
                 if (data?.user) {
                     setUserEmail(data.user.email ?? "Usuário PalletCore");
                     setUserId(data.user.id);
@@ -47,15 +49,16 @@ export default function Configurations() {
                         );
                     }
                 }
-            } catch (e) {
-                console.log("Erro ao carregar usuário:", e);
+            } catch {
+                if (current) setProfileError(true);
             } finally {
-                setLoadingUser(false);
+                if (current) setLoadingUser(false);
             }
         }
 
-        carregarUsuario();
-    }, []);
+        void carregarUsuario();
+        return () => { current = false; };
+    }, [profileAttempt]);
 
     function getInitials(email?: string | null) {
         if (!email) return "PC";
@@ -95,16 +98,23 @@ export default function Configurations() {
                                 <Text style={styles.profileName}>
                                     {loadingUser ? "Carregando..." : userEmail || "Usuário PalletCore"}
                                 </Text>
-                                <View style={styles.badgeAdmin}>
+                                <View style={styles.badgeAccount}>
                                     <Ionicons name="shield-checkmark" size={12} color={Colors.hex166534} />
-                                    <Text style={styles.badgeAdminText}>Administrador</Text>
+                                    <Text style={styles.badgeAccountText}>Conta</Text>
                                 </View>
                             </View>
 
                             <Text style={styles.profileSubtext}>
-                                {createdAt ? `Membro desde ${createdAt}` : "Sessão autenticada"}
+                                {createdAt ? `Membro desde ${createdAt}` : ""}
                             </Text>
 
+                            {profileError && <Pressable accessibilityRole="button" onPress={() => {
+                                setProfileError(false);
+                                setLoadingUser(true);
+                                setProfileAttempt(previous => previous + 1);
+                            }}>
+                                <Text style={styles.profileSubtext}>Falha ao carregar a conta. Tentar novamente.</Text>
+                            </Pressable>}
                             {userId && (
                                 <Text style={styles.profileId} numberOfLines={1}>
                                     ID: {userId}
@@ -125,14 +135,13 @@ export default function Configurations() {
                                 <View style={styles.prefTextContainer}>
                                     <Text style={styles.prefTitle}>Notificações Operacionais</Text>
                                     <Text style={styles.prefDescription}>
-                                        Avisos sobre novos pedidos e alterações de estoque
+                                        Indisponível nesta versão
                                     </Text>
                                 </View>
                                 <Switch
-                                    value={notificacoes}
-                                    onValueChange={setNotificacoes}
-                                    thumbColor={notificacoes ? Colors.hex0B4F6C : Colors.hexD9E3EA}
-                                    trackColor={{ false: Colors.hexD9E3EA, true: Colors.hexBAE6FD }}
+                                    value={false}
+                                    disabled
+                                    thumbColor={Colors.hexD9E3EA}
                                 />
                             </View>
 
@@ -142,14 +151,13 @@ export default function Configurations() {
                                 <View style={styles.prefTextContainer}>
                                     <Text style={styles.prefTitle}>Sincronização em Tempo Real</Text>
                                     <Text style={styles.prefDescription}>
-                                        Atualizar listagens automaticamente com o banco de dados
+                                        Indisponível nesta versão
                                     </Text>
                                 </View>
                                 <Switch
-                                    value={atualizacoesAuto}
-                                    onValueChange={setAtualizacoesAuto}
-                                    thumbColor={atualizacoesAuto ? Colors.hex0B4F6C : Colors.hexD9E3EA}
-                                    trackColor={{ false: Colors.hexD9E3EA, true: Colors.hexBAE6FD }}
+                                    value={false}
+                                    disabled
+                                    thumbColor={Colors.hexD9E3EA}
                                 />
                             </View>
                         </View>
@@ -175,7 +183,7 @@ export default function Configurations() {
 
                             <View style={styles.tccItem}>
                                 <Text style={styles.tccLabel}>STACK TECNOLÓGICA</Text>
-                                <Text style={styles.tccValue}>React Native • Expo v54 • TypeScript • NativeWind</Text>
+                                <Text style={styles.tccValue}>React Native • Expo • TypeScript • NativeWind</Text>
                             </View>
 
                             <View style={styles.tccItem}>
@@ -332,7 +340,7 @@ const styles = StyleSheet.create({
         fontFamily: "WorksansBold",
         color: Colors.hex0F172A,
     },
-    badgeAdmin: {
+    badgeAccount: {
         flexDirection: "row",
         alignItems: "center",
         gap: 4,
@@ -343,7 +351,7 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: Colors.hexBBF7D0,
     },
-    badgeAdminText: {
+    badgeAccountText: {
         fontSize: 11,
         fontFamily: "WorksansSemiBold",
         color: Colors.hex166534,

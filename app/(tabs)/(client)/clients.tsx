@@ -4,7 +4,7 @@ import { useRecordDeletion } from "@/src/hooks/useRecordDeletion";
 import { Colors } from "@/src/theme/colors";
 // app/(tabs)/clients/Clients.tsx
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   Alert,
   FlatList,
@@ -29,14 +29,14 @@ import useResponsive from "@/src/hooks/useResponsive";
 const PAGE_SIZE = 50;
 
 export default function Clients() {
-  const { isMobile, maxCardWidth } = useResponsive();
+  const { isMobile } = useResponsive();
 
   const [clientes, setClientes] = useState<Cliente[]>([]);
   const [pesquisa, setPesquisa] = useState("");
   const [tipoPesquisa, setTipoPesquisa] =
     useState<TipoPesquisaCliente>("NOME");
 
-    const pagination = useRef(createPagination()).current;
+    const [pagination] = useState(createPagination);
     const [hasMore, setHasMore] = useState(true);
     const [loading, setLoading] = useState(false);
 
@@ -148,10 +148,9 @@ export default function Clients() {
 
     useEffect(() => {
       pagination.invalidate();
-      setLoading(false);
-      setHasMore(true);
 
       const timer = setTimeout(() => {
+        setHasMore(true);
         loadClientes(true);
       }, 300);
 

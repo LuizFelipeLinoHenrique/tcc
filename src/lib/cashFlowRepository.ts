@@ -12,8 +12,8 @@ export async function loadCashEntries(): Promise<CashEntry[]> {
     if (cursor) query = query.gt("id", cursor);
     const { data, error } = await query;
     if (error) throw error;
+    if (!data?.length) return entries;
     entries.push(...(data as CashEntry[]));
-    if (data.length < 500) return entries;
     cursor = data[data.length - 1].id;
   }
 }

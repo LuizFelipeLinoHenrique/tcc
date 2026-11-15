@@ -1,6 +1,6 @@
 import { Colors } from "@/src/theme/colors";
 import { Ionicons } from "@expo/vector-icons";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Animated, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import useResponsive from "../hooks/useResponsive";
 import { AnimatedButton } from "./AnimatedButton";
@@ -41,7 +41,7 @@ export function OrdersFilters({
     onClear,
 }: OrdersFiltersProps) {
 
-    const animation = useRef(new Animated.Value(0)).current;
+    const [animation] = useState(() => new Animated.Value(0));
 
     const [filtrosAbertos, setFiltrosAbertos] = useState(false);
     const [contentHeight, setContentHeight] = useState(0);

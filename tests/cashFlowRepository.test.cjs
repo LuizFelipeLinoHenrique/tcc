@@ -21,11 +21,11 @@ function repository(responses, user = { id: "owner" }) {
 }
 
 test("cash balances load all pages using a stable ID cursor", async () => {
-  const first = Array.from({ length: 500 }, (_, id) => ({ id: String(id).padStart(4, "0") }));
-  const repo = repository([{ data: first, error: null }, { data: [{ id: "0500" }], error: null }]);
+  const first = Array.from({ length: 250 }, (_, id) => ({ id: String(id).padStart(4, "0") }));
+  const repo = repository([{ data: first, error: null }, { data: [{ id: "0500" }], error: null }, { data: [], error: null }]);
   const records = await repo.loadCashEntries();
-  assert.equal(records.length, 501);
-  assert.deepEqual(repo.calls.filter(call => call[0] === "gt"), [["gt", "id", "0499"]]);
+  assert.equal(records.length, 251);
+  assert.deepEqual(repo.calls.filter(call => call[0] === "gt"), [["gt", "id", "0249"], ["gt", "id", "0500"]]);
 });
 
 test("a failed page cannot return partial cash balances", async () => {

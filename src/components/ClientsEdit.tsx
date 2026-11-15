@@ -50,50 +50,49 @@ export function EditClientCard({
     const [error, setError] = useState("");
 
     useEffect(() => {
-        carregarCliente();
-    }, [idCliente]);
+        let active = true;
+        async function carregarCliente() {
+            const {
+                data,
+                error,
+            } = await supabase
+                .from("clientes")
+                .select("*")
+                .eq("id", idCliente)
+                .single();
+            if (!active) return;
 
-    async function carregarCliente() {
-        setLoading(true);
-        setError("");
+            if (error) {
+                console.error(
+                    "Erro ao carregar cliente:",
+                    error
+                );
 
-        const {
-            data,
-            error,
-        } = await supabase
-            .from("clientes")
-            .select("*")
-            .eq("id", idCliente)
-            .single();
+                setError(
+                    "Não foi possível carregar o cliente."
+                );
 
-        if (error) {
-            console.error(
-                "Erro ao carregar cliente:",
-                error
-            );
+                setLoading(false);
+                return;
+            }
 
-            setError(
-                "Não foi possível carregar o cliente."
+            setCliente(data);
+
+            setNome(data.nome ?? "");
+            setEndereco(data.endereco ?? "");
+            setEmail(data.email ?? "");
+
+            setTelefone(
+                data.telefone != null
+                    ? String(data.telefone)
+                    : ""
             );
 
             setLoading(false);
-            return;
         }
-
-        setCliente(data);
-
-        setNome(data.nome ?? "");
-        setEndereco(data.endereco ?? "");
-        setEmail(data.email ?? "");
-
-        setTelefone(
-            data.telefone != null
-                ? String(data.telefone)
-                : ""
-        );
-
-        setLoading(false);
-    }
+        void carregarCliente();
+        return () => { active = false; };
+    }, [idCliente]);
 
     async function salvar() {
         if (!cliente || saving) {

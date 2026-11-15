@@ -30,6 +30,7 @@ function loadActions(responses = []) {
         "select",
         "delete",
         "update",
+        "insert",
         "eq",
         "single",
         "maybeSingle",
@@ -190,4 +191,25 @@ test("order lookup errors and related query errors propagate", async () => {
     actions.getOrderDetails(4),
     (error) => error === failure,
   );
+});
+
+test("material creation supports all legacy column combinations", async () => {
+  const { createMaterial, queries } = loadActions([
+    ...Array.from({ length: 3 }, () => ({ error: { code: "PGRST204" } })),
+    { data: { id: 42, nome: "Madeira" }, error: null },
+  ]);
+  assert.equal((await createMaterial("Madeira", "Pallet", 25)).id, 42);
+  assert.deepEqual(queries.map(query => query.find(([method]) => method === "insert")[1]), [
+    { nome: "Madeira", "descrição": "Pallet", preco: 25 },
+    { nome: "Madeira", descricao: "Pallet", preco: 25 },
+    { nome: "Madeira", descricao: "Pallet", "preço": 25 },
+    { nome: "Madeira", "descrição": "Pallet", "preço": 25 },
+  ]);
+});
+
+test("material creation does not retry uncertain writes", async () => {
+  const error = { code: "42501", message: "permission denied" };
+  const { createMaterial, queries } = loadActions([{ data: null, error }]);
+  await assert.rejects(createMaterial("Madeira", "Pallet", 25), cause => cause === error);
+  assert.equal(queries.length, 1);
 });

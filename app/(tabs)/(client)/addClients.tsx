@@ -2,7 +2,6 @@ import { Colors } from "@/src/theme/colors";
 import { useState } from "react";
 import {
     ActivityIndicator,
-    Alert,
     StyleSheet,
     Text,
     TextInput,
@@ -13,6 +12,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { AnimatedButton } from "@/src/components/AnimatedButton";
 import { PagesLayout, pagesStyles } from "@/src/components/ScreensLayout";
 import useResponsive from "@/src/hooks/useResponsive";
+import { recordError } from "@/src/lib/tableActions";
 import { supabase } from "@/src/lib/supabase";
 
 export default function AddClients() {
@@ -44,6 +44,7 @@ export default function AddClients() {
     }
 
     async function handleCadastrar() {
+        if (loading) return;
         setErro(null);
         setMensagemSucesso(null);
 
@@ -66,31 +67,31 @@ export default function AddClients() {
 
         setLoading(true);
 
-        const { data, error } = await supabase
-            .from("clientes")
-            .insert({
-                nome: nome.trim(),
-                email: email.trim().toLowerCase(),
-                telefone: telefoneNumerico,
-                endereco: endereco.trim(),
-            })
-            .select()
-            .single();
+        try {
+            const { data, error } = await supabase
+                .from("clientes")
+                .insert({
+                    nome: nome.trim(),
+                    email: email.trim().toLowerCase(),
+                    telefone: telefoneNumerico,
+                    endereco: endereco.trim(),
+                })
+                .select()
+                .single();
 
-        setLoading(false);
+            if (error) throw error;
 
-        if (error) {
-            console.error("Erro ao cadastrar cliente:", error);
-            setErro("Não foi possível cadastrar o cliente. Tente novamente.");
-            return;
-        }
-
-        if (data) {
-            setMensagemSucesso(`Cliente "${data.nome}" cadastrado com sucesso! (ID: #${data.id})`);
-            setNome("");
-            setEmail("");
-            setTelefone("");
-            setEndereco("");
+            if (data) {
+                setMensagemSucesso(`Cliente "${data.nome}" cadastrado com sucesso! (ID: #${data.id})`);
+                setNome("");
+                setEmail("");
+                setTelefone("");
+                setEndereco("");
+            }
+        } catch (cause) {
+            setErro(recordError(cause));
+        } finally {
+            setLoading(false);
         }
     }
 

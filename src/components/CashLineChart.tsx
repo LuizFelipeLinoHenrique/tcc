@@ -8,7 +8,7 @@ import { Colors } from "@/src/theme/colors";
 export function CashLineChart({ points, width }: { points: CashChartPoint[]; width: number }) {
   const clipId = `cashPlot${useId().replace(/:/g, "")}`;
   const pointsKey = points.map(point => `${point.date}:${point.balance}`).join("|");
-  const chart = useMemo(() => buildCashChart(points, width), [pointsKey, width]);
+  const chart = useMemo(() => buildCashChart(points, width), [points, width]);
   const [reduceMotion, setReduceMotion] = useState(false);
   const previousKey = useRef(pointsKey);
   const [reveal, setReveal] = useState({ key: pointsKey, progress: 1 });
@@ -24,8 +24,8 @@ export function CashLineChart({ points, width }: { points: CashChartPoint[]; wid
   useEffect(() => {
     if (reduceMotion) {
       previousKey.current = pointsKey;
-      setReveal({ key: pointsKey, progress: 1 });
-      return;
+      const frame = requestAnimationFrame(() => setReveal({ key: pointsKey, progress: 1 }));
+      return () => cancelAnimationFrame(frame);
     }
     if (previousKey.current === pointsKey) return;
     previousKey.current = pointsKey;

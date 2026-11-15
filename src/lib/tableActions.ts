@@ -104,3 +104,29 @@ export async function getOrderDetails(id: number) {
         status: pedido.status,
     };
 }
+
+export async function createMaterial(nome: string, descricao: string, preco: number) {
+    const columns = [
+        ["descrição", "preco"],
+        ["descricao", "preco"],
+        ["descricao", "preço"],
+        ["descrição", "preço"],
+    ];
+    let schemaError;
+
+    for (const [descriptionKey, priceKey] of columns) {
+        const { data, error } = await supabase
+            .from("produtos")
+            .insert({ nome, [descriptionKey]: descricao, [priceKey]: preco })
+            .select("id, nome")
+            .single();
+        if (!error) return data;
+
+        // A API rejeitou a coluna antes da inserção. Em outros erros, repetir
+        // a operação poderia duplicar um registro ou mascarar a causa.
+        if (error.code !== "PGRST204") throw error;
+        schemaError = error;
+    }
+
+    throw schemaError;
+}

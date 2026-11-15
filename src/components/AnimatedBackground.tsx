@@ -1,5 +1,5 @@
 import { Colors } from "@/src/theme/colors";
-import { ReactNode, useEffect, useRef } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { Animated, StyleSheet } from "react-native";
 import AnimatedSquares from "./Squares";
 
@@ -8,11 +8,11 @@ type AnimatedBackgroundProps = {
 }
 
 export function AnimatedBackground({ children }: AnimatedBackgroundProps) {
-    const animation = useRef(new Animated.Value(0)).current;
+    const [animation] = useState(() => new Animated.Value(0));
 
 
     useEffect(() => {
-        Animated.loop(
+        const loop = Animated.loop(
             Animated.sequence([
                 Animated.timing(animation, {
                     toValue: 0,
@@ -32,9 +32,10 @@ export function AnimatedBackground({ children }: AnimatedBackgroundProps) {
                     useNativeDriver: false,
                 }),
             ])
-        ).start();
-
-    }, []);
+        );
+        loop.start();
+        return () => loop.stop();
+    }, [animation]);
 
     const backgroundColor = animation.interpolate({
         inputRange: [0, 1],

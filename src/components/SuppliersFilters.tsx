@@ -1,6 +1,6 @@
 import { Colors } from "@/src/theme/colors";
 import { Ionicons } from "@expo/vector-icons";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import {
     Animated,
     Pressable,
@@ -34,7 +34,7 @@ export function SuppliersFilters({
     onClear,
     isMobile,
 }: SuppliersFiltersProps) {
-    const animation = useRef(new Animated.Value(0)).current;
+    const [animation] = useState(() => new Animated.Value(0));
 
     const [filtrosAbertos, setFiltrosAbertos] = useState(false);
     const [contentHeight, setContentHeight] = useState(0);

@@ -1,5 +1,5 @@
 import { createPagination, mergeById } from "@/src/lib/pagination";
-import { parsePositiveInteger } from "@/src/lib/orderValidation";
+import { orderDateRange, parsePositiveInteger } from "@/src/lib/orderValidation";
 import { RecordModal } from "@/src/components/RecordModal";
 import { useRecordDeletion } from "@/src/hooks/useRecordDeletion";
 import { getOrderDetails, recordError } from "@/src/lib/tableActions";
@@ -24,7 +24,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import {
     ActivityIndicator,
     FlatList,
-    Pressable,
     ScrollView,
     StyleSheet,
     Text,
@@ -94,7 +93,7 @@ export default function Orders() {
 
     const [reloadOrders, setReloadOrders] = useState<number>(0);
 
-    const pagination = useRef(createPagination()).current;
+    const [pagination] = useState(createPagination);
 
     const detailsRequest = useRef(0);
     const detailsOrderId = useRef<number | null>(null);
@@ -147,22 +146,9 @@ export default function Orders() {
                 }
 
                 if (periodoFiltro !== "TODOS") {
-                    const agora = new Date();
-                    const inicio = new Date(agora);
-
-                    if (periodoFiltro === "HOJE") {
-                        inicio.setHours(0, 0, 0, 0);
-                    }
-
-                    if (periodoFiltro === "7_DIAS") {
-                        inicio.setDate(inicio.getDate() - 7);
-                    }
-
-                    if (periodoFiltro === "30_DIAS") {
-                        inicio.setDate(inicio.getDate() - 30);
-                    }
-
-                    query = query.gte("data_pedido", inicio.toISOString());
+                    const days = periodoFiltro === "HOJE" ? 1 : periodoFiltro === "7_DIAS" ? 7 : 30;
+                    const { start, end } = orderDateRange(days);
+                    query = query.gte("data_pedido", start).lte("data_pedido", end);
                 }
 
                 if (request.cursor !== null) {
@@ -201,7 +187,6 @@ export default function Orders() {
 
     useEffect(() => {
         pagination.invalidate();
-        setLoading(false);
         const timeout = setTimeout(() => {
             setHasMore(true);
 

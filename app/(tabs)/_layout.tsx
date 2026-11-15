@@ -22,7 +22,7 @@ import "../../global.css";
 export default function TabsLayout() {
 
     const [confirmationCard, setConfirmationCard] = useState<boolean>(false)
-    const [fontsLoaded] = useFonts({
+    const [fontsLoaded, fontError] = useFonts({
 
         FugazOne: FugazOne_400Regular,
 
@@ -37,7 +37,7 @@ export default function TabsLayout() {
 
     });
 
-    if (!fontsLoaded) {
+    if (!fontsLoaded && !fontError) {
         return null;
     }
 

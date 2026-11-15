@@ -17,7 +17,7 @@ import "../../global.css";
 
 export default function RecoveryLayout() {
 
-    const [fontsLoaded] = useFonts({
+    const [fontsLoaded, fontError] = useFonts({
 
         FugazOne: FugazOne_400Regular,
 
@@ -32,7 +32,7 @@ export default function RecoveryLayout() {
 
     });
 
-    if (!fontsLoaded) {
+    if (!fontsLoaded && !fontError) {
         return null;
     }
 

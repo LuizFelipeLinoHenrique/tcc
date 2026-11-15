@@ -53,32 +53,32 @@ export function EditOrderCard({
     const [errorMessage, setErrorMessage] = useState<string>("");
 
     useEffect(() => {
-        buscarPedido();
-    }, [idPedido]);
+        let active = true;
+        async function buscarPedido() {
+            const { data, error } = await supabase
+                .from("pedidos")
+                .select("*")
+                .eq("id", idPedido)
+                .single();
+            if (!active) return;
 
-    async function buscarPedido() {
-        setLoading(true);
+            if (error) {
+                setErrorMessage("Não foi possível carregar os dados do pedido.");
+                console.error("Erro ao buscar pedido:", error);
+                setLoading(false);
+                return;
+            }
 
-        const { data, error } = await supabase
-            .from("pedidos")
-            .select("*")
-            .eq("id", idPedido)
-            .single();
-
-        if (error) {
-            setErrorMessage("Não foi possível carregar os dados do pedido.");
-            console.error("Erro ao buscar pedido:", error);
+            setPedido(data);
+            setIdCliente(String(data.id_cliente ?? ""));
+            setQtde(String(data.qtde ?? ""));
+            setIdProduto(String(data.id_produto ?? ""));
+            setStatus(data.status ?? "");
             setLoading(false);
-            return;
         }
-
-        setPedido(data);
-        setIdCliente(String(data.id_cliente ?? ""));
-        setQtde(String(data.qtde ?? ""));
-        setIdProduto(String(data.id_produto ?? ""));
-        setStatus(data.status ?? "");
-        setLoading(false);
-    }
+        void buscarPedido();
+        return () => { active = false; };
+    }, [idPedido]);
 
     async function salvarAlteracoes() {
         if (!pedido || saving) {
@@ -116,8 +116,7 @@ export function EditOrderCard({
         }
 
         Alert.alert("Sucesso", "Pedido atualizado com sucesso.");
-        if (onSaveSuccess) onSaveSuccess();
-        else buscarPedido();
+        onSaveSuccess?.();
     }
 
     if (loading) {

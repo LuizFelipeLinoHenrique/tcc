@@ -40,10 +40,6 @@ export function EditSupplierCard({
     const [error, setError] = useState("");
     const [mensagemSucesso, setMensagemSucesso] = useState<string | null>(null);
 
-    useEffect(() => {
-        carregarFornecedor();
-    }, [idFornecedor]);
-
     function formatarCnpj(valor: string) {
         const digitos = valor.replace(/\D/g, "").slice(0, 14);
         if (digitos.length <= 2) return digitos;
@@ -65,35 +61,37 @@ export function EditSupplierCard({
         return `(${digitos.slice(0, 2)}) ${digitos.slice(2, 7)}-${digitos.slice(7)}`;
     }
 
-    async function carregarFornecedor() {
-        setLoading(true);
-        setError("");
-        setMensagemSucesso(null);
+    useEffect(() => {
+        let active = true;
+        async function carregarFornecedor() {
+            const { data, error } = await supabase
+                .from("fornecedores")
+                .select("*")
+                .eq("id", idFornecedor)
+                .single();
+            if (!active) return;
 
-        const { data, error } = await supabase
-            .from("fornecedores")
-            .select("*")
-            .eq("id", idFornecedor)
-            .single();
+            if (error) {
+                console.error("Erro ao carregar fornecedor:", error);
+                setError("Não foi possível carregar os dados do fornecedor.");
+                setLoading(false);
+                return;
+            }
 
-        if (error) {
-            console.error("Erro ao carregar fornecedor:", error);
-            setError("Não foi possível carregar os dados do fornecedor.");
+            const forn = data as Fornecedor;
+            setFornecedor(forn);
+            setNome(forn.nome ?? "");
+            setCnpj(forn.cnpj ? formatarCnpj(forn.cnpj) : "");
+            setEmail(forn.email ?? "");
+            setTelefone(forn.telefone ? formatarTelefone(String(forn.telefone)) : "");
+            setContato(forn.contato ?? "");
+            setEndereco(forn.endereco ?? "");
+
             setLoading(false);
-            return;
         }
-
-        const forn = data as Fornecedor;
-        setFornecedor(forn);
-        setNome(forn.nome ?? "");
-        setCnpj(forn.cnpj ? formatarCnpj(forn.cnpj) : "");
-        setEmail(forn.email ?? "");
-        setTelefone(forn.telefone ? formatarTelefone(String(forn.telefone)) : "");
-        setContato(forn.contato ?? "");
-        setEndereco(forn.endereco ?? "");
-
-        setLoading(false);
-    }
+        void carregarFornecedor();
+        return () => { active = false; };
+    }, [idFornecedor]);
 
     async function salvar() {
         if (!fornecedor || saving) return;

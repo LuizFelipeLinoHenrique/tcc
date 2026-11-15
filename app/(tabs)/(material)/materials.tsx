@@ -2,7 +2,7 @@ import { createPagination, mergeById } from "@/src/lib/pagination";
 import { RecordModal } from "@/src/components/RecordModal";
 import { useRecordDeletion } from "@/src/hooks/useRecordDeletion";
 import { Colors } from "@/src/theme/colors";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
     Alert,
     FlatList,
@@ -45,7 +45,7 @@ export default function Materials() {
     const [tipoPesquisa, setTipoPesquisa] =
         useState<TipoPesquisaMaterial>("NOME");
 
-    const pagination = useRef(createPagination()).current;
+    const [pagination] = useState(createPagination);
     const [hasMore, setHasMore] = useState(true);
     const [loading, setLoading] = useState(false);
 
@@ -158,10 +158,9 @@ export default function Materials() {
 
     useEffect(() => {
         pagination.invalidate();
-        setLoading(false);
-        setHasMore(true);
 
         const timer = setTimeout(() => {
+            setHasMore(true);
             loadMateriais(true);
         }, 300);
 

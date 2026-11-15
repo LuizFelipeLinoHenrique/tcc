@@ -11,6 +11,19 @@ export const supabase = createClient(supabaseUrl, supabasePublishableKey, {
         ...(Platform.OS !== "web" ? { storage: AsyncStorage } : {}),
         autoRefreshToken: true,
         persistSession: true,
-        detectSessionInUrl: Platform.OS === "web",
+        detectSessionInUrl: Platform.OS === "web"
+            ? (url) => !url.pathname.replace(/\/$/, "").endsWith("/resetPassword")
+            : false,
     },
 });
+
+export function createRecoveryClient() {
+    return createClient(supabaseUrl, supabasePublishableKey, {
+        auth: {
+            storageKey: "palletcore-password-recovery",
+            autoRefreshToken: false,
+            persistSession: false,
+            detectSessionInUrl: false,
+        },
+    });
+}

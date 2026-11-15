@@ -1,6 +1,6 @@
 import { Colors } from "@/src/theme/colors";
 import { Ionicons } from "@expo/vector-icons";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import {
     Animated,
     Pressable,
@@ -22,8 +22,8 @@ type SpeedDialProps = {
 export default function SpeedDial({ actions }: SpeedDialProps) {
 
     const [open, setOpen] = useState(false);
-    const scale = useRef(new Animated.Value(1)).current;
-    const animation = useRef(new Animated.Value(0)).current;
+    const [scale] = useState(() => new Animated.Value(1));
+    const [animation] = useState(() => new Animated.Value(0));
 
     function toggleSpeedDial() {
         const toValue = open ? 0 : 1;

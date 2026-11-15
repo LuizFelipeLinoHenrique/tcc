@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useState } from "react";
 
 import {
     Animated,
@@ -30,7 +30,7 @@ export function AnimatedButton({
     stylesAnimatedView,
     disabled,
 }: AnimatedButtonProps) {
-    const scale = useRef(new Animated.Value(1)).current;
+    const [scale] = useState(() => new Animated.Value(1));
 
     const [pressed, setPressed] = useState(false);
 

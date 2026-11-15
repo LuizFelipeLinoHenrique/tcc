@@ -23,7 +23,7 @@ function screen(file) {
   const react = {
     useState(initial) {
       const key = index++;
-      if (!(key in hooks)) hooks[key] = initial;
+      if (!(key in hooks)) hooks[key] = typeof initial === "function" ? initial() : initial;
       return [hooks[key], value => { hooks[key] = typeof value === "function" ? value(hooks[key]) : value; }];
     },
     useRef(initial) {
@@ -41,7 +41,7 @@ function screen(file) {
     const request = { table, resolve, reject, calls: [] };
     requests.push(request);
     const query = { then: promise.then.bind(promise) };
-    for (const method of ["select", "eq", "gt", "gte", "order", "limit", "maybeSingle", "single", "insert"]) {
+    for (const method of ["select", "eq", "gt", "gte", "lte", "order", "limit", "maybeSingle", "single", "insert"]) {
       query[method] = (...args) => { request.calls.push([method, ...args]); return query; };
     }
     return query;
@@ -153,4 +153,11 @@ test("failed insertion releases loading, preserves fields and permits retry", as
   assert.equal(page.nodes("TextInput")[0].props.editable, true);
   assert.match(JSON.stringify(page.nodes("Text").map(node => node.props.children)), /permissão/);
   assert.equal(page.nodes("AnimatedButton")[0].props.disabled, false);
+});
+
+test("order filters use civil dates and cover exactly the selected days", () => {
+  const { orderDateRange } = compile("src/lib/orderValidation.ts", require);
+  const now = new Date(2026, 0, 3, 23, 50);
+  assert.deepEqual(orderDateRange(1, now), { start: "2026-01-03", end: "2026-01-03" });
+  assert.deepEqual(orderDateRange(7, now), { start: "2025-12-28", end: "2026-01-03" });
 });

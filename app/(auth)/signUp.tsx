@@ -14,9 +14,11 @@ export default function SignUpPage() {
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [displayName, setDisplayName] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
+  const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState<string>("");
 
   async function signUp() {
+    if (loading) return;
     if (!displayName.trim() || !email.trim() || !password.trim()) {
       setErrorMessage("Preencha todos os campos.");
       setTimeout(() => {
@@ -27,6 +29,7 @@ export default function SignUpPage() {
 
     setSigningUp(true);
     setLoading(true);
+    setErrorMessage("");
 
     try {
       const { data, error } = await supabase.auth.signUp({
@@ -40,18 +43,22 @@ export default function SignUpPage() {
       });
 
       if (error) {
-        setErrorMessage("Não foi possível criar sua conta. Tente novamente mais tarde.");
-        setTimeout(() => {
-          setErrorMessage("");
-        }, 3000);
-      };
+        setErrorMessage(error.code === "weak_password"
+          ? "Escolha uma senha mais forte e tente novamente."
+          : "Não foi possível criar sua conta. Revise os dados e tente novamente.");
+        return;
+      }
 
       if (data.session) {
-        await supabase.auth.signOut();
-      };
+        await supabase.auth.signOut({ scope: "local" });
+      }
 
+      setSuccessMessage(data.session
+        ? "Conta criada. Volte ao login para entrar."
+        : "Confira seu e-mail para confirmar o cadastro.");
+    } catch {
+      setErrorMessage("Não foi possível concluir o cadastro. Verifique sua conexão e tente novamente.");
     } finally {
-      router.replace("/(auth)/signIn");
       setSigningUp(false);
       setLoading(false);
     }
@@ -142,6 +149,10 @@ export default function SignUpPage() {
               {errorMessage}
             </Text>
           </View>
+        ) : successMessage ? (
+          <View style={authStyles.warning}>
+            <Text accessibilityLiveRegion="polite" style={authStyles.warningText}>{successMessage}</Text>
+          </View>
         ) : null}
 
         <AnimatedButton
@@ -150,6 +161,7 @@ export default function SignUpPage() {
           stylesPressablePressed={authStyles.primaryButtonPressed}
           stylesText={authStyles.primaryButtonText}
           onPress={signUp}
+          disabled={loading || !!successMessage}
         />
 
         <AnimatedButton

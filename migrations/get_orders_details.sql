@@ -6,7 +6,7 @@
 --                  quanto sem acento ("descricao", "preco").
 -- ==============================================================================
 
-CREATE OR REPLACE FUNCTION get_orders_details(id_order_detail BIGINT DEFAULT NULL)
+CREATE OR REPLACE FUNCTION public.get_orders_details(id_order_detail BIGINT DEFAULT NULL)
 RETURNS TABLE (
     id_pedido BIGINT,
     id_cliente BIGINT,
@@ -23,7 +23,8 @@ RETURNS TABLE (
     status TEXT
 )
 LANGUAGE plpgsql
-SECURITY DEFINER
+SECURITY INVOKER
+SET search_path = public
 AS $$
 DECLARE
     col_desc TEXT;
@@ -33,7 +34,7 @@ BEGIN
     -- Verifica se a coluna na tabela produtos é 'descrição' ou 'descricao'
     IF EXISTS (
         SELECT 1 FROM information_schema.columns 
-        WHERE table_name = 'produtos' AND column_name = 'descrição'
+        WHERE table_schema = 'public' AND table_name = 'produtos' AND column_name = 'descrição'
     ) THEN
         col_desc := 'pr."descrição"';
     ELSE
@@ -43,7 +44,7 @@ BEGIN
     -- Verifica se a coluna na tabela produtos é 'preco' ou 'preço'
     IF EXISTS (
         SELECT 1 FROM information_schema.columns 
-        WHERE table_name = 'produtos' AND column_name = 'preco'
+        WHERE table_schema = 'public' AND table_name = 'produtos' AND column_name = 'preco'
     ) THEN
         col_preco := 'pr.preco';
     ELSE
@@ -66,9 +67,9 @@ BEGIN
             p.data_pedido::TEXT AS data_pedido,
             p.status::TEXT AS status
         FROM
-            pedidos p
-            INNER JOIN clientes c ON c.id = p.id_cliente
-            INNER JOIN produtos pr ON pr.id = p.id_produto
+            public.pedidos p
+            INNER JOIN public.clientes c ON c.id = p.id_cliente
+            INNER JOIN public.produtos pr ON pr.id = p.id_produto
         WHERE
             ($1 IS NULL OR p.id = $1)
         ORDER BY
@@ -80,6 +81,6 @@ END;
 $$;
 
 -- Permissões de execução para o Supabase
-GRANT EXECUTE ON FUNCTION get_orders_details(BIGINT) TO authenticated;
-GRANT EXECUTE ON FUNCTION get_orders_details(BIGINT) TO anon;
-GRANT EXECUTE ON FUNCTION get_orders_details(BIGINT) TO service_role;
+GRANT EXECUTE ON FUNCTION public.get_orders_details(BIGINT) TO authenticated;
+REVOKE EXECUTE ON FUNCTION public.get_orders_details(BIGINT) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.get_orders_details(BIGINT) TO service_role;
