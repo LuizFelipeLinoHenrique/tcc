@@ -19,11 +19,6 @@ export default function SuppliersLayout() {
                         value: "add",
                         route: "/addSupplier",
                     },
-                    // {
-                    //     label: "Editar",
-                    //     value: "edit",
-                    //     route: "/editSupplier",
-                    // }
                 ]}
             />
             <Stack

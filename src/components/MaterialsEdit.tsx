@@ -37,34 +37,33 @@ export function EditMaterialCard({
     const [error, setError] = useState("");
 
     useEffect(() => {
-        carregarMaterial();
-    }, [idMaterial]);
+        let active = true;
+        async function carregarMaterial() {
+            const { data, error } = await supabase
+                .from("produtos")
+                .select("*")
+                .eq("id", idMaterial)
+                .single();
+            if (!active) return;
 
-    async function carregarMaterial() {
-        setLoading(true);
-        setError("");
+            if (error) {
+                console.error("Erro ao carregar material:", error);
+                setError("Não foi possível carregar o material.");
+                setLoading(false);
+                return;
+            }
 
-        const { data, error } = await supabase
-            .from("produtos")
-            .select("*")
-            .eq("id", idMaterial)
-            .single();
+            const mat = data as Material;
+            setMaterial(mat);
+            setNome(mat.nome ?? "");
+            setPreco(String(getMaterialPreco(mat)));
+            setDescricao(getMaterialDescricao(mat));
 
-        if (error) {
-            console.error("Erro ao carregar material:", error);
-            setError("Não foi possível carregar o material.");
             setLoading(false);
-            return;
         }
-
-        const mat = data as Material;
-        setMaterial(mat);
-        setNome(mat.nome ?? "");
-        setPreco(String(getMaterialPreco(mat)));
-        setDescricao(getMaterialDescricao(mat));
-
-        setLoading(false);
-    }
+        void carregarMaterial();
+        return () => { active = false; };
+    }, [idMaterial]);
 
     async function salvar() {
         if (!material || saving) {

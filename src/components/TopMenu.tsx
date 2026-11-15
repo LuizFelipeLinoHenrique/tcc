@@ -1,7 +1,7 @@
 import { Colors } from "@/src/theme/colors";
 import { Ionicons } from "@expo/vector-icons";
 import { Href, router, usePathname } from "expo-router";
-import { useRef } from "react";
+import { useState } from "react";
 import { Animated, Pressable, StyleSheet, Text, View } from "react-native";
 
 type Tab = {
@@ -29,7 +29,7 @@ function AnimatedTab({ tab, active }: {
     tab: Tab;
     active: boolean;
 }) {
-    const scale = useRef(new Animated.Value(1)).current;
+    const [scale] = useState(() => new Animated.Value(1));
 
     const pressionar = () => {
         Animated.timing(scale, {

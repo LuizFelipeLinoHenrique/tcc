@@ -1,5 +1,5 @@
 import { Colors } from "@/src/theme/colors";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import { Animated, StyleSheet, useWindowDimensions } from "react-native";
 
 type AnimatedSquaresProps = {
@@ -8,17 +8,17 @@ type AnimatedSquaresProps = {
 
 export default function AnimatedSquares({ index }: AnimatedSquaresProps) {
 
-    const rotate = useRef(new Animated.Value(0)).current;
+    const [rotate] = useState(() => new Animated.Value(0));
 
     const { width, height } = useWindowDimensions();
-    const squareWidth = useRef(new Animated.Value(Math.floor(Math.random() * 70) + 1,)).current;
-    const squareHeight = useRef(new Animated.Value(Math.floor(Math.random() * 70) + 50,)).current;
-    const top = useRef(new Animated.Value(Math.floor(Math.random() * height) + 1,)).current;
-    const left = useRef(new Animated.Value(Math.floor(Math.random() * width) + 1,)).current;
-    const borderWidth = useRef(new Animated.Value(Math.floor(Math.random() * 3) + 1,)).current;
+    const [squareWidth] = useState(() => Math.floor(Math.random() * 70) + 1);
+    const [squareHeight] = useState(() => Math.floor(Math.random() * 70) + 50);
+    const [top] = useState(() => Math.floor(Math.random() * height) + 1);
+    const [left] = useState(() => Math.floor(Math.random() * width) + 1);
+    const [borderWidth] = useState(() => Math.floor(Math.random() * 3) + 1);
 
     useEffect(() => {
-        Animated.loop(
+        const loop = Animated.loop(
             Animated.sequence([
                 Animated.timing(rotate, {
                     toValue: 0,
@@ -39,8 +39,10 @@ export default function AnimatedSquares({ index }: AnimatedSquaresProps) {
                     useNativeDriver: false
                 }),
             ])
-        ).start();
-    })
+        );
+        loop.start();
+        return () => loop.stop();
+    }, [index, rotate]);
 
     const squareRotate = rotate.interpolate({
         inputRange: [0, 1, 2],

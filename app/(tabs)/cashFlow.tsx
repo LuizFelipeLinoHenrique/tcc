@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { useFocusEffect } from "expo-router";
 import { ActivityIndicator, FlatList, Platform, Pressable, Share, StyleSheet, Text, TextInput, View, useWindowDimensions } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
@@ -53,7 +53,7 @@ export default function CashFlowScreen() {
   const start = isoDate(month);
   const end = isoDate(new Date(month.getFullYear(), month.getMonth() + 1, 0, 12));
   const summary = cashMonthData(entries, start, end, today);
-  const filtered = useMemo(() => {
+  const filtered = (() => {
     const query = search.trim().toLocaleLowerCase("pt-BR");
     return entries.filter(entry => {
       const date = effectiveDate(entry);
@@ -62,7 +62,7 @@ export default function CashFlowScreen() {
         (category === ALL || entry.category === category) &&
         (!query || [entry.description, entry.category, entry.notes].some(value => value.toLocaleLowerCase("pt-BR").includes(query)));
     }).sort((a, b) => effectiveDate(b).localeCompare(effectiveDate(a)) || b.id.localeCompare(a.id));
-  }, [entries, start, end, type, status, category, search, today]);
+  })();
   const categories = Array.from(new Set(entries.map(entry => entry.category))).sort();
   const pages = Math.max(1, Math.ceil(filtered.length / 25));
   const currentPage = Math.min(page, pages);
@@ -83,13 +83,13 @@ export default function CashFlowScreen() {
   function resetFilters() { setSearch(""); setType("all"); setStatus("all"); setCategory(ALL); setMonth(currentCashMonth()); setPage(1); }
   function saved(records: CashEntry[]) { request.current++; setLoading(false); setEntries(previous => [...previous.filter(entry => !records.some(record => record.id === entry.id)), ...records]); setForm(null); setNotice(records.length > 1 ? `${records.length} lançamentos registrados.` : "Lançamento salvo."); }
 
-  async function remove() {
+  const remove = useCallback(async () => {
     if (!toDelete || mutation.current) return;
     mutation.current = true; setBusy(true); setDeleteError("");
     try { await deleteCashEntry(toDelete.id); request.current++; setLoading(false); setEntries(previous => previous.filter(entry => entry.id !== toDelete.id)); setToDelete(null); setNotice("Lançamento excluído."); }
     catch (cause) { setDeleteError(cashError(cause)); }
     finally { mutation.current = false; setBusy(false); }
-  }
+  }, [toDelete]);
 
   async function exportCsv() {
     if (!loaded || loading || error || !filtered.length) return;
@@ -104,14 +104,13 @@ export default function CashFlowScreen() {
     } catch { setExportError("Não foi possível exportar os lançamentos. Tente novamente."); }
   }
 
-  const button = (label: string, icon: keyof typeof Ionicons.glyphMap, action: () => void, primary = false, disabled = false) => <Pressable accessibilityRole="button" accessibilityLabel={label} onPress={action} disabled={disabled} style={({ pressed }) => [styles.button, primary && styles.primaryButton, (pressed || disabled) && { opacity: 0.5 }]}><Ionicons name={icon} size={17} color={primary ? Colors.white : Colors.hex475569} /><Text style={[styles.buttonText, primary && { color: Colors.white }]}>{label}</Text></Pressable>;
   const metric = (label: string, value: number, icon: keyof typeof Ionicons.glyphMap, color = Colors.hex0F172A as string, subtitle?: string) => <View style={styles.metric}><View style={styles.between}><Text style={styles.muted}>{label}</Text><Ionicons name={icon} size={19} color={color} /></View><Text style={[styles.metricValue, { color }]}>{money(value)}</Text>{subtitle && <Text style={styles.small}>{subtitle}</Text>}</View>;
 
   const header = <View style={styles.sections}>
-    <View style={styles.between}><View style={{ flex: 1, minWidth: 220 }}><Text style={styles.title}>Fluxo de caixa</Text><Text style={styles.subtitle}>Organize suas movimentações e antecipe o saldo do seu negócio.</Text></View><View style={styles.row}>{button("Nova saída", "arrow-up-outline", () => { setNotice(""); setForm({ type: "expense" }); }, false, !loaded || loading || !!error)}{button("Nova entrada", "add-outline", () => { setNotice(""); setForm({ type: "income" }); }, true, !loaded || loading || !!error)}</View></View>
-    {!!error && <View style={styles.errorBox}><Text accessibilityRole="alert" style={styles.error}>{error}</Text>{button("Tentar novamente", "refresh-outline", load, false, loading)}</View>}
+    <View style={styles.between}><View style={{ flex: 1, minWidth: 220 }}><Text style={styles.title}>Fluxo de caixa</Text><Text style={styles.subtitle}>Organize suas movimentações e antecipe o saldo do seu negócio.</Text></View><View style={styles.row}><CashButton label="Nova saída" icon="arrow-up-outline" onPress={() => { setNotice(""); setForm({ type: "expense" }); }} disabled={!loaded || loading || !!error} /><CashButton label="Nova entrada" icon="add-outline" onPress={() => { setNotice(""); setForm({ type: "income" }); }} primary disabled={!loaded || loading || !!error} /></View></View>
+    {!!error && <View style={styles.errorBox}><Text accessibilityRole="alert" style={styles.error}>{error}</Text><CashButton label="Tentar novamente" icon="refresh-outline" onPress={load} disabled={loading} /></View>}
     {!!exportError && <View style={styles.errorBox}><Text accessibilityRole="alert" style={styles.error}>{exportError}</Text></View>}
-    {!!notice && <View style={styles.notice}><Text accessibilityLiveRegion="polite" style={styles.success}>{notice}</Text>{button("Fechar aviso", "close-outline", () => setNotice(""))}</View>}
+    {!!notice && <View style={styles.notice}><Text accessibilityLiveRegion="polite" style={styles.success}>{notice}</Text><CashButton label="Fechar aviso" icon="close-outline" onPress={() => setNotice("")} /></View>}
     <View style={styles.monthNavigation}>
       <Pressable accessibilityRole="button" accessibilityLabel="Mês anterior" onPress={() => changeMonth(-1)} style={({ pressed }) => [styles.monthArrow, pressed && { opacity: 0.5 }]}><Ionicons name="chevron-back" size={22} color={Colors.hex0B4F6C} /></Pressable>
       <Text accessibilityLiveRegion="polite" style={[styles.panelTitle, styles.monthLabel]}>{month.toLocaleDateString("pt-BR", { month: "long", year: "numeric" })}</Text>
@@ -137,12 +136,12 @@ export default function CashFlowScreen() {
         {!overdueExpenseGroups.length ? <Text style={styles.muted}>Nenhuma saída vencida neste mês.</Text> : overdueExpenseGroups.map(([name, total]) => <View key={name} style={{ gap: 7 }}><View style={styles.between}><Text style={styles.label}>{name}</Text><Text style={styles.label}>{money(total)}</Text></View><View style={styles.barTrack}><View style={[styles.bar, { backgroundColor: Colors.hexB45309, width: `${total / totalOverdueExpenses * 100}%` }]} /></View></View>)}
       </View>
     </>}
-    <View style={styles.panel}><View style={styles.between}><View><Text style={styles.panelTitle}>Movimentações</Text><Text style={styles.small}>{filtered.length} lançamento(s) no mês</Text></View><View style={styles.row}>{button("Atualizar", "refresh-outline", load, false, loading)}{button("Exportar CSV", "download-outline", exportCsv, false, !loaded || loading || !!error || !filtered.length)}</View></View>
+    <View style={styles.panel}><View style={styles.between}><View><Text style={styles.panelTitle}>Movimentações</Text><Text style={styles.small}>{filtered.length} lançamento(s) no mês</Text></View><View style={styles.row}><CashButton label="Atualizar" icon="refresh-outline" onPress={load} disabled={loading} /><CashButton label="Exportar CSV" icon="download-outline" onPress={exportCsv} disabled={!loaded || loading || !!error || !filtered.length} /></View></View>
       <TextInput accessibilityLabel="Buscar movimentações" placeholder="Buscar descrição, categoria ou observações" placeholderTextColor={Colors.hex94A3B8} value={search} onChangeText={value => { setSearch(value); setPage(1); }} style={styles.input} />
       <CashChoices values={[{ value: "all", label: "Todos os tipos" }, { value: "income", label: "Entradas" }, { value: "expense", label: "Saídas" }]} value={type} onChange={value => { setType(value); setPage(1); }} />
       <CashChoices values={[{ value: "all", label: "Todas as situações" }, { value: "pending", label: "Pendentes" }, { value: "paid", label: "Realizados" }, { value: "overdue", label: "Vencidos" }, { value: "cancelled", label: "Cancelados" }]} value={status} onChange={value => { setStatus(value); setPage(1); }} />
       {!!categories.length && <CashChoices values={[ALL, ...categories].map(value => ({ value, label: value === ALL ? "Todas as categorias" : value }))} value={category} onChange={value => { setCategory(value); setPage(1); }} />}
-      <View style={styles.between}><Text style={[styles.small, { flex: 1 }]}>Realizados são filtrados pela data do pagamento; pendentes e cancelados, pelo vencimento. Os indicadores acima consideram o mês selecionado.</Text>{button("Limpar filtros", "close-circle-outline", resetFilters)}</View>
+      <View style={styles.between}><Text style={[styles.small, { flex: 1 }]}>Realizados são filtrados pela data do pagamento; pendentes e cancelados, pelo vencimento. Os indicadores acima consideram o mês selecionado.</Text><CashButton label="Limpar filtros" icon="close-circle-outline" onPress={resetFilters} /></View>
     </View>
   </View>;
 
@@ -152,12 +151,28 @@ export default function CashFlowScreen() {
       showsHorizontalScrollIndicator={false}
       data={visible} keyExtractor={entry => entry.id} contentContainerStyle={[styles.content, compact && { padding: 16 }]} ListHeaderComponent={header} keyboardShouldPersistTaps="handled"
       ListEmptyComponent={!loading && loaded ? <View style={styles.empty}><Ionicons name="wallet-outline" size={38} color={Colors.hex94A3B8} /><Text style={styles.panelTitle}>{entries.length ? "Nenhuma movimentação encontrada" : "Seu fluxo de caixa começa aqui"}</Text><Text style={styles.muted}>{entries.length ? "Ajuste o mês e os filtros para consultar os lançamentos." : "Registre a primeira entrada ou saída. Para incluir um saldo anterior, crie um lançamento realizado na categoria Saldo inicial."}</Text></View> : null}
-      renderItem={({ item }) => <View style={[styles.entry, compact && { flexDirection: "column", alignItems: "stretch" }]}><View style={styles.entryMain}><View style={[styles.entryIcon, { backgroundColor: item.type === "income" ? Colors.hexDCFCE7 : Colors.hexFEE2E2 }]}><Ionicons name={item.type === "income" ? "arrow-down" : "arrow-up"} size={19} color={item.type === "income" ? Colors.hex15803D : Colors.hexB91C1C} /></View><View style={{ flex: 1, gap: 5 }}><Text style={styles.entryTitle}>{item.description}</Text><Text style={styles.small}>{item.category}</Text><Text style={styles.small}>Vence em {displayDate(item.due_date)}{item.paid_date ? ` • Realizado em ${displayDate(item.paid_date)}` : ""}</Text>{!!item.notes && <Text style={styles.small} numberOfLines={2}>{item.notes}</Text>}</View></View><View style={styles.entryEnd}><View style={{ alignItems: "flex-end", gap: 5 }}><Text style={[styles.entryAmount, { color: item.status === "cancelled" ? Colors.hex94A3B8 : item.type === "income" ? Colors.hex15803D : Colors.hexB91C1C }]}>{item.type === "income" ? "+ " : "− "}{money(item.amount_cents)}</Text><Text style={[styles.small, item.status === "pending" && item.due_date < today && { color: Colors.hexB45309 }]}>{item.status === "pending" && item.due_date < today ? "Vencido" : statusLabels[item.status]}</Text></View><View style={styles.row}>{button("Editar", "create-outline", () => { setNotice(""); setForm({ type: item.type, entry: item }); })}
-        {item.status === "pending" && button("Registrar pagamento", "checkmark-circle-outline", () => { setNotice(""); setForm({ type: item.type, entry: { ...item, status: "paid", paid_date: cashToday() } }); })}{button("Excluir", "trash-outline", () => { setDeleteError(""); setToDelete(item); })}</View></View></View>}
-      ListFooterComponent={loaded && filtered.length > 0 ? <View style={[styles.between, { paddingVertical: 20 }]}>{button("Anterior", "chevron-back", () => setPage(currentPage - 1), false, currentPage === 1)}<Text style={styles.muted}>Página {currentPage} de {pages}</Text>{button("Próxima", "chevron-forward", () => setPage(currentPage + 1), false, currentPage === pages)}</View> : null} />
+      renderItem={({ item }) => <View style={[styles.entry, compact && { flexDirection: "column", alignItems: "stretch" }]}><View style={styles.entryMain}><View style={[styles.entryIcon, { backgroundColor: item.type === "income" ? Colors.hexDCFCE7 : Colors.hexFEE2E2 }]}><Ionicons name={item.type === "income" ? "arrow-down" : "arrow-up"} size={19} color={item.type === "income" ? Colors.hex15803D : Colors.hexB91C1C} /></View><View style={{ flex: 1, gap: 5 }}><Text style={styles.entryTitle}>{item.description}</Text><Text style={styles.small}>{item.category}</Text><Text style={styles.small}>Vence em {displayDate(item.due_date)}{item.paid_date ? ` • Realizado em ${displayDate(item.paid_date)}` : ""}</Text>{!!item.notes && <Text style={styles.small} numberOfLines={2}>{item.notes}</Text>}</View></View><View style={styles.entryEnd}><View style={{ alignItems: "flex-end", gap: 5 }}><Text style={[styles.entryAmount, { color: item.status === "cancelled" ? Colors.hex94A3B8 : item.type === "income" ? Colors.hex15803D : Colors.hexB91C1C }]}>{item.type === "income" ? "+ " : "− "}{money(item.amount_cents)}</Text><Text style={[styles.small, item.status === "pending" && item.due_date < today && { color: Colors.hexB45309 }]}>{item.status === "pending" && item.due_date < today ? "Vencido" : statusLabels[item.status]}</Text></View><View style={styles.row}><CashButton label="Editar" icon="create-outline" onPress={() => { setNotice(""); setForm({ type: item.type, entry: item }); }} />
+        {item.status === "pending" && <CashButton label="Registrar pagamento" icon="checkmark-circle-outline" onPress={() => { setNotice(""); setForm({ type: item.type, entry: { ...item, status: "paid", paid_date: cashToday() } }); }} />}<CashButton label="Excluir" icon="trash-outline" onPress={() => { setDeleteError(""); setToDelete(item); }} /></View></View></View>}
+      ListFooterComponent={loaded && filtered.length > 0 ? <View style={[styles.between, { paddingVertical: 20 }]}><CashButton label="Anterior" icon="chevron-back" onPress={() => setPage(currentPage - 1)} disabled={currentPage === 1} /><Text style={styles.muted}>Página {currentPage} de {pages}</Text><CashButton label="Próxima" icon="chevron-forward" onPress={() => setPage(currentPage + 1)} disabled={currentPage === pages} /></View> : null} />
     <RecordModal visible={!!form} title={form?.entry ? "Editar lançamento" : "Novo lançamento"} onClose={() => setForm(null)} busy={busy}>{form && <CashEntryForm key={form.entry?.id ?? form.type} entry={form.entry} initialType={form.type} onSaved={saved} onBusy={setBusy} />}</RecordModal>
-    <RecordModal visible={!!toDelete} title="Excluir lançamento" onClose={() => setToDelete(null)} busy={busy}><View style={{ width: "100%", padding: 16, gap: 20 }}><Text style={styles.label}>Excluir “{toDelete?.description}”? Essa ação remove o lançamento e recalcula os saldos.</Text>{!!deleteError && <Text accessibilityRole="alert" style={styles.error}>{deleteError}</Text>}<View style={styles.row}>{button("Cancelar", "close", () => setToDelete(null), false, busy)}{button(busy ? "Excluindo…" : "Confirmar exclusão", "trash-outline", remove, true, busy)}</View></View></RecordModal>
+    <RecordModal visible={!!toDelete} title="Excluir lançamento" onClose={() => setToDelete(null)} busy={busy}><View style={{ width: "100%", padding: 16, gap: 20 }}><Text style={styles.label}>Excluir “{toDelete?.description}”? Essa ação remove o lançamento e recalcula os saldos.</Text>{!!deleteError && <Text accessibilityRole="alert" style={styles.error}>{deleteError}</Text>}<View style={styles.row}><CashButton label="Cancelar" icon="close" onPress={() => setToDelete(null)} disabled={busy} /><CashButton label={busy ? "Excluindo…" : "Confirmar exclusão"} icon="trash-outline" onPress={remove} primary disabled={busy} /></View></View></RecordModal>
   </>;
+}
+
+function CashButton({ label, icon, onPress, primary = false, disabled = false }: {
+  label: string;
+  icon: keyof typeof Ionicons.glyphMap;
+  onPress: () => void;
+  primary?: boolean;
+  disabled?: boolean;
+}) {
+  return (
+    <Pressable accessibilityRole="button" accessibilityLabel={label} onPress={onPress} disabled={disabled}
+      style={({ pressed }) => [styles.button, primary && styles.primaryButton, (pressed || disabled) && { opacity: 0.5 }]}>
+      <Ionicons name={icon} size={17} color={primary ? Colors.white : Colors.hex475569} />
+      <Text style={[styles.buttonText, primary && { color: Colors.white }]}>{label}</Text>
+    </Pressable>
+  );
 }
 
 const styles = StyleSheet.create({

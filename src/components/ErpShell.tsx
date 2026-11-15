@@ -1,7 +1,7 @@
-﻿import { Colors } from "@/src/theme/colors";
+import { Colors } from "@/src/theme/colors";
 import { Ionicons } from "@expo/vector-icons";
 import { Href, router, usePathname } from "expo-router";
-import { PropsWithChildren } from "react";
+import { PropsWithChildren, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -18,13 +18,16 @@ const modules: { label: string; path: string; route: Href; icon: keyof typeof Io
 export function ErpShell({ children, onSignOut }: PropsWithChildren<{ onSignOut: () => void }>) {
   const { width } = useWindowDimensions();
   const desktop = width >= 1000;
+  const [hoveredPath, setHoveredPath] = useState<string | null>(null);
   const pathname = usePathname().toLowerCase();
   const active = modules.find(item => pathname.includes(item.path.toLowerCase()));
   const navigation = modules.map(item => {
     const selected = item === active;
     return <Pressable key={item.path} accessibilityRole="tab" accessibilityState={{ selected }} accessibilityLabel={item.label}
       onPress={() => router.replace(item.route)}
-      style={({ pressed, hovered }) => [styles.navItem, !desktop && styles.mobileItem, selected && styles.selected, (pressed || hovered) && styles.hover]}>
+      onHoverIn={() => setHoveredPath(item.path)}
+      onHoverOut={() => setHoveredPath(null)}
+      style={({ pressed }) => [styles.navItem, !desktop && styles.mobileItem, selected && styles.selected, (pressed || hoveredPath === item.path) && styles.hover]}>
       <Ionicons name={item.icon} size={19} color={selected ? Colors.white : desktop ? Colors.hexCBD8E2 : Colors.hex475569} />
       <Text style={[styles.navText, !desktop && styles.mobileText, selected && styles.selectedText]}>{item.label}</Text>
     </Pressable>;

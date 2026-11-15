@@ -70,7 +70,12 @@ async function main() {
   await new Promise(resolve => server.listen(0, "127.0.0.1", resolve));
   let browser;
   try {
-    browser = await chromium.launch({ channel: "chrome", headless: true });
+    browser = await chromium.launch({
+      ...(process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE
+        ? { executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE }
+        : { channel: "chrome" }),
+      headless: true,
+    });
     const page = await browser.newPage();
     const errors = [];
     page.on("pageerror", error => errors.push(error.message));
