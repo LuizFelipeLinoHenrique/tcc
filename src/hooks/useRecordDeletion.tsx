@@ -44,8 +44,9 @@ export function useRecordDeletion(
         >
             <View style={{ width: "100%", padding: 16, gap: 16 }}>
                 <Text style={pagesStyles.text}>
-                    Deseja realmente excluir "{record?.name}"? Esta ação não
-                    pode ser desfeita.
+                    {table === "pedidos"
+                        ? `Excluir definitivamente "${record?.name}" e seus vínculos financeiros não recebidos? Esta ação não pode ser desfeita. Pedidos com recebimento realizado não podem ser excluídos.`
+                        : `Deseja realmente excluir "${record?.name}"? Esta ação não pode ser desfeita.`}
                 </Text>
                 {!!error && <Text accessibilityRole="alert">{error}</Text>}
                 <Pressable

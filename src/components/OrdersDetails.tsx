@@ -58,7 +58,7 @@ export function OrderDetailsCard({
             <View
                 style={[
                     styles.detail,
-                    fullWidth && styles.detailFullWidth,
+                    (fullWidth || detail.fullWidth) && styles.detailFullWidth,
                 ]}
             >
                 <Text style={styles.label}>
@@ -74,8 +74,8 @@ export function OrderDetailsCard({
     const cliente = getDetail("Cliente");
     const telefone = getDetail("Telefone");
     const endereco = getDetail("Endereço");
-    const material = getDetail("Material");
-    const descricao = getDetail("Descrição do Material");
+    const produto = getDetail("Produto");
+    const descricao = getDetail("Descrição do Produto");
     const precoUnit = getDetail("Preço Unitário");
     const quantidade = getDetail("Quantidade Pedida");
     const precoTotal = getDetail("Preço Total");
@@ -172,15 +172,15 @@ export function OrderDetailsCard({
             )}
 
             {/* PRODUTO */}
-            {(material || descricao) && (
+            {(produto || descricao) && (
                 <View style={styles.section}>
                     <View style={styles.sectionHeader}>
                         <Ionicons name="cube-outline" size={17} color={Colors.hex0B4F6C} />
-                        <Text style={styles.sectionTitle}>Material / Produto</Text>
+                        <Text style={styles.sectionTitle}>Produto</Text>
                     </View>
 
                     <View style={styles.details}>
-                        {renderDetail(material)}
+                        {renderDetail(produto)}
                         {renderDetail(descricao, true)}
                     </View>
                 </View>

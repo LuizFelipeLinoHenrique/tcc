@@ -9,7 +9,7 @@ Os dados exercitam as funções do módulo; inserir exemplos não equivale a exe
 | Função | Como conferir |
 | --- | --- |
 | Saldo inicial e saldo anterior | Consulte outubro e novembro de 2026. Há saldos iniciais, uma venda e uma compra anteriores a novembro. |
-| Entradas e saídas realizadas | Confira vendas, serviços, aportes e despesas de materiais, salários, aluguel, impostos e transporte. |
+| Entradas e saídas realizadas | Confira vendas, serviços, aportes e despesas de produtos, salários, aluguel, impostos e transporte. |
 | Data efetiva de pagamento | A venda vencida no mês anterior e recebida hoje aparece no mês do pagamento. |
 | Caixa único | Confira que todos os exemplos entram nos indicadores e na projeção, sem seletor de contas. Novos lançamentos usam Caixa principal. |
 | Categorias | Use a categoria personalizada Manutenção de equipamentos e compare o gráfico de saídas realizadas. |

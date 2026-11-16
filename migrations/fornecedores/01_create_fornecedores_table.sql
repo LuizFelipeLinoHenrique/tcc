@@ -1,6 +1,6 @@
 -- ==============================================================================
 -- Migration: Criação da tabela 'fornecedores'
--- Descrição: Estrutura completa para gestão de fornecedores de materiais e insumos.
+-- Descrição: Estrutura completa para gestão de fornecedores de produtos e insumos.
 -- ==============================================================================
 
 CREATE TABLE IF NOT EXISTS public.fornecedores (

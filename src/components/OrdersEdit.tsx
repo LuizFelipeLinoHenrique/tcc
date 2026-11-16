@@ -1,7 +1,9 @@
 import { Colors } from "@/src/theme/colors";
 import { Ionicons } from "@expo/vector-icons";
 import { supabase } from "@/src/lib/supabase";
-import { recordError, updateRecord } from "@/src/lib/tableActions";
+import { recordError } from "@/src/lib/tableActions";
+import { OrderItem, orderItems } from "@/src/lib/orderItems";
+import { parsePositiveInteger } from "@/src/lib/orderValidation";
 import React, { useEffect, useState } from "react";
 import {
     ActivityIndicator,
@@ -23,6 +25,8 @@ type EditOrderCardProps = {
 };
 
 type Order = {
+    financial_user_id?: string | null;
+    itens?: OrderItem[];
     id: number;
     data_pedido: string;
     id_cliente: number;
@@ -45,8 +49,7 @@ export function EditOrderCard({
 
     const [pedido, setPedido] = useState<Order | null>(null);
     const [idCliente, setIdCliente] = useState("");
-    const [qtde, setQtde] = useState("");
-    const [idProduto, setIdProduto] = useState("");
+    const [itens, setItens] = useState<{ id_produto: string; qtde: string }[]>([]);
     const [status, setStatus] = useState("");
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -61,7 +64,8 @@ export function EditOrderCard({
 
         const { data, error } = await supabase
             .from("pedidos")
-            .select("*")
+            .select("*, itens:pedido_itens(id_produto, qtde)")
+            .is("deleted_at", null)
             .eq("id", idPedido)
             .single();
 
@@ -74,8 +78,7 @@ export function EditOrderCard({
 
         setPedido(data);
         setIdCliente(String(data.id_cliente ?? ""));
-        setQtde(String(data.qtde ?? ""));
-        setIdProduto(String(data.id_produto ?? ""));
+        setItens(orderItems(data).map(item => ({ id_produto: String(item.id_produto), qtde: String(item.qtde) })));
         setStatus(data.status ?? "");
         setLoading(false);
     }
@@ -85,12 +88,12 @@ export function EditOrderCard({
             return;
         }
 
-        if (!idCliente.trim() || !idProduto.trim() || !qtde.trim()) {
+        if (!idCliente.trim() || !itens.length || itens.some(item => !item.id_produto.trim() || !item.qtde.trim())) {
             setErrorMessage("Preencha todos os campos obrigatórios.");
             return;
         }
 
-        if (![idCliente, idProduto, qtde].every(value => Number.isSafeInteger(Number(value)) && Number(value) > 0)) {
+        if (![idCliente, ...itens.flatMap(item => [item.id_produto, item.qtde])].every(value => parsePositiveInteger(value) !== null)) {
             setErrorMessage("Informe IDs e quantidade com números inteiros maiores que zero.");
             return;
         }
@@ -98,16 +101,22 @@ export function EditOrderCard({
             setErrorMessage("Selecione um status válido.");
             return;
         }
+        if (new Set(itens.map(item => Number(item.id_produto))).size !== itens.length) {
+            setErrorMessage("Cada produto deve aparecer uma vez. Ajuste sua quantidade.");
+            return;
+        }
         setSaving(true);
         setErrorMessage("");
 
         try {
-            await updateRecord("pedidos", idPedido, {
-                id_cliente: Number(idCliente),
-                qtde: Number(qtde),
-                id_produto: Number(idProduto),
-                status: status,
+            const { data, error } = await supabase.rpc("save_order_items", {
+                p_pedido: idPedido,
+                p_cliente: Number(idCliente),
+                p_itens: itens.map(item => ({ id_produto: Number(item.id_produto), qtde: Number(item.qtde) })),
+                p_status: status,
             });
+            if (error) throw error;
+            if (!data) throw new Error("O pedido não foi atualizado.");
         } catch (cause) {
             setErrorMessage(recordError(cause));
             return;
@@ -225,41 +234,10 @@ export function EditOrderCard({
                             <TextInput
                                 value={idCliente}
                                 onChangeText={setIdCliente}
+                                editable={!saving && !pedido.financial_user_id}
                                 keyboardType="numeric"
                                 style={styles.input}
                                 placeholder="Ex: 1"
-                                placeholderTextColor={Colors.hex94A3B8}
-                            />
-                        </View>
-                    </View>
-
-                    {/* ID PRODUTO */}
-                    <View style={[styles.field, isMobile && styles.fieldMobile]}>
-                        <Text style={pagesStyles.label}>ID DO PRODUTO</Text>
-                        <View style={styles.inputWrapper}>
-                            <Ionicons name="pricetag-outline" size={18} color={Colors.hex64748B} style={styles.inputIcon} />
-                            <TextInput
-                                value={idProduto}
-                                onChangeText={setIdProduto}
-                                keyboardType="numeric"
-                                style={styles.input}
-                                placeholder="Ex: 10"
-                                placeholderTextColor={Colors.hex94A3B8}
-                            />
-                        </View>
-                    </View>
-
-                    {/* QUANTIDADE */}
-                    <View style={[styles.field, isMobile && styles.fieldMobile]}>
-                        <Text style={pagesStyles.label}>QUANTIDADE</Text>
-                        <View style={styles.inputWrapper}>
-                            <Ionicons name="layers-outline" size={18} color={Colors.hex64748B} style={styles.inputIcon} />
-                            <TextInput
-                                value={qtde}
-                                onChangeText={setQtde}
-                                keyboardType="numeric"
-                                style={styles.input}
-                                placeholder="Ex: 5"
                                 placeholderTextColor={Colors.hex94A3B8}
                             />
                         </View>
@@ -273,6 +251,7 @@ export function EditOrderCard({
                             <TextInput
                                 value={status}
                                 onChangeText={setStatus}
+                                editable={!saving}
                                 style={styles.input}
                                 placeholder="P, E ou C"
                                 placeholderTextColor={Colors.hex94A3B8}
@@ -281,6 +260,25 @@ export function EditOrderCard({
                         </View>
                     </View>
                 </View>
+                {itens.map((item, index) => (
+                    <View key={index} style={styles.fields}>
+                        <View style={[styles.field, isMobile && styles.fieldMobile]}>
+                            <Text style={pagesStyles.label}>ID DO PRODUTO {index + 1}</Text>
+                            <TextInput accessibilityLabel={`Produto ${index + 1}`} value={item.id_produto} editable={!saving && !pedido.financial_user_id} keyboardType="number-pad" style={[styles.inputWrapper, styles.input]}
+                                onChangeText={value => setItens(prev => prev.map((entry, i) => i === index ? { ...entry, id_produto: value } : entry))} />
+                        </View>
+                        <View style={[styles.field, isMobile && styles.fieldMobile]}>
+                            <Text style={pagesStyles.label}>QUANTIDADE</Text>
+                            <TextInput accessibilityLabel={`Quantidade do produto ${index + 1}`} value={item.qtde} editable={!saving && !pedido.financial_user_id} keyboardType="number-pad" style={[styles.inputWrapper, styles.input]}
+                                onChangeText={value => setItens(prev => prev.map((entry, i) => i === index ? { ...entry, qtde: value } : entry))} />
+                        </View>
+                        <Pressable accessibilityRole="button" accessibilityLabel={`Remover produto ${index + 1}`} disabled={saving || !!pedido.financial_user_id || itens.length === 1} onPress={() => setItens(prev => prev.filter((_, i) => i !== index))}>
+                            <Text style={pagesStyles.label}>Remover</Text>
+                        </Pressable>
+                    </View>
+                ))}
+                {!!pedido.financial_user_id && <Text style={pagesStyles.description}>Itens, preços e vencimento preservados. Entregar não confirma pagamento. Cancelar encerra apenas o recebimento pendente; valores já recebidos permanecem no caixa.</Text>}
+                <AnimatedButton title="Adicionar outro produto" disabled={saving || !!pedido.financial_user_id} onPress={() => setItens(prev => [...prev, { id_produto: "", qtde: "" }])} stylesPressable={pagesStyles.primaryButton} stylesText={pagesStyles.primaryButtonText} />
             </View>
 
             {/* ERRO */}
@@ -304,6 +302,7 @@ export function EditOrderCard({
                     stylesPressable={pagesStyles.primaryButton}
                     stylesText={pagesStyles.primaryButtonText}
                     onPress={salvarAlteracoes}
+                    disabled={saving}
                 />
             </View>
         </View>

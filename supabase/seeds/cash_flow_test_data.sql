@@ -16,19 +16,19 @@ begin
       ('opening', 'Saldo inicial', 'income', 1000000, 'Saldo inicial', month_start - 1, month_start - 1, 'paid'),
       ('sale', 'Venda de pallets recebida', 'income', 325050, 'Vendas', today - 2, today - 1, 'paid'),
       ('service', 'Serviço de manutenção recebido', 'income', 85075, 'Serviços', today, today, 'paid'),
-      ('materials', 'Compra de madeira paga', 'expense', 135040, 'Materiais', today - 2, today - 1, 'paid'),
+      ('materials', 'Compra de madeira paga', 'expense', 135040, 'Produtos', today - 2, today - 1, 'paid'),
       ('rent', 'Aluguel do galpão pago', 'expense', 180000, 'Aluguel', month_start, month_start, 'paid'),
       ('late-income', 'Cliente com recebimento atrasado', 'income', 210000, 'Vendas', today - 5, null, 'pending'),
       ('late-expense', 'Fornecedor com pagamento atrasado', 'expense', 130000, 'Fornecedores', today - 3, null, 'pending'),
       ('today', 'Frete previsto para hoje', 'expense', 12500, 'Transporte', today, null, 'pending'),
-      ('negative', 'Compra de máquina em 15 dias', 'expense', 2500000, 'Materiais', today + 15, null, 'pending'),
+      ('negative', 'Compra de máquina em 15 dias', 'expense', 2500000, 'Produtos', today + 15, null, 'pending'),
       ('recovery', 'Contrato a receber em 35 dias', 'income', 3200000, 'Vendas', today + 35, null, 'pending'),
       ('cancel-income', 'Venda cancelada', 'income', 9999999, 'Vendas', today, null, 'cancelled'),
-      ('cancel-expense', 'Compra cancelada', 'expense', 8888888, 'Materiais', today, null, 'cancelled')
+      ('cancel-expense', 'Compra cancelada', 'expense', 8888888, 'Produtos', today, null, 'cancelled')
   ), pagination as (
     select 'page-' || n, 'Lote de pallets ' || lpad(n::text, 2, '0'),
       case when n % 2 = 0 then 'income' else 'expense' end,
-      10000 + n * 137, case when n % 2 = 0 then 'Vendas' else 'Materiais' end,
+      10000 + n * 137, case when n % 2 = 0 then 'Vendas' else 'Produtos' end,
       month_start + (n - 1), null::date, 'pending'
     from generate_series(1, 24) n
   ), monthly as (

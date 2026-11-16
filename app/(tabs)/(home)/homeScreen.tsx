@@ -1,3 +1,4 @@
+import { orderItems, orderQuantity } from "@/src/lib/orderItems";
 import { Colors } from "@/src/theme/colors";
 import { AnimatedButton } from "@/src/components/AnimatedButton";
 import { BarGraph, BarGraphItem } from "@/src/components/BarGraph";
@@ -60,7 +61,8 @@ export default function HomeScreen() {
                 // 1. Carregar Pedidos
                 const { data: pedidos, error: pedidosError } = await supabase
                     .from("pedidos")
-                    .select("*");
+                    .select("*, itens:pedido_itens(id_produto, qtde, unit_price_cents)")
+                    .is("deleted_at", null);
 
                 if (pedidosError) {
                     console.error("Erro ao carregar pedidos no dashboard:", pedidosError);
@@ -68,7 +70,7 @@ export default function HomeScreen() {
 
                 const listaPedidos = pedidos ?? [];
 
-                // 2. Carregar Produtos / Materiais
+                // 2. Carregar Produtos
                 const { data: produtos } = await supabase
                     .from("produtos")
                     .select("*");
@@ -99,7 +101,7 @@ export default function HomeScreen() {
                         const preco = Number(p.preco ?? p["preço"] ?? p.preco_unit ?? 0);
                         somaPrecos += preco;
                         produtosMap.set(p.id, {
-                            nome: p.nome ?? `Material #${p.id}`,
+                            nome: p.nome ?? `Produto #${p.id}`,
                             preco,
                         });
                     });
@@ -132,16 +134,9 @@ export default function HomeScreen() {
                         countP++;
                     }
 
-                    const qtde = Number(ped.qtde ?? ped.quantidade ?? 1);
-                    const idProd = ped.id_produto ?? ped.id_material ?? ped.produto_id;
-                    const prodInfo = idProd ? produtosMap.get(idProd) : undefined;
-                    const precoUnit = prodInfo
-                        ? prodInfo.preco
-                        : listaProdutos.length > 0
-                            ? Number(listaProdutos[0].preco ?? listaProdutos[0]["preço"] ?? 0)
-                            : 0;
-
-                    const valorPedido = qtde * precoUnit;
+                    const itens = orderItems(ped);
+                    const qtde = orderQuantity(ped);
+                    const valorPedido = itens.reduce((total, item) => total + Number(item.qtde) * (item.unit_price_cents != null ? Number(item.unit_price_cents) / 100 : produtosMap.get(item.id_produto)?.preco ?? 0), 0);
                     faturamentoPorPedido.set(ped.id, rawStatus === "C" || rawStatus.startsWith("CANC") ? 0 : valorPedido);
 
                     // Pedidos cancelados sao mantidos no historico de status, mas nao
@@ -153,10 +148,9 @@ export default function HomeScreen() {
                     somaQtde += qtde;
                     somaFaturamento += valorPedido;
 
-                    if (idProd) {
-                        const demAtual = demandaPorProduto.get(idProd) || 0;
-                        demandaPorProduto.set(idProd, demAtual + qtde);
-                    }
+                    itens.forEach(item => {
+                        demandaPorProduto.set(item.id_produto, (demandaPorProduto.get(item.id_produto) || 0) + Number(item.qtde));
+                    });
 
                     const idCliente = ped.id_cliente ?? ped.cliente_id;
                     if (idCliente) {
@@ -179,7 +173,7 @@ export default function HomeScreen() {
                     { label: "Cancelado", value: countC, color: Colors.hexDC2626 },
                 ]);
 
-                // Gráfico de Barras: Top Materiais com Demanda
+                // Gráfico de Barras: Top Produtos com Demanda
                 const coresBarras = [Colors.hex0B4F6C, Colors.hex0E7490, Colors.hex145D7E, Colors.hex38BDF8];
                 const topBars: BarGraphItem[] = [];
 
@@ -361,7 +355,7 @@ export default function HomeScreen() {
                 <Text style={pagesStyles.brand}>VISÃO GERAL</Text>
                 <Text style={styles.dashboardTitle}>Painel de operações</Text>
                 <Text style={styles.dashboardSubtitle}>
-                    Métricas consolidadas de faturamento, fluxo de pedidos, materiais e parceiros
+                    Métricas consolidadas de faturamento, fluxo de pedidos, produtos e parceiros
                 </Text>
             </View>
 
@@ -474,7 +468,7 @@ export default function HomeScreen() {
 
                     {/* Gráfico 1: Evolução Temporal com Seletor de Período */}
 
-                    {/* Visão de Suporte Operacional (Clientes, Materiais e Fornecedores) */}
+                    {/* Visão de Suporte Operacional (Clientes, Produtos e Fornecedores) */}
                     <View style={[pagesStyles.card, styles.supportCard, { width: "100%" }]}>
                         <View style={styles.supportHeader}>
                             <View style={styles.supportIcon}>
@@ -497,7 +491,7 @@ export default function HomeScreen() {
 
                             <View style={styles.supportMetricItem}>
                                 <Text style={styles.supportMetricNum}>{totalMateriais}</Text>
-                                <Text style={styles.supportMetricLabel}>Materiais Cadastrados</Text>
+                                <Text style={styles.supportMetricLabel}>Produtos Cadastrados</Text>
                             </View>
 
                             <View style={styles.supportDivider} />
@@ -565,7 +559,7 @@ export default function HomeScreen() {
                             />
                         </View>
 
-                        {/* Seção Gráfica 2: Distribuição por Status (Donut) & Top Materiais (Barras) */}
+                        {/* Seção Gráfica 2: Distribuição por Status (Donut) & Top Produtos (Barras) */}
                         <View style={[styles.dualGrid, isMobile && styles.dualGridMobile]}>
                             <View style={[pagesStyles.card, styles.graphCard, { maxWidth: maxCardWidth }]}>
                                 <LineGraph
@@ -591,7 +585,7 @@ export default function HomeScreen() {
                             </View>
                         </View>
 
-                        {/* Indicadores de receita, clientes e materiais */}
+                        {/* Indicadores de receita, clientes e produtos */}
                         <View style={[styles.tripleGrid, isMobile && styles.tripleGridMobile]}>
                             <View style={[pagesStyles.card, styles.tripleCard, isMobile && styles.tripleCardMobile]}>
                                 <LineGraph
@@ -616,7 +610,7 @@ export default function HomeScreen() {
                             </View>
                             <View style={[pagesStyles.card, styles.tripleCard, isMobile && styles.tripleCardMobile]}>
                                 <BarGraph
-                                    title="Materiais Mais Solicitados"
+                                    title="Produtos Mais Solicitados"
                                     subtitle="Unidades demandadas nos pedidos"
                                     badgeText="Demanda"
                                     badgeIcon="trending-up"

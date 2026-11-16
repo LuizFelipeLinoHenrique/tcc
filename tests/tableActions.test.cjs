@@ -31,6 +31,7 @@ function loadActions(responses = []) {
         "delete",
         "update",
         "eq",
+        "is",
         "single",
         "maybeSingle",
       ]) {
@@ -41,6 +42,12 @@ function loadActions(responses = []) {
       }
       return query;
     },
+  };
+  supabase.rpc = async (name, args) => {
+    queries.push([["rpc", name, args]]);
+    const response = responses.shift();
+    assert.ok(response, `Unexpected RPC ${name}`);
+    return response;
   };
   const source = fs.readFileSync(
     path.join(__dirname, "../src/lib/tableActions.ts"),
@@ -54,7 +61,15 @@ function loadActions(responses = []) {
   });
   const mod = { exports: {} };
   new Function("require", "module", "exports", outputText)(
-    () => ({ supabase }),
+    name => {
+      if (name === "./orderItems") {
+        const helper = ts.transpileModule(fs.readFileSync(path.join(__dirname, "../src/lib/orderItems.ts"), "utf8"), { compilerOptions: { module: ts.ModuleKind.CommonJS } });
+        const loaded = { exports: {} };
+        new Function("module", "exports", helper.outputText)(loaded, loaded.exports);
+        return loaded.exports;
+      }
+      return { supabase };
+    },
     mod,
     mod.exports,
   );
@@ -70,6 +85,18 @@ test("deletion targets one ID and requires a returned row", async () => {
     ["eq", "id", 42],
     ["select", "id"],
   ]);
+});
+
+test("order deletion uses the transactional cancellation and payment checks", async () => {
+  const actions = loadActions([{ data: 266, error: null }]);
+  await actions.deleteRecord("pedidos", 266);
+  assert.deepEqual(actions.queries, [[["rpc", "delete_cancelled_order", { p_pedido: 266 }]]]);
+  const failure = { code: "P0001", message: "Cancele o pedido antes de excluí-lo" };
+  await assert.rejects(loadActions([{ error: failure }]).deleteRecord("pedidos", 1), error => error === failure);
+  const paidFailure = { code: "P0001", message: "Pedido com recebimento realizado não pode ser excluído" };
+  await assert.rejects(loadActions([{ error: paidFailure }]).deleteRecord("pedidos", 279), error => error === paidFailure);
+  assert.equal(actions.recordError(paidFailure), paidFailure.message);
+  await assert.rejects(loadActions([{ data: null }]).deleteRecord("pedidos", 1), /não foi excluído/);
 });
 
 test("deletion and update do not report success when no rows were changed", async () => {
@@ -107,7 +134,7 @@ test("foreign key and permission errors reach the user", async () => {
   assert.match(actions.recordError({ code: "23505" }), /Já existe/);
 });
 
-test("material editing supports all four accented/unaccented column combinations", () => {
+test("product editing supports all four accented/unaccented column combinations", () => {
   const { materialValues } = loadActions();
   for (const desc of ["descricao", "descrição"]) {
     for (const price of ["preco", "preço"]) {
@@ -171,8 +198,39 @@ test("missing related records do not leave order details blank", async () => {
   ]);
   const result = await actions.getOrderDetails(4);
   assert.equal(result.nome_cliente, "Cliente indisponível");
-  assert.equal(result.nome_material, "Material indisponível");
+  assert.equal(result.nome_material, "Produto indisponível");
   assert.equal(result.preco_total, 0);
+});
+
+test("multi-product details total every item and preserve each quantity and price", async () => {
+  const actions = loadActions([
+    { data: { id: 4, id_cliente: 2, id_produto: 3, qtde: 5, itens: [{ id_produto: 3, qtde: 5 }, { id_produto: 8, qtde: 2 }] } },
+    { data: { nome: "Cliente" } },
+    { data: { nome: "Madeira", preco: 12.5 } },
+    { data: { nome: "Pallet", preco: 100 } },
+  ]);
+  const details = await actions.getOrderDetails(4);
+  assert.equal(details.preco_total, 262.5);
+  assert.equal(details.qtde_pedido, 7);
+  assert.deepEqual(details.produtos.map(item => [item.nome, item.qtde, item.preco_total]), [["Madeira", 5, 62.5], ["Pallet", 2, 200]]);
+});
+
+test("order details preserve sale prices after catalog changes, including a free item", async () => {
+  const actions = loadActions([
+    { data: { id: 4, id_cliente: 2, id_produto: 3, qtde: 3, itens: [{ id_produto: 3, qtde: 3, unit_price_cents: 1250 }, { id_produto: 8, qtde: 2, unit_price_cents: 0 }] } },
+    { data: { nome: "Cliente" } },
+    { data: { nome: "Madeira", preco: 999 } },
+    { data: { nome: "Amostra", preco: 100 } },
+  ]);
+  const details = await actions.getOrderDetails(4);
+  assert.equal(details.preco_unit, 12.5);
+  assert.equal(details.preco_total, 37.5);
+  assert.deepEqual(details.produtos.map(item => item.preco_unit), [12.5, 0]);
+});
+
+test("financial business errors explain why the operation was blocked", () => {
+  const actions = loadActions();
+  assert.equal(actions.recordError({ code: "P0001", message: "Pedido com histórico financeiro não pode ser excluído" }), "Pedido com histórico financeiro não pode ser excluído");
 });
 
 test("order lookup errors and related query errors propagate", async () => {

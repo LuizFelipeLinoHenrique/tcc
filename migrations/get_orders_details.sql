@@ -1,7 +1,7 @@
 -- ==============================================================================
 -- Migration: Criação da função RPC get_orders_details
 -- Descrição: Retorna os detalhes consolidados de pedidos, cruzando os dados da
---            tabela 'pedidos' com 'clientes' e 'produtos' (materiais).
+--            tabela 'pedidos' com 'clientes' e 'produtos' (produtos).
 -- Compatibilidade: Suporta automaticamente tanto colunas acentuadas ("descrição", "preço")
 --                  quanto sem acento ("descricao", "preco").
 -- ==============================================================================

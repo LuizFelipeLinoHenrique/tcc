@@ -38,12 +38,12 @@ export default function AddMaterial() {
         setMensagemSucesso(null);
 
         if (!nome.trim()) {
-            setErro("Informe o nome do material.");
+            setErro("Informe o nome do produto.");
             return;
         }
 
         if (!preco.trim()) {
-            setErro("Informe o preço do material.");
+            setErro("Informe o preço do produto.");
             return;
         }
 
@@ -101,13 +101,13 @@ export default function AddMaterial() {
         setLoading(false);
 
         if (error) {
-            console.error("Erro ao cadastrar material:", error);
-            setErro("Não foi possível cadastrar o material. Tente novamente.");
+            console.error("Erro ao cadastrar produto:", error);
+            setErro("Não foi possível cadastrar o produto. Tente novamente.");
             return;
         }
 
         if (data) {
-            setMensagemSucesso(`Material "${data.nome}" cadastrado com sucesso! (ID: #${data.id})`);
+            setMensagemSucesso(`Produto "${data.nome}" cadastrado com sucesso! (ID: #${data.id})`);
             setNome("");
             setPreco("");
             setDescricao("");
@@ -129,12 +129,12 @@ export default function AddMaterial() {
                             <Ionicons name="layers" size={24} color={Colors.hex0B4F6C} />
                         </View>
                         <View style={styles.headerTextContainer}>
-                            <Text style={pagesStyles.brand}>CADASTRO DE MATERIAIS</Text>
+                            <Text style={pagesStyles.brand}>CADASTRO DE PRODUTOS</Text>
                             <Text style={[pagesStyles.title, styles.titleText]}>
-                                Novo Material
+                                Novo Produto
                             </Text>
                             <Text style={pagesStyles.description}>
-                                Cadastre um novo produto/material com suas informações e valor
+                                Cadastre um novo produto com suas informações e valor
                             </Text>
                         </View>
                     </View>
@@ -248,7 +248,7 @@ export default function AddMaterial() {
                                 loading ? (
                                     <ActivityIndicator size="small" color={Colors.hexFFFDF9} />
                                 ) : (
-                                    "Cadastrar Material"
+                                    "Cadastrar Produto"
                                 )
                             }
                         />

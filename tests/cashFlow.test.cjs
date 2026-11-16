@@ -10,6 +10,44 @@ new Function("module", "exports", outputText)(mod, mod.exports);
 const { cashToday, parseMoney, parseDate, addMonths, summarizeCash, projectCash, cashMonthData, cashCsv, effectiveDate } = mod.exports;
 const entry = (overrides = {}) => ({ id: "1", user_id: "user", description: "Venda", amount_cents: 10000, type: "income", category: "Vendas", account: "Caixa", due_date: "2026-11-10", paid_date: null, status: "pending", notes: "", created_at: "", ...overrides });
 
+test("linked order income moves from receivable and forecast to realized cash on receipt", () => {
+  const sale = entry({ order_id: 42, amount_cents: 12400, due_date: "2026-11-20" });
+  const month = status => cashMonthData([{ ...sale, ...status }], "2026-11-01", "2026-11-30", "2026-11-15");
+  const pending = month({});
+  assert.equal(pending.receivable, 12400);
+  assert.equal(pending.expected, 12400);
+  assert.equal(pending.income, 0);
+  assert.equal(pending.balance, 0);
+  const paid = month({ status: "paid", paid_date: "2026-11-15" });
+  assert.equal(paid.receivable, 0);
+  assert.equal(paid.income, 12400);
+  assert.equal(paid.balance, 12400);
+  assert.equal(paid.closing, 12400);
+  assert.equal(paid.expected, 12400);
+  const cancelled = month({ status: "cancelled" });
+  assert.equal(cancelled.receivable, 0);
+  assert.equal(cancelled.income, 0);
+  assert.equal(cancelled.expected, 0);
+});
+
+test("paid sale remains in cash after cancellation; removing an unpaid cancelled sale preserves indicators", () => {
+  // O status operacional do pedido não modifica a movimentação realizada.
+  const paid = entry({ id: "paid-sale", order_id: 279, amount_cents: 15000, status: "paid", paid_date: "2026-11-15" });
+  const cancelled = entry({ id: "unpaid-sale", order_id: 280, amount_cents: 61000, status: "cancelled" });
+  const manual = entry({ id: "manual", order_id: null, amount_cents: 5000, status: "paid", paid_date: "2026-11-10" });
+  const month = entries => cashMonthData(entries, "2026-11-01", "2026-11-30", "2026-11-15");
+  const beforeDelete = month([paid, cancelled, manual]);
+  assert.equal(beforeDelete.income, 20000);
+  assert.equal(beforeDelete.closing, 20000);
+  assert.equal(beforeDelete.receivable, 0);
+  assert.equal(beforeDelete.expected, 20000);
+  const afterDelete = month([paid, manual]);
+  assert.equal(afterDelete.entries.length, 2);
+  for (const key of Object.keys(beforeDelete).filter(key => key !== "entries")) {
+    assert.deepEqual(afterDelete[key], beforeDelete[key], key);
+  }
+});
+
 test("monthly results use settlement dates and accumulated balances include prior months", () => {
   const records = [
     entry({ status: "paid", paid_date: "2026-10-31", amount_cents: 90000 }),

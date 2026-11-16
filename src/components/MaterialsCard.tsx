@@ -3,7 +3,7 @@ import { Ionicons } from "@expo/vector-icons";
 import React from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
-export type Material = {
+export type Produto = {
     id: number;
     nome: string;
     descricao?: string;
@@ -13,18 +13,18 @@ export type Material = {
 };
 
 export type MaterialCardProps = {
-    material: Material;
+    produto: Produto;
     iconDetails: () => void;
     iconEdit: () => void;
     iconDelete?: () => void;
     index?: number;
 };
 
-export function getMaterialDescricao(m: Material): string {
+export function getMaterialDescricao(m: Produto): string {
     return m.descricao ?? m.descrição ?? "";
 }
 
-export function getMaterialPreco(m: Material): number {
+export function getMaterialPreco(m: Produto): number {
     return Number(m.preco ?? m.preço ?? 0);
 }
 
@@ -55,26 +55,26 @@ export function MaterialTableHeader() {
 }
 
 export function MaterialTableRow({
-    material,
+    produto,
     iconDetails,
     iconEdit,
     iconDelete,
     index = 0,
 }: MaterialCardProps) {
     const isEven = index % 2 === 0;
-    const descricao = getMaterialDescricao(material);
-    const preco = getMaterialPreco(material);
+    const descricao = getMaterialDescricao(produto);
+    const preco = getMaterialPreco(produto);
 
     return (
         <View style={[styles.row, isEven ? styles.rowEven : styles.rowOdd]}>
             {/* ID */}
             <View style={styles.colId}>
                 <View style={styles.idBadge}>
-                    <Text style={styles.idBadgeText}>#{material.id}</Text>
+                    <Text style={styles.idBadgeText}>#{produto.id}</Text>
                 </View>
             </View>
 
-            {/* Material */}
+            {/* Produto */}
             <View style={styles.colName}>
                 <View style={styles.materialInfo}>
                     <View style={styles.materialIconBox}>
@@ -82,7 +82,7 @@ export function MaterialTableRow({
                     </View>
                     <View style={styles.nameContainer}>
                         <Text style={styles.materialName} numberOfLines={1}>
-                            {material.nome}
+                            {produto.nome}
                         </Text>
                         <Text style={styles.materialSubtitle}>Item de catálogo</Text>
                     </View>

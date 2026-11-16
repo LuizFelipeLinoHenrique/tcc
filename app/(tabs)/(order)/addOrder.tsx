@@ -1,9 +1,11 @@
 import { Colors } from "@/src/theme/colors";
 import { useEffect, useRef, useState } from "react";
 import { parsePositiveInteger } from "@/src/lib/orderValidation";
+import { parseDate } from "@/src/lib/cashFlow";
 import { recordError } from "@/src/lib/tableActions";
 import {
     ActivityIndicator,
+    Pressable,
     StyleSheet,
     Text,
     TextInput,
@@ -24,6 +26,9 @@ export default function OrdersManager() {
     const [idCliente, setIdCliente] = useState("");
     const [idProduto, setIdProduto] = useState("");
     const [qtde, setQtde] = useState("");
+    const [vencimento, setVencimento] = useState("");
+    const requestKey = useRef<string | null>(null);
+    const [itens, setItens] = useState<{ id_produto: number; nome: string; quantidade: string }[]>([]);
 
     const [nomeCliente, setNomeCliente] = useState<string | null>(null);
     const [nomeProduto, setNomeProduto] = useState<string | null>(null);
@@ -121,7 +126,7 @@ export default function OrdersManager() {
 
         if (idNumerico === null) {
             setProdutoStatus("error");
-            setProdutoErro("Informe um ID de material válido.");
+            setProdutoErro("Informe um ID de produto válido.");
             return false;
         }
 
@@ -139,13 +144,13 @@ export default function OrdersManager() {
 
             if (!data) {
                 setProdutoStatus("error");
-                setProdutoErro("Nenhum material encontrado com esse ID.");
+                setProdutoErro("Nenhum produto encontrado com esse ID.");
                 return false;
             }
 
             setNomeProduto(data.nome);
             setProdutoStatus("success");
-            return true;
+            return data.nome || `Produto #${id}`;
         } catch (cause) {
             if (request === produtoRequest.current) {
                 setProdutoStatus("error");
@@ -186,29 +191,37 @@ export default function OrdersManager() {
         setSubmitError(null);
         setMensagemSucesso(null);
         try {
+            const due = parseDate(vencimento);
+            if (!due) {
+                setSubmitError("Informe o vencimento do recebimento no formato DD/MM/AAAA.");
+                return;
+            }
+            const temRascunho = !!(idProduto.trim() || qtde.trim());
             const [clienteValido, produtoValido] = await Promise.all([
-                verificarCliente(), verificarProduto(),
+                verificarCliente(), temRascunho ? verificarProduto() : Promise.resolve(true),
             ]);
-            const quantidadeValida = validarQuantidade();
+            const quantidadeValida = !temRascunho || validarQuantidade();
 
             if (!clienteValido || !produtoValido || !quantidadeValida) {
                 return;
             }
 
-            const idClienteNumerico = Number(idCliente);
-            const idProdutoNumerico = Number(idProduto);
-            const quantidadeNumerica = Number(qtde.trim().replace(",", "."));
-
-            const { data, error } = await supabase
-                .from("pedidos")
-                .insert({
-                    id_cliente: idClienteNumerico,
-                    qtde: quantidadeNumerica,
-                    id_produto: idProdutoNumerico,
-                    status: "P",
-                })
-                .select()
-                .single();
+            const produtos = itens.map(item => ({ id_produto: item.id_produto, qtde: parsePositiveInteger(item.quantidade) }));
+            if (temRascunho) produtos.push({ id_produto: Number(idProduto), qtde: parsePositiveInteger(qtde) });
+            if (!produtos.length || produtos.some(item => item.qtde === null)) {
+                setSubmitError("Adicione produtos com quantidades inteiras maiores que zero.");
+                return;
+            }
+            if (new Set(produtos.map(item => item.id_produto)).size !== produtos.length) {
+                setSubmitError("Esse produto já está no pedido. Altere a quantidade na lista.");
+                return;
+            }
+            // Mantém a chave após erro de rede: repetir a requisição recupera o mesmo pedido.
+            requestKey.current ??= globalThis.crypto.randomUUID();
+            const { data, error } = await supabase.rpc("save_order_items", {
+                p_cliente: Number(idCliente), p_itens: produtos, p_status: "P",
+                p_due_date: due, p_request_id: requestKey.current,
+            });
 
             if (error) throw error;
             if (!data) throw new Error("O pedido não foi confirmado. Consulte a lista antes de tentar novamente.");
@@ -216,7 +229,10 @@ export default function OrdersManager() {
             if (data) {
                 clienteRequest.current += 1;
                 produtoRequest.current += 1;
-                setMensagemSucesso(`Pedido #${data.id} cadastrado com sucesso!`);
+                setMensagemSucesso(`Pedido #${data} cadastrado com sucesso!`);
+                setItens([]);
+                setVencimento("");
+                requestKey.current = null;
                 setIdCliente("");
                 setIdProduto("");
                 setQtde("");
@@ -263,13 +279,40 @@ export default function OrdersManager() {
         limparMensagemSucesso();
     }
 
+    async function adicionarProduto() {
+        if (submitting.current) return;
+        submitting.current = true;
+        setLoading(true);
+        setSubmitError(null);
+        try {
+            if (!validarQuantidade()) return;
+            const produtoValidado = await verificarProduto();
+            if (!produtoValidado) return;
+            if (itens.some(item => item.id_produto === Number(idProduto))) {
+                setSubmitError("Esse produto já está no pedido. Altere a quantidade na lista.");
+                return;
+            }
+            setItens(prev => [...prev, { id_produto: Number(idProduto), nome: produtoValidado, quantidade: qtde }]);
+            produtoRequest.current += 1;
+            setIdProduto("");
+            setQtde("");
+            setNomeProduto(null);
+            setProdutoStatus("idle");
+            setProdutoErro(null);
+        } finally {
+            submitting.current = false;
+            setLoading(false);
+        }
+    }
+
     const formularioValido =
         idCliente.trim() !== "" &&
-        idProduto.trim() !== "" &&
-        qtde.trim() !== "" &&
         clienteStatus === "success" &&
-        produtoStatus === "success" &&
+        (itens.length > 0 || (produtoStatus === "success" && parsePositiveInteger(qtde) !== null)) &&
+        (!(idProduto || qtde) || (produtoStatus === "success" && parsePositiveInteger(qtde) !== null)) &&
+        itens.every(item => parsePositiveInteger(item.quantidade) !== null) &&
         !quantidadeErro &&
+        !!parseDate(vencimento) &&
         !loading;
 
     return (
@@ -287,7 +330,7 @@ export default function OrdersManager() {
                                 Adicionar Pedido
                             </Text>
                             <Text style={pagesStyles.description}>
-                                Vincule o cliente, material e quantidade para criar o pedido
+                                Vincule o cliente, produto e quantidade para criar o pedido
                             </Text>
                         </View>
                     </View>
@@ -389,7 +432,7 @@ export default function OrdersManager() {
                             {produtoStatus === "success" && nomeProduto && (
                                 <View style={styles.verifiedBox}>
                                     <Ionicons name="checkmark-circle" size={16} color={Colors.hex166534} />
-                                    <Text style={styles.verifiedText}>Material: {nomeProduto}</Text>
+                                    <Text style={styles.verifiedText}>Produto: {nomeProduto}</Text>
                                 </View>
                             )}
 
@@ -437,6 +480,49 @@ export default function OrdersManager() {
                             )}
                         </View>
 
+                        <View style={pagesStyles.field}>
+                            <Text style={pagesStyles.label}>VENCIMENTO DO RECEBIMENTO *</Text>
+                            <TextInput accessibilityLabel="Vencimento do recebimento" value={vencimento}
+                                onChangeText={setVencimento} editable={!loading} placeholder="DD/MM/AAAA"
+                                maxLength={10} style={[styles.inputWrapper, styles.input]} />
+                        </View>
+                        <AnimatedButton
+                            title="Adicionar produto ao pedido"
+                            onPress={adicionarProduto}
+                            disabled={loading || !idProduto || parsePositiveInteger(qtde) === null}
+                            stylesPressable={pagesStyles.primaryButton}
+                            stylesText={pagesStyles.primaryButtonText}
+                        />
+                        {itens.length > 0 && (
+                            <View style={styles.formContainer}>
+                                <Text style={pagesStyles.label}>PRODUTOS DO PEDIDO ({itens.length})</Text>
+                                {itens.map((item, index) => (
+                                    <View key={item.id_produto} style={styles.itemRow}>
+                                        <Text style={styles.itemName}>{item.nome} (#{item.id_produto})</Text>
+                                        <View style={styles.itemQuantity}>
+                                            <Text style={pagesStyles.label}>QUANTIDADE</Text>
+                                            <TextInput
+                                                accessibilityLabel={`Quantidade do produto ${item.id_produto}`}
+                                                value={item.quantidade}
+                                                keyboardType="number-pad"
+                                                editable={!loading}
+                                                style={[styles.inputWrapper, styles.input]}
+                                                onChangeText={value => {
+                                                    setItens(prev => prev.map((entry, i) => i === index ? { ...entry, quantidade: value } : entry));
+                                                    setSubmitError(null);
+                                                    limparMensagemSucesso();
+                                                }}
+                                            />
+                                            {parsePositiveInteger(item.quantidade) === null && <Text accessibilityRole="alert" style={styles.errorBoxText}>Informe uma quantidade inteira maior que zero.</Text>}
+                                        </View>
+                                        <Pressable accessibilityRole="button" accessibilityLabel={`Remover produto ${item.id_produto}`} disabled={loading}
+                                            onPress={() => { setItens(prev => prev.filter((_, i) => i !== index)); setSubmitError(null); }}>
+                                            <Ionicons name="trash-outline" size={22} color={Colors.hexB91C1C} />
+                                        </Pressable>
+                                    </View>
+                                ))}
+                            </View>
+                        )}
                         {/* STATUS INICIAL INFORMATIVO */}
                         <View style={styles.statusContainer}>
                             <View style={styles.statusIcon}>
@@ -495,6 +581,9 @@ export default function OrdersManager() {
 }
 
 const styles = StyleSheet.create({
+    itemRow: { flexDirection: "row", flexWrap: "wrap", alignItems: "center", gap: 12, padding: 12, borderWidth: 1, borderColor: Colors.hexCFDDE6, borderRadius: 8 },
+    itemName: { flex: 1, minWidth: 100, fontFamily: "WorksansMedium", color: Colors.hex0F172A },
+    itemQuantity: { width: 110 },
     container: {
         width: "100%",
         alignItems: "center",

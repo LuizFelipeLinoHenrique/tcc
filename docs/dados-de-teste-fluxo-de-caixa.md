@@ -2,7 +2,7 @@
 
 Carga de 48 lançamentos: 9 realizados, 37 pendentes e 2 cancelados. Todos usam Caixa principal, descrição com `[TESTE]` e marcador `[cash-flow-test-v2:...]` nas observações.
 
-Os exemplos incluem saldo inicial, vendas, serviços, materiais, aluguel, impostos, transporte, atrasos, vencimento hoje e projeção com compra de máquina em 15 dias e recebimento em 35 dias. Há 24 lançamentos adicionais no mês atual para conferir paginação, filtros e CSV, além de registros nos dois meses anteriores e quatro seguintes.
+Os exemplos incluem saldo inicial, vendas, serviços, produtos, aluguel, impostos, transporte, atrasos, vencimento hoje e projeção com compra de máquina em 15 dias e recebimento em 35 dias. Há 24 lançamentos adicionais no mês atual para conferir paginação, filtros e CSV, além de registros nos dois meses anteriores e quatro seguintes.
 
 Script: `supabase/seeds/cash_flow_test_data.sql`. Execute no SQL Editor do Supabase:
 

@@ -13,7 +13,7 @@ import {
 
 import useResponsive from "@/src/hooks/useResponsive";
 import { AnimatedButton } from "./AnimatedButton";
-import { Material, getMaterialDescricao, getMaterialPreco } from "./MaterialsCard";
+import { Produto, getMaterialDescricao, getMaterialPreco } from "./MaterialsCard";
 import { pagesStyles } from "./ScreensLayout";
 
 type MaterialEditProps = {
@@ -27,7 +27,7 @@ export function EditMaterialCard({
 }: MaterialEditProps) {
     const { isMobile, maxCardWidth } = useResponsive();
 
-    const [material, setMaterial] = useState<Material | null>(null);
+    const [produto, setMaterial] = useState<Produto | null>(null);
     const [nome, setNome] = useState("");
     const [preco, setPreco] = useState("");
     const [descricao, setDescricao] = useState("");
@@ -51,13 +51,13 @@ export function EditMaterialCard({
             .single();
 
         if (error) {
-            console.error("Erro ao carregar material:", error);
-            setError("Não foi possível carregar o material.");
+            console.error("Erro ao carregar produto:", error);
+            setError("Não foi possível carregar o produto.");
             setLoading(false);
             return;
         }
 
-        const mat = data as Material;
+        const mat = data as Produto;
         setMaterial(mat);
         setNome(mat.nome ?? "");
         setPreco(String(getMaterialPreco(mat)));
@@ -67,12 +67,12 @@ export function EditMaterialCard({
     }
 
     async function salvar() {
-        if (!material || saving) {
+        if (!produto || saving) {
             return;
         }
 
         if (!nome.trim() || !preco.trim()) {
-            setError("Preencha o nome e o preço do material.");
+            setError("Preencha o nome e o preço do produto.");
             return;
         }
 
@@ -86,7 +86,7 @@ export function EditMaterialCard({
         setError("");
 
         try {
-            await updateRecord("produtos", material.id, materialValues(material, nome.trim(), descricao.trim(), precoNumero));
+            await updateRecord("produtos", produto.id, materialValues(produto, nome.trim(), descricao.trim(), precoNumero));
         } catch (cause) {
             setError(recordError(cause));
             return;
@@ -95,12 +95,12 @@ export function EditMaterialCard({
         }
 
         setMaterial({
-            ...material,
-            ...materialValues(material, nome.trim(), descricao.trim(), precoNumero),
+            ...produto,
+            ...materialValues(produto, nome.trim(), descricao.trim(), precoNumero),
         });
 
         setSaving(false);
-        Alert.alert("Sucesso", "Material atualizado com sucesso.");
+        Alert.alert("Sucesso", "Produto atualizado com sucesso.");
         if (onSaveSuccess) {
             onSaveSuccess();
         }
@@ -110,16 +110,16 @@ export function EditMaterialCard({
         return (
             <View style={[pagesStyles.card, styles.loading]}>
                 <ActivityIndicator color={Colors.hex0B4F6C} />
-                <Text style={pagesStyles.text}>Carregando material...</Text>
+                <Text style={pagesStyles.text}>Carregando produto...</Text>
             </View>
         );
     }
 
-    if (!material) {
+    if (!produto) {
         return (
             <View style={pagesStyles.card}>
                 <Text style={pagesStyles.text}>
-                    {error || "Material não encontrado."}
+                    {error || "Produto não encontrado."}
                 </Text>
             </View>
         );
@@ -134,9 +134,9 @@ export function EditMaterialCard({
                 ]}
             >
                 <View style={styles.headerTitle}>
-                    <Text style={pagesStyles.brand}>Materiais</Text>
+                    <Text style={pagesStyles.brand}>Produtos</Text>
                     <Text style={pagesStyles.title}>
-                        Editar Material #{material.id}
+                        Editar Produto #{produto.id}
                     </Text>
                 </View>
 
@@ -146,19 +146,19 @@ export function EditMaterialCard({
                         isMobile && styles.idBoxMobile,
                     ]}
                 >
-                    <Text style={styles.idLabel}>ID do material</Text>
-                    <Text style={styles.readOnlyValue}>{material.id}</Text>
+                    <Text style={styles.idLabel}>ID do produto</Text>
+                    <Text style={styles.readOnlyValue}>{produto.id}</Text>
                 </View>
             </View>
 
             {/* CAMPOS */}
             <View style={styles.section}>
-                <Text style={styles.sectionTitle}>Dados do material</Text>
+                <Text style={styles.sectionTitle}>Dados do produto</Text>
 
                 <View style={styles.fields}>
                     {/* NOME */}
                     <View style={pagesStyles.field}>
-                        <Text style={pagesStyles.textBold}>Nome do Material</Text>
+                        <Text style={pagesStyles.textBold}>Nome do Produto</Text>
                         <TextInput
                             value={nome}
                             onChangeText={setNome}
@@ -197,7 +197,7 @@ export function EditMaterialCard({
                         <TextInput
                             value={descricao}
                             onChangeText={setDescricao}
-                            placeholder="Descrição detalhada do material..."
+                            placeholder="Descrição detalhada do produto..."
                             placeholderTextColor={Colors.hex64748B}
                             multiline
                             numberOfLines={4}

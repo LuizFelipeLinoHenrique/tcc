@@ -24,7 +24,7 @@ type MaterialDetailsCardProps = {
 };
 
 export function MaterialDetailsCard({
-    title = "Detalhes do Material",
+    title = "Detalhes do Produto",
     data,
     style,
 }: MaterialDetailsCardProps) {
@@ -73,7 +73,7 @@ export function MaterialDetailsCard({
 
     const { maxCardWidth } = useResponsive();
 
-    const id = getDetail("ID do Material");
+    const id = getDetail("ID do Produto");
     const nome = getDetail("Nome");
     const preco = getDetail("Preço");
     const descricao = getDetail("Descrição");

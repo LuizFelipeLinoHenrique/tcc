@@ -117,7 +117,7 @@ export default function AddSupplier() {
                                 Novo Fornecedor
                             </Text>
                             <Text style={pagesStyles.description}>
-                                Cadastre um novo fornecedor de materiais, insumos ou serviços
+                                Cadastre um novo fornecedor de produtos, insumos ou serviços
                             </Text>
                         </View>
                     </View>

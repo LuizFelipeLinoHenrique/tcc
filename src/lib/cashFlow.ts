@@ -1,4 +1,5 @@
 export type CashEntry = {
+  order_id?: number | null;
   id: string;
   user_id: string;
   description: string;
@@ -13,7 +14,7 @@ export type CashEntry = {
   created_at: string;
 };
 
-export const cashCategories = ["Vendas", "Serviços", "Aportes", "Saldo inicial", "Materiais", "Fornecedores", "Salários", "Aluguel", "Impostos", "Transporte", "Outros"];
+export const cashCategories = ["Vendas", "Serviços", "Aportes", "Saldo inicial", "Produtos", "Fornecedores", "Salários", "Aluguel", "Impostos", "Transporte", "Outros"];
 export const money = (cents: number) => (cents / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 export const isoDate = (date = new Date()) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 const cashDateFormatter = new Intl.DateTimeFormat("en-CA", {

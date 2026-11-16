@@ -1,7 +1,7 @@
 import { supabase } from "./supabase";
 import { CashEntry } from "./cashFlow";
 
-export type CashDraft = Omit<CashEntry, "id" | "user_id" | "created_at">;
+export type CashDraft = Omit<CashEntry, "id" | "user_id" | "created_at" | "order_id">;
 
 export async function loadCashEntries(): Promise<CashEntry[]> {
   // Percorre todas as páginas: o limite padrão da API não pode truncar saldos.

@@ -1,4 +1,5 @@
 import { Colors } from "@/src/theme/colors";
+import { OrderItem, orderItems, orderQuantity } from "@/src/lib/orderItems";
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
@@ -10,6 +11,9 @@ export type Pedido = {
     qtde: number;
     id_produto: number;
     status: string;
+    financial_user_id?: string | null;
+    financeiro?: { status: string } | null;
+    itens?: OrderItem[];
 };
 
 export type OrderCardProps = {
@@ -118,14 +122,14 @@ export function OrderTableRow({
             <View style={styles.colProduct}>
                 <View style={styles.labelValueContainer}>
                     <Ionicons name="cube-outline" size={13} color={Colors.hex0E7490} />
-                    <Text style={styles.cellText}>Item #{pedido.id_produto}</Text>
+                    <Text style={styles.cellText}>{orderItems(pedido).map(item => `#${item.id_produto} (${item.qtde} un.)`).join(", ")}</Text>
                 </View>
             </View>
 
             {/* Quantidade */}
             <View style={styles.colQty}>
                 <View style={styles.qtyBadge}>
-                    <Text style={styles.qtyBadgeText}>{pedido.qtde} un.</Text>
+                    <Text style={styles.qtyBadgeText}>{orderQuantity(pedido)} un.</Text>
                 </View>
             </View>
 
@@ -163,7 +167,11 @@ export function OrderTableRow({
                         <Text style={styles.editBtnText}>Editar</Text>
                     </Pressable>
 
-                    {iconDelete ? (
+                    {pedido.status === "C" && pedido.financeiro?.status === "paid" && (
+                        <Text style={styles.cellText}>Recebimento realizado: exclusão bloqueada</Text>
+                    )}
+                    {iconDelete && pedido.status === "C" && pedido.financeiro?.status !== "paid"
+                        && (!pedido.financial_user_id || !!pedido.financeiro) ? (
                         <Pressable
                             onPress={iconDelete}
                             style={({ pressed }) => [

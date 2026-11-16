@@ -69,9 +69,9 @@ export function MaterialsFilters({
     }
 
     const placeholder = {
-        ID: "Digite o ID do material...",
-        NOME: "Digite o nome do material...",
-        DESCRICAO: "Digite a descrição do material...",
+        ID: "Digite o ID do produto...",
+        NOME: "Digite o nome do produto...",
+        DESCRICAO: "Digite a descrição do produto...",
     }[tipoPesquisa];
 
     return (

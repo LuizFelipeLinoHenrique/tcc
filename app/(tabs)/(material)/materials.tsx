@@ -18,7 +18,7 @@ import useResponsive from "@/src/hooks/useResponsive";
 import { supabase } from "@/src/lib/supabase";
 
 import {
-    Material,
+    Produto,
     MaterialCard,
     MaterialTableHeader,
     getMaterialDescricao,
@@ -40,7 +40,7 @@ function formatMoney(value: number): string {
 export default function Materials() {
     const { isMobile } = useResponsive();
 
-    const [materiais, setMateriais] = useState<Material[]>([]);
+    const [produtos, setMateriais] = useState<Produto[]>([]);
     const [pesquisa, setPesquisa] = useState("");
     const [tipoPesquisa, setTipoPesquisa] =
         useState<TipoPesquisaMaterial>("NOME");
@@ -50,8 +50,8 @@ export default function Materials() {
     const [loading, setLoading] = useState(false);
 
     const [materialSelecionado, setMaterialSelecionado] =
-        useState<Material | null>(null);
-    const [materialEditar, setMaterialEditar] = useState<Material | null>(null);
+        useState<Produto | null>(null);
+    const [materialEditar, setMaterialEditar] = useState<Produto | null>(null);
 
     const [detalhesAberto, setDetalhesAberto] = useState(false);
     const [editarAberto, setEditarAberto] = useState(false);
@@ -123,15 +123,15 @@ export default function Materials() {
                 if (!pagination.isCurrent(request)) return;
 
                 if (error) {
-                    console.error("Erro ao carregar materiais:", error);
+                    console.error("Erro ao carregar produtos:", error);
                     Alert.alert(
                         "Erro",
-                        "Não foi possível carregar os materiais.",
+                        "Não foi possível carregar os produtos.",
                     );
                     return;
                 }
 
-                const novosMateriais = (data ?? []) as Material[];
+                const novosMateriais = (data ?? []) as Produto[];
 
                 if (reset) {
                     setMateriais(mergeById([], novosMateriais));
@@ -189,8 +189,8 @@ export default function Materials() {
         }
     };
 
-    const abrirDetalhes = (material: Material) => {
-        setMaterialSelecionado(material);
+    const abrirDetalhes = (produto: Produto) => {
+        setMaterialSelecionado(produto);
         setDetalhesAberto(true);
     };
 
@@ -199,8 +199,8 @@ export default function Materials() {
         setMaterialSelecionado(null);
     };
 
-    const abrirEditar = (material: Material) => {
-        setMaterialEditar(material);
+    const abrirEditar = (produto: Produto) => {
+        setMaterialEditar(produto);
         setEditarAberto(true);
     };
 
@@ -246,14 +246,14 @@ export default function Materials() {
                   <View style={styles.tableContainer}>
                       <FlatList
                           showsHorizontalScrollIndicator={false}
-                          data={materiais}
+                          data={produtos}
                           keyExtractor={(item) => item.id.toString()}
                           ListHeaderComponent={<MaterialTableHeader />}
                           showsVerticalScrollIndicator={false}
                           renderItem={({ item, index }) => (
                               <MaterialCard
                                   index={index}
-                                  material={item}
+                                  produto={item}
                                   iconDetails={() => abrirDetalhes(item)}
                                   iconEdit={() => abrirEditar(item)}
                                   iconDelete={() =>
@@ -270,7 +270,7 @@ export default function Materials() {
                                           Carregando...
                                       </Text>
                                   </View>
-                              ) : hasMore && materiais.length > 0 ? (
+                              ) : hasMore && produtos.length > 0 ? (
                                   <View style={styles.moreContainer}>
                                       <Pressable
                                           style={styles.moreButton}
@@ -287,7 +287,7 @@ export default function Materials() {
                               !loading ? (
                                   <View style={styles.emptyContainer}>
                                       <Text style={styles.emptyText}>
-                                          Nenhum material encontrado.
+                                          Nenhum produto encontrado.
                                       </Text>
                                   </View>
                               ) : null
@@ -307,7 +307,7 @@ export default function Materials() {
                   <MaterialDetailsCard
                       data={[
                           {
-                              label: "ID do Material",
+                              label: "ID do Produto",
                               value: materialSelecionado.id,
                           },
                           {

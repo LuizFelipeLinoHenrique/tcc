@@ -87,7 +87,7 @@ export function OrdersFilters({
         };
 
         return (
-            "Digite o ID do material..."
+            "Digite o ID do produto..."
         );
     };
 
@@ -213,7 +213,7 @@ export function OrdersFilters({
                                 title="Cliente"
                             />
 
-                            {/* Material */}
+                            {/* Produto */}
                             <AnimatedButton
                                 stylesPressable={[
                                     styles.filtroBotao,
@@ -226,7 +226,7 @@ export function OrdersFilters({
                                     tipoPesquisa === "MATERIAL" && styles.filtroTextoSelecionado,
                                 ]}
                                 onPress={() => setTipoPesquisa("MATERIAL")}
-                                title="Material"
+                                title="Produto"
                             />
                         </View>
                     </View>

@@ -1,4 +1,4 @@
-﻿import { Colors } from "@/src/theme/colors";
+import { Colors } from "@/src/theme/colors";
 import { Ionicons } from "@expo/vector-icons";
 import { Href, router, usePathname } from "expo-router";
 import { PropsWithChildren } from "react";
@@ -11,7 +11,7 @@ const modules: { label: string; path: string; route: Href; icon: keyof typeof Io
   { label: "Fluxo de caixa", path: "cashFlow", route: "/(tabs)/cashFlow", icon: "wallet-outline" },
   { label: "Clientes", path: "client", route: "/(tabs)/(client)/clients", icon: "people-outline" },
   { label: "Fornecedores", path: "supplier", route: "/(tabs)/(supplier)/suppliers", icon: "business-outline" },
-  { label: "Materiais", path: "material", route: "/(tabs)/(material)/materials", icon: "layers-outline" },
+  { label: "Produtos", path: "material", route: "/(tabs)/(material)/materials", icon: "layers-outline" },
   { label: "Configurações", path: "configurations", route: "/(tabs)/(configs)/configurations", icon: "settings-outline" },
 ];
 

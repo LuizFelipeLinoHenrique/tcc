@@ -1,5 +1,6 @@
 import { createPagination, mergeById } from "@/src/lib/pagination";
 import { parsePositiveInteger } from "@/src/lib/orderValidation";
+import { OrderItem } from "@/src/lib/orderItems";
 import { RecordModal } from "@/src/components/RecordModal";
 import { useRecordDeletion } from "@/src/hooks/useRecordDeletion";
 import { getOrderDetails, recordError } from "@/src/lib/tableActions";
@@ -32,15 +33,19 @@ import {
 } from "react-native";
 
 type Pedido = {
+    itens?: OrderItem[];
     id: number;
     data_pedido: string;
     id_cliente: number;
     qtde: number;
     id_produto: number;
     status: string;
+    financial_user_id?: string | null;
+    financeiro?: { status: string } | null;
 };
 
 type PedidoDetalhes = {
+    produtos: (OrderItem & { nome: string; descricao: string; preco_unit: number; preco_total: number })[];
     id_pedido: number;
     id_cliente: number;
     nome_cliente: string;
@@ -126,7 +131,8 @@ export default function Orders() {
                     setListError("Informe um identificador válido: um número inteiro positivo.");
                     return;
                 }
-                let query = supabase.from("pedidos").select("*");
+                let query = supabase.from("pedidos").select(tipoPesquisa === "MATERIAL" && pesquisa.trim() ? "*, itens:pedido_itens(id_produto, qtde), financeiro:cash_flow_entries(status), filtro_itens:pedido_itens!inner(id_produto)" : "*, itens:pedido_itens(id_produto, qtde), financeiro:cash_flow_entries(status)");
+                query = query.is("deleted_at", null);
 
                 if (numero !== null) {
                     if (tipoPesquisa === "PEDIDO") {
@@ -138,7 +144,7 @@ export default function Orders() {
                     }
 
                     if (tipoPesquisa === "MATERIAL") {
-                        query = query.eq("id_produto", numero);
+                        query = query.eq("filtro_itens.id_produto", numero);
                     }
                 }
 
@@ -180,7 +186,7 @@ export default function Orders() {
 
                 if (error) throw error;
 
-                const rows = (data ?? []) as Pedido[];
+                const rows = (data ?? []) as unknown as Pedido[];
                 pagination.accept(request, rows, PAGE_SIZE);
                 setPedidos((prev) => mergeById(reset ? [] : prev, rows));
                 setHasMore(rows.length === PAGE_SIZE);
@@ -293,17 +299,18 @@ export default function Orders() {
                   fullWidth: true,
               },
               {
-                  label: "Material",
-                  value: pedidoSelecionado.nome_material,
+                  label: "Produto",
+                  value: pedidoSelecionado.produtos.map(item => `${item.nome} (#${item.id_produto}): ${item.qtde} un. × R$ ${item.preco_unit.toFixed(2)} = R$ ${item.preco_total.toFixed(2)}`).join("\n"),
+                  fullWidth: true,
               },
               {
-                  label: "Descrição do Material",
-                  value: pedidoSelecionado.descricao_material,
+                  label: "Descrição do Produto",
+                  value: pedidoSelecionado.produtos.map(item => `${item.nome}: ${item.descricao}`).join("\n"),
                   fullWidth: true,
               },
               {
                   label: "Preço Unitário",
-                  value: `R$ ${Number(pedidoSelecionado.preco_unit).toFixed(
+                  value: pedidoSelecionado.produtos.length > 1 ? "Informado por produto acima" : `R$ ${Number(pedidoSelecionado.preco_unit).toFixed(
                       2,
                   )}`,
               },

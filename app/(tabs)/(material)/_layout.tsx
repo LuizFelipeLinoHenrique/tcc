@@ -10,12 +10,12 @@ export default function MaterialsLayout() {
             <TopMenu
                 tabs={[
                     {
-                        label: "Materiais",
+                        label: "Produtos",
                         value: "materials",
                         route: "/materials",
                     },
                     {
-                        label: "Adicionar material",
+                        label: "Adicionar produto",
                         value: "add",
                         route: "/addMaterial",
                     }
