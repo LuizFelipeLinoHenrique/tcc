@@ -113,14 +113,14 @@ const styles = StyleSheet.create({
         width: "100%",
         paddingHorizontal: 16,
         paddingTop: 8,
-        paddingBottom: 4,
+        paddingBottom: 6,
     },
     container: {
         flexDirection: "row",
         width: "100%",
         backgroundColor: Colors.white,
         borderRadius: 8,
-        padding: 4,
+        padding: 6,
         gap: 4,
     },
     tab: {

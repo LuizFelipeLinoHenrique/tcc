@@ -365,7 +365,7 @@ const styles = StyleSheet.create({
         marginBottom: 2,
     },
     readOnlyValue: {
-        paddingVertical: 2,
+        paddingVertical: 6,
         fontSize: 16,
         color: Colors.hex0B4F6C,
         fontWeight: "600",

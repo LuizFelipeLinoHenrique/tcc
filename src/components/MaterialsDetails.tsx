@@ -189,7 +189,7 @@ const styles = StyleSheet.create({
     idPill: {
         backgroundColor: Colors.hexE0EDF4,
         paddingHorizontal: 10,
-        paddingVertical: 5,
+        paddingVertical: 6,
         borderRadius: 8,
     },
     idText: {

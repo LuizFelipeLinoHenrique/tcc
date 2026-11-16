@@ -362,7 +362,7 @@ const styles = StyleSheet.create({
         color: Colors.hex0B4F6C,
     },
     valuesSection: {
-        paddingBottom: 4,
+        paddingBottom: 6,
     },
     valuesContainer: {
         width: "100%",

@@ -125,7 +125,7 @@ const styles = StyleSheet.create({
         gap: 4,
         backgroundColor: Colors.hexE8F1F5,
         paddingHorizontal: 8,
-        paddingVertical: 4,
+        paddingVertical: 6,
         borderRadius: 8,
     },
     badgeText: {

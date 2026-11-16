@@ -83,7 +83,7 @@ const styles = StyleSheet.create({
     muted: { color: Colors.hex64748B, fontSize: 11, lineHeight: 16, fontFamily: "WorksansRegular", textAlign: "center" },
     mix: { flexDirection: "row", flexWrap: "wrap", alignItems: "center", justifyContent: "center", gap: 24, paddingVertical: 20, minHeight: 224 },
     donut: { width: 136, height: 136, alignItems: "center", justifyContent: "center" },
-    donutCenter: { position: "absolute", alignItems: "center", gap: 2 },
+    donutCenter: { position: "absolute", alignItems: "center", gap: 3 },
     donutValue: { color: Colors.hex0F172A, fontSize: 25, fontFamily: "WorksansSemiBold" },
     legend: { flexGrow: 1, flexBasis: 130, gap: 18 },
     legendRow: { flexDirection: "row", alignItems: "center", gap: 8 },

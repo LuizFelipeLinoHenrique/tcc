@@ -593,7 +593,7 @@ const styles = StyleSheet.create({
     container: {
         width: "100%",
         alignItems: "center",
-        paddingHorizontal: 0,
+        paddingHorizontal: 6,
     },
     header: {
         flexDirection: "row",
@@ -721,7 +721,7 @@ const styles = StyleSheet.create({
     },
     statusBadge: {
         paddingHorizontal: 10,
-        paddingVertical: 5,
+        paddingVertical: 6,
         borderRadius: 8,
         backgroundColor: Colors.hex92400E,
     },

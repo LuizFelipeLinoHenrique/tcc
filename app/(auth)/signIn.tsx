@@ -184,7 +184,7 @@ const localStyles = StyleSheet.create({
     position: "absolute",
     right: 14,
     zIndex: 2,
-    padding: 4,
+    padding: 6,
   },
   passwordHeader: {
     flexDirection: "row",

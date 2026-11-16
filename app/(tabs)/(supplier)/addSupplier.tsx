@@ -336,7 +336,7 @@ const styles = StyleSheet.create({
     container: {
         width: "100%",
         alignItems: "center",
-        paddingHorizontal: 0,
+        paddingHorizontal: 6,
     },
     header: {
         flexDirection: "row",

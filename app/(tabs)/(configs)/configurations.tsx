@@ -331,7 +331,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
         gap: 4,
         paddingHorizontal: 8,
-        paddingVertical: 3,
+        paddingVertical: 6,
         borderRadius: 6,
         backgroundColor: Colors.hexDCFCE7,
         borderWidth: 1,
@@ -388,7 +388,7 @@ const styles = StyleSheet.create({
     },
     prefTextContainer: {
         flex: 1,
-        gap: 2,
+        gap: 3,
     },
     prefTitle: {
         fontSize: 14,
@@ -459,7 +459,7 @@ const styles = StyleSheet.create({
     },
     actionTextContainer: {
         flex: 1,
-        gap: 2,
+        gap: 3,
     },
     actionTitle: {
         fontSize: 14,

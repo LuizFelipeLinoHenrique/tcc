@@ -43,5 +43,5 @@ const styles = StyleSheet.create({
   categoryColumn: { flex: 1 },
   categories: { minHeight: 0, overflow: "hidden" },
   scroll: { flex: 1, minHeight: 0 },
-  items: { gap: 16, paddingBottom: 4 },
+  items: { gap: 16, paddingBottom: 6 },
 });
