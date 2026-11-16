@@ -75,19 +75,12 @@ export function ClientTableRow({
         <View style={[styles.row, isEven ? styles.rowEven : styles.rowOdd]}>
             {/* ID */}
             <View style={styles.colId}>
-                <View style={styles.idBadge}>
-                    <Text style={styles.idBadgeText}>#{cliente.id}</Text>
-                </View>
+                <Text style={styles.idBadgeText}>#{cliente.id}</Text>
             </View>
 
-            {/* Cliente (Avatar + Nome) */}
+            {/* Cliente */}
             <View style={styles.colName}>
                 <View style={styles.clientInfo}>
-                    <View style={styles.avatar}>
-                        <Text style={styles.avatarText}>
-                            {getInitials(cliente.nome)}
-                        </Text>
-                    </View>
                     <View style={styles.nameContainer}>
                         <Text style={styles.clientName} numberOfLines={1}>
                             {cliente.nome}
@@ -100,7 +93,6 @@ export function ClientTableRow({
             {/* E-mail */}
             <View style={styles.colEmail}>
                 <View style={styles.iconTextRow}>
-                    <Ionicons name="mail-outline" size={13} color={Colors.hex64748B} />
                     <Text style={styles.cellText} numberOfLines={1}>
                         {cliente.email || "Sem e-mail"}
                     </Text>
@@ -110,7 +102,6 @@ export function ClientTableRow({
             {/* Telefone */}
             <View style={styles.colPhone}>
                 <View style={styles.iconTextRow}>
-                    <Ionicons name="call-outline" size={13} color={Colors.hex64748B} />
                     <Text style={styles.cellText} numberOfLines={1}>
                         {formatPhone(cliente.telefone)}
                     </Text>
@@ -120,7 +111,6 @@ export function ClientTableRow({
             {/* Endereço */}
             <View style={styles.colAddress}>
                 <View style={styles.iconTextRow}>
-                    <Ionicons name="location-outline" size={13} color={Colors.hex64748B} />
                     <Text style={styles.cellText} numberOfLines={1}>
                         {cliente.endereco || "Não informado"}
                     </Text>
@@ -132,6 +122,8 @@ export function ClientTableRow({
                 <View style={styles.actionsContainer}>
                     <Pressable
                         onPress={iconDetails}
+                        accessibilityRole="button"
+                        accessibilityLabel="Detalhes"
                         style={({ pressed }) => [
                             styles.actionBtn,
                             styles.detailsBtn,
@@ -140,11 +132,12 @@ export function ClientTableRow({
                         hitSlop={4}
                     >
                         <Ionicons name="eye-outline" size={15} color={Colors.hex0B4F6C} />
-                        <Text style={styles.detailsBtnText}>Detalhes</Text>
                     </Pressable>
 
                     <Pressable
                         onPress={iconEdit}
+                        accessibilityRole="button"
+                        accessibilityLabel="Editar"
                         style={({ pressed }) => [
                             styles.actionBtn,
                             styles.editBtn,
@@ -153,12 +146,13 @@ export function ClientTableRow({
                         hitSlop={4}
                     >
                         <Ionicons name="pencil-outline" size={15} color={Colors.hex0E7490} />
-                        <Text style={styles.editBtnText}>Editar</Text>
                     </Pressable>
 
                     {iconDelete ? (
                         <Pressable
                             onPress={iconDelete}
+                            accessibilityRole="button"
+                            accessibilityLabel="Excluir"
                             style={({ pressed }) => [
                                 styles.actionBtn,
                                 styles.deleteBtn,
@@ -167,7 +161,6 @@ export function ClientTableRow({
                             hitSlop={4}
                         >
                             <Ionicons name="trash-outline" size={15} color={Colors.hexA74E3C} />
-                            <Text style={styles.deleteBtnText}>Excluir</Text>
                         </Pressable>
                     ) : null}
                 </View>
@@ -185,10 +178,11 @@ const styles = StyleSheet.create({
         alignItems: "center",
         backgroundColor: Colors.hexE8F1F5,
         paddingVertical: 12,
-        paddingHorizontal: 16,
+        paddingHorizontal: 24,
+        columnGap: 24,
         borderBottomWidth: 1.5,
         borderColor: Colors.hexCFDDE6,
-        minWidth: 860,
+        minWidth: 1180,
     },
     headerText: {
         fontSize: 11,
@@ -204,10 +198,11 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         paddingVertical: 10,
-        paddingHorizontal: 16,
+        paddingHorizontal: 24,
+        columnGap: 24,
         borderBottomWidth: 1,
         borderColor: Colors.hexE2EBF0,
-        minWidth: 860,
+        minWidth: 1180,
     },
     rowEven: {
         backgroundColor: Colors.white,
@@ -218,42 +213,41 @@ const styles = StyleSheet.create({
 
     // Colunas
     colId: {
-        width: 70,
+        width: 80,
+        flexShrink: 0,
         justifyContent: "center",
     },
     colName: {
-        flex: 1.5,
-        minWidth: 180,
+        width: 200,
+        flexShrink: 0,
+        flexGrow: 1,
         justifyContent: "center",
     },
     colEmail: {
-        flex: 1.3,
-        minWidth: 150,
+        width: 220,
+        flexShrink: 0,
+        flexGrow: 1,
         justifyContent: "center",
     },
     colPhone: {
-        width: 140,
+        width: 160,
+        flexShrink: 0,
         justifyContent: "center",
     },
     colAddress: {
-        flex: 1.5,
-        minWidth: 170,
+        width: 220,
+        flexShrink: 0,
+        flexGrow: 1,
         justifyContent: "center",
     },
     colActions: {
-        width: 220,
+        width: 132,
+        flexShrink: 0,
         alignItems: "flex-end",
         justifyContent: "center",
     },
 
     // Células e textos
-    idBadge: {
-        backgroundColor: Colors.hexE8F1F5,
-        paddingHorizontal: 8,
-        paddingVertical: 4,
-        borderRadius: 6,
-        alignSelf: "flex-start",
-    },
     idBadgeText: {
         fontSize: 12,
         fontFamily: "WorksansBold",
@@ -263,21 +257,6 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         gap: 10,
-    },
-    avatar: {
-        width: 34,
-        height: 34,
-        borderRadius: 17,
-        backgroundColor: Colors.hexE8F1F5,
-        alignItems: "center",
-        justifyContent: "center",
-        borderWidth: 1,
-        borderColor: Colors.hexCFDDE6,
-    },
-    avatarText: {
-        color: Colors.hex0B4F6C,
-        fontSize: 12,
-        fontFamily: "WorksansBold",
     },
     nameContainer: {
         flex: 1,
@@ -311,13 +290,12 @@ const styles = StyleSheet.create({
         gap: 6,
     },
     actionBtn: {
-        flexDirection: "row",
+        width: 40,
+        height: 40,
         alignItems: "center",
-        paddingVertical: 6,
-        paddingHorizontal: 9,
+        justifyContent: "center",
         borderRadius: 8,
         borderWidth: 1,
-        gap: 4,
     },
     actionBtnPressed: {
         opacity: 0.7,
@@ -327,27 +305,12 @@ const styles = StyleSheet.create({
         backgroundColor: Colors.hexE8F1F5,
         borderColor: Colors.hexCFDDE6,
     },
-    detailsBtnText: {
-        fontSize: 12,
-        fontFamily: "WorksansSemiBold",
-        color: Colors.hex0B4F6C,
-    },
     editBtn: {
         backgroundColor: Colors.hexE0F2FE,
         borderColor: Colors.hexBAE6FD,
     },
-    editBtnText: {
-        fontSize: 12,
-        fontFamily: "WorksansSemiBold",
-        color: Colors.hex0E7490,
-    },
     deleteBtn: {
         backgroundColor: Colors.hexFEE2E2,
         borderColor: Colors.hexFECACA,
-    },
-    deleteBtnText: {
-        fontSize: 12,
-        fontFamily: "WorksansSemiBold",
-        color: Colors.hexA74E3C,
     },
 });

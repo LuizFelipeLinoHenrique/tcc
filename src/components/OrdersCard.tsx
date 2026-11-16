@@ -25,33 +25,20 @@ export type OrderCardProps = {
 };
 
 function renderStatusBadge(status: string) {
-    if (status === "P") {
-        return (
-            <View style={[styles.statusBadge, styles.statusPending]}>
-                <Ionicons name="time-outline" size={12} color={Colors.hex92400E} />
-                <Text style={styles.statusPendingText}>Pendente</Text>
-            </View>
-        );
-    }
-    if (status === "E") {
-        return (
-            <View style={[styles.statusBadge, styles.statusDelivered]}>
-                <Ionicons name="checkmark-circle-outline" size={12} color={Colors.hex166534} />
-                <Text style={styles.statusDeliveredText}>Entregue</Text>
-            </View>
-        );
-    }
-    if (status === "C") {
-        return (
-            <View style={[styles.statusBadge, styles.statusCanceled]}>
-                <Ionicons name="close-circle-outline" size={12} color={Colors.hex991B1B} />
-                <Text style={styles.statusCanceledText}>Cancelado</Text>
-            </View>
-        );
-    }
+    const states = {
+        P: { icon: "time-outline", label: "Pendente", color: Colors.hex92400E, style: styles.statusPending },
+        E: { icon: "checkmark-circle-outline", label: "Entregue", color: Colors.hex166534, style: styles.statusDelivered },
+        C: { icon: "close-circle-outline", label: "Cancelado", color: Colors.hex991B1B, style: styles.statusCanceled },
+    } as const;
+    const state = states[status as keyof typeof states];
     return (
-        <View style={styles.statusBadge}>
-            <Text style={styles.statusDefaultText}>{status}</Text>
+        <View
+            accessible
+            accessibilityRole="image"
+            accessibilityLabel={state?.label ?? `Status: ${status || "Não informado"}`}
+            style={[styles.statusBadge, state?.style]}
+        >
+            <Ionicons name={state?.icon ?? "help-circle-outline"} size={20} color={state?.color ?? Colors.hex475569} />
         </View>
     );
 }
@@ -97,15 +84,12 @@ export function OrderTableRow({
         <View style={[styles.row, isEven ? styles.rowEven : styles.rowOdd]}>
             {/* ID */}
             <View style={styles.colId}>
-                <View style={styles.idBadge}>
-                    <Text style={styles.idBadgeText}>#{pedido.id}</Text>
-                </View>
+                <Text style={styles.idBadgeText}>#{pedido.id}</Text>
             </View>
 
             {/* Data */}
             <View style={styles.colDate}>
                 <View style={styles.dateContainer}>
-                    <Ionicons name="calendar-outline" size={13} color={Colors.hex64748B} />
                     <Text style={styles.cellText}>{pedido.data_pedido}</Text>
                 </View>
             </View>
@@ -113,7 +97,6 @@ export function OrderTableRow({
             {/* Cliente */}
             <View style={styles.colClient}>
                 <View style={styles.labelValueContainer}>
-                    <Ionicons name="person-outline" size={13} color={Colors.hex0B4F6C} />
                     <Text style={styles.cellTextBold}>Cliente #{pedido.id_cliente}</Text>
                 </View>
             </View>
@@ -121,16 +104,13 @@ export function OrderTableRow({
             {/* Produto */}
             <View style={styles.colProduct}>
                 <View style={styles.labelValueContainer}>
-                    <Ionicons name="cube-outline" size={13} color={Colors.hex0E7490} />
                     <Text style={styles.cellText}>{orderItems(pedido).map(item => `#${item.id_produto} (${item.qtde} un.)`).join(", ")}</Text>
                 </View>
             </View>
 
             {/* Quantidade */}
             <View style={styles.colQty}>
-                <View style={styles.qtyBadge}>
-                    <Text style={styles.qtyBadgeText}>{orderQuantity(pedido)} un.</Text>
-                </View>
+                <Text style={styles.qtyBadgeText}>{orderQuantity(pedido)} un.</Text>
             </View>
 
             {/* Status */}
@@ -143,6 +123,8 @@ export function OrderTableRow({
                 <View style={styles.actionsContainer}>
                     <Pressable
                         onPress={iconDetails}
+                        accessibilityRole="button"
+                        accessibilityLabel="Detalhes"
                         style={({ pressed }) => [
                             styles.actionBtn,
                             styles.detailsBtn,
@@ -151,11 +133,12 @@ export function OrderTableRow({
                         hitSlop={4}
                     >
                         <Ionicons name="eye-outline" size={15} color={Colors.hex0B4F6C} />
-                        <Text style={styles.detailsBtnText}>Detalhes</Text>
                     </Pressable>
 
                     <Pressable
                         onPress={iconEdit}
+                        accessibilityRole="button"
+                        accessibilityLabel="Editar"
                         style={({ pressed }) => [
                             styles.actionBtn,
                             styles.editBtn,
@@ -164,16 +147,19 @@ export function OrderTableRow({
                         hitSlop={4}
                     >
                         <Ionicons name="pencil-outline" size={15} color={Colors.hex0E7490} />
-                        <Text style={styles.editBtnText}>Editar</Text>
                     </Pressable>
 
                     {pedido.status === "C" && pedido.financeiro?.status === "paid" && (
-                        <Text style={styles.cellText}>Recebimento realizado: exclusão bloqueada</Text>
+                        <View accessible accessibilityRole="image" accessibilityLabel="Recebimento realizado: exclusão bloqueada" style={[styles.actionBtn, styles.detailsBtn]}>
+                            <Ionicons name="lock-closed-outline" size={15} color={Colors.hex64748B} />
+                        </View>
                     )}
                     {iconDelete && pedido.status === "C" && pedido.financeiro?.status !== "paid"
                         && (!pedido.financial_user_id || !!pedido.financeiro) ? (
                         <Pressable
                             onPress={iconDelete}
+                            accessibilityRole="button"
+                            accessibilityLabel="Excluir"
                             style={({ pressed }) => [
                                 styles.actionBtn,
                                 styles.deleteBtn,
@@ -182,7 +168,6 @@ export function OrderTableRow({
                             hitSlop={4}
                         >
                             <Ionicons name="trash-outline" size={15} color={Colors.hexA74E3C} />
-                            <Text style={styles.deleteBtnText}>Excluir</Text>
                         </Pressable>
                     ) : null}
                 </View>
@@ -200,10 +185,11 @@ const styles = StyleSheet.create({
         alignItems: "center",
         backgroundColor: Colors.hexE8F1F5,
         paddingVertical: 12,
-        paddingHorizontal: 16,
+        paddingHorizontal: 24,
+        columnGap: 24,
         borderBottomWidth: 1.5,
         borderColor: Colors.hexCFDDE6,
-        minWidth: 860,
+        minWidth: 1148,
     },
     headerText: {
         fontSize: 11,
@@ -219,10 +205,11 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         paddingVertical: 11,
-        paddingHorizontal: 16,
+        paddingHorizontal: 24,
+        columnGap: 24,
         borderBottomWidth: 1,
         borderColor: Colors.hexE2EBF0,
-        minWidth: 860,
+        minWidth: 1148,
     },
     rowEven: {
         backgroundColor: Colors.white,
@@ -233,45 +220,45 @@ const styles = StyleSheet.create({
 
     // Colunas
     colId: {
-        width: 75,
+        width: 80,
+        flexShrink: 0,
         justifyContent: "center",
     },
     colDate: {
-        width: 125,
+        width: 140,
+        flexShrink: 0,
         justifyContent: "center",
     },
     colClient: {
-        flex: 1.1,
-        minWidth: 130,
+        width: 180,
+        flexShrink: 0,
+        flexGrow: 1,
         justifyContent: "center",
     },
     colProduct: {
-        flex: 1.1,
-        minWidth: 130,
+        width: 220,
+        flexShrink: 0,
+        flexGrow: 1,
         justifyContent: "center",
     },
     colQty: {
-        width: 115,
+        width: 120,
+        flexShrink: 0,
         justifyContent: "center",
     },
     colStatus: {
-        width: 130,
+        width: 84,
+        flexShrink: 0,
         justifyContent: "center",
     },
     colActions: {
-        width: 220,
+        width: 132,
+        flexShrink: 0,
         alignItems: "flex-end",
         justifyContent: "center",
     },
 
     // Células e textos
-    idBadge: {
-        backgroundColor: Colors.hexE8F1F5,
-        paddingHorizontal: 8,
-        paddingVertical: 4,
-        borderRadius: 6,
-        alignSelf: "flex-start",
-    },
     idBadgeText: {
         fontSize: 12,
         fontFamily: "WorksansBold",
@@ -297,13 +284,6 @@ const styles = StyleSheet.create({
         alignItems: "center",
         gap: 6,
     },
-    qtyBadge: {
-        backgroundColor: Colors.hexEDF3F7,
-        paddingHorizontal: 8,
-        paddingVertical: 4,
-        borderRadius: 6,
-        alignSelf: "flex-start",
-    },
     qtyBadgeText: {
         fontSize: 12,
         fontFamily: "WorksansMedium",
@@ -312,12 +292,11 @@ const styles = StyleSheet.create({
 
     // Status
     statusBadge: {
-        flexDirection: "row",
+        width: 36,
+        height: 36,
         alignItems: "center",
-        paddingHorizontal: 9,
-        paddingVertical: 4,
+        justifyContent: "center",
         borderRadius: 8,
-        gap: 4,
         alignSelf: "flex-start",
     },
     statusPending: {
@@ -325,35 +304,15 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: Colors.hexFDE68A,
     },
-    statusPendingText: {
-        fontSize: 11,
-        fontFamily: "WorksansSemiBold",
-        color: Colors.hex92400E,
-    },
     statusDelivered: {
         backgroundColor: Colors.hexDCFCE7,
         borderWidth: 1,
         borderColor: Colors.hexBBF7D0,
     },
-    statusDeliveredText: {
-        fontSize: 11,
-        fontFamily: "WorksansSemiBold",
-        color: Colors.hex166534,
-    },
     statusCanceled: {
         backgroundColor: Colors.hexFEE2E2,
         borderWidth: 1,
         borderColor: Colors.hexFECACA,
-    },
-    statusCanceledText: {
-        fontSize: 11,
-        fontFamily: "WorksansSemiBold",
-        color: Colors.hex991B1B,
-    },
-    statusDefaultText: {
-        fontSize: 11,
-        fontFamily: "WorksansSemiBold",
-        color: Colors.hex475569,
     },
 
     // Ações
@@ -363,13 +322,12 @@ const styles = StyleSheet.create({
         gap: 6,
     },
     actionBtn: {
-        flexDirection: "row",
+        width: 40,
+        height: 40,
         alignItems: "center",
-        paddingVertical: 6,
-        paddingHorizontal: 9,
+        justifyContent: "center",
         borderRadius: 8,
         borderWidth: 1,
-        gap: 4,
     },
     actionBtnPressed: {
         opacity: 0.7,
@@ -379,27 +337,12 @@ const styles = StyleSheet.create({
         backgroundColor: Colors.hexE8F1F5,
         borderColor: Colors.hexCFDDE6,
     },
-    detailsBtnText: {
-        fontSize: 12,
-        fontFamily: "WorksansSemiBold",
-        color: Colors.hex0B4F6C,
-    },
     editBtn: {
         backgroundColor: Colors.hexE0F2FE,
         borderColor: Colors.hexBAE6FD,
     },
-    editBtnText: {
-        fontSize: 12,
-        fontFamily: "WorksansSemiBold",
-        color: Colors.hex0E7490,
-    },
     deleteBtn: {
         backgroundColor: Colors.hexFEE2E2,
         borderColor: Colors.hexFECACA,
-    },
-    deleteBtnText: {
-        fontSize: 12,
-        fontFamily: "WorksansSemiBold",
-        color: Colors.hexA74E3C,
     },
 });

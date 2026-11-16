@@ -69,17 +69,12 @@ export function MaterialTableRow({
         <View style={[styles.row, isEven ? styles.rowEven : styles.rowOdd]}>
             {/* ID */}
             <View style={styles.colId}>
-                <View style={styles.idBadge}>
-                    <Text style={styles.idBadgeText}>#{produto.id}</Text>
-                </View>
+                <Text style={styles.idBadgeText}>#{produto.id}</Text>
             </View>
 
             {/* Produto */}
             <View style={styles.colName}>
                 <View style={styles.materialInfo}>
-                    <View style={styles.materialIconBox}>
-                        <Ionicons name="layers-outline" size={17} color={Colors.hex0B4F6C} />
-                    </View>
                     <View style={styles.nameContainer}>
                         <Text style={styles.materialName} numberOfLines={1}>
                             {produto.nome}
@@ -91,10 +86,7 @@ export function MaterialTableRow({
 
             {/* Preço */}
             <View style={styles.colPrice}>
-                <View style={styles.priceBadge}>
-                    <Ionicons name="pricetag-outline" size={12} color={Colors.hex0E7490} />
-                    <Text style={styles.priceText}>{formatMoney(preco)}</Text>
-                </View>
+                <Text style={styles.priceText}>{formatMoney(preco)}</Text>
             </View>
 
             {/* Descrição */}
@@ -109,6 +101,8 @@ export function MaterialTableRow({
                 <View style={styles.actionsContainer}>
                     <Pressable
                         onPress={iconDetails}
+                        accessibilityRole="button"
+                        accessibilityLabel="Detalhes"
                         style={({ pressed }) => [
                             styles.actionBtn,
                             styles.detailsBtn,
@@ -117,11 +111,12 @@ export function MaterialTableRow({
                         hitSlop={4}
                     >
                         <Ionicons name="eye-outline" size={15} color={Colors.hex0B4F6C} />
-                        <Text style={styles.detailsBtnText}>Detalhes</Text>
                     </Pressable>
 
                     <Pressable
                         onPress={iconEdit}
+                        accessibilityRole="button"
+                        accessibilityLabel="Editar"
                         style={({ pressed }) => [
                             styles.actionBtn,
                             styles.editBtn,
@@ -130,12 +125,13 @@ export function MaterialTableRow({
                         hitSlop={4}
                     >
                         <Ionicons name="pencil-outline" size={15} color={Colors.hex0E7490} />
-                        <Text style={styles.editBtnText}>Editar</Text>
                     </Pressable>
 
                     {iconDelete ? (
                         <Pressable
                             onPress={iconDelete}
+                            accessibilityRole="button"
+                            accessibilityLabel="Excluir"
                             style={({ pressed }) => [
                                 styles.actionBtn,
                                 styles.deleteBtn,
@@ -144,7 +140,6 @@ export function MaterialTableRow({
                             hitSlop={4}
                         >
                             <Ionicons name="trash-outline" size={15} color={Colors.hexA74E3C} />
-                            <Text style={styles.deleteBtnText}>Excluir</Text>
                         </Pressable>
                     ) : null}
                 </View>
@@ -162,10 +157,11 @@ const styles = StyleSheet.create({
         alignItems: "center",
         backgroundColor: Colors.hexE8F1F5,
         paddingVertical: 12,
-        paddingHorizontal: 16,
+        paddingHorizontal: 24,
+        columnGap: 24,
         borderBottomWidth: 1.5,
         borderColor: Colors.hexCFDDE6,
-        minWidth: 840,
+        minWidth: 1076,
     },
     headerText: {
         fontSize: 11,
@@ -181,10 +177,11 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         paddingVertical: 10,
-        paddingHorizontal: 16,
+        paddingHorizontal: 24,
+        columnGap: 24,
         borderBottomWidth: 1,
         borderColor: Colors.hexE2EBF0,
-        minWidth: 840,
+        minWidth: 1076,
     },
     rowEven: {
         backgroundColor: Colors.white,
@@ -195,37 +192,35 @@ const styles = StyleSheet.create({
 
     // Colunas
     colId: {
-        width: 70,
+        width: 80,
+        flexShrink: 0,
         justifyContent: "center",
     },
     colName: {
-        flex: 1.5,
-        minWidth: 180,
+        width: 220,
+        flexShrink: 0,
+        flexGrow: 1,
         justifyContent: "center",
     },
     colPrice: {
-        width: 140,
+        width: 160,
+        flexShrink: 0,
         justifyContent: "center",
     },
     colDesc: {
-        flex: 2,
-        minWidth: 200,
+        width: 340,
+        flexShrink: 0,
+        flexGrow: 1,
         justifyContent: "center",
     },
     colActions: {
-        width: 220,
+        width: 132,
+        flexShrink: 0,
         alignItems: "flex-end",
         justifyContent: "center",
     },
 
     // Células e textos
-    idBadge: {
-        backgroundColor: Colors.hexE8F1F5,
-        paddingHorizontal: 8,
-        paddingVertical: 4,
-        borderRadius: 6,
-        alignSelf: "flex-start",
-    },
     idBadgeText: {
         fontSize: 12,
         fontFamily: "WorksansBold",
@@ -235,16 +230,6 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         gap: 10,
-    },
-    materialIconBox: {
-        width: 32,
-        height: 32,
-        borderRadius: 8,
-        backgroundColor: Colors.hexE8F1F5,
-        alignItems: "center",
-        justifyContent: "center",
-        borderWidth: 1,
-        borderColor: Colors.hexCFDDE6,
     },
     nameContainer: {
         flex: 1,
@@ -258,18 +243,6 @@ const styles = StyleSheet.create({
         fontSize: 10,
         fontFamily: "WorksansRegular",
         color: Colors.hex64748B,
-    },
-    priceBadge: {
-        flexDirection: "row",
-        alignItems: "center",
-        gap: 4,
-        backgroundColor: Colors.hexE0F2FE,
-        paddingHorizontal: 9,
-        paddingVertical: 4,
-        borderRadius: 6,
-        alignSelf: "flex-start",
-        borderWidth: 1,
-        borderColor: Colors.hexBAE6FD,
     },
     priceText: {
         fontSize: 12,
@@ -290,13 +263,12 @@ const styles = StyleSheet.create({
         gap: 6,
     },
     actionBtn: {
-        flexDirection: "row",
+        width: 40,
+        height: 40,
         alignItems: "center",
-        paddingVertical: 6,
-        paddingHorizontal: 9,
+        justifyContent: "center",
         borderRadius: 8,
         borderWidth: 1,
-        gap: 4,
     },
     actionBtnPressed: {
         opacity: 0.7,
@@ -306,27 +278,12 @@ const styles = StyleSheet.create({
         backgroundColor: Colors.hexE8F1F5,
         borderColor: Colors.hexCFDDE6,
     },
-    detailsBtnText: {
-        fontSize: 12,
-        fontFamily: "WorksansSemiBold",
-        color: Colors.hex0B4F6C,
-    },
     editBtn: {
         backgroundColor: Colors.hexE0F2FE,
         borderColor: Colors.hexBAE6FD,
     },
-    editBtnText: {
-        fontSize: 12,
-        fontFamily: "WorksansSemiBold",
-        color: Colors.hex0E7490,
-    },
     deleteBtn: {
         backgroundColor: Colors.hexFEE2E2,
         borderColor: Colors.hexFECACA,
-    },
-    deleteBtnText: {
-        fontSize: 12,
-        fontFamily: "WorksansSemiBold",
-        color: Colors.hexA74E3C,
     },
 });

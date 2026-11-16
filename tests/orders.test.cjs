@@ -96,7 +96,7 @@ test("delete action appears only for cancelled orders", () => {
       pedido: { id: 266, status, id_cliente: 1, id_produto: 1, qtde: 1 },
       iconDetails() {}, iconEdit() {}, iconDelete() { clicked = true; },
     });
-    const deletes = page.nodes("Pressable").filter(node => page.nodes("Text", node).some(text => text.props.children === "Excluir"));
+    const deletes = page.nodes("Pressable").filter(node => node.props.accessibilityLabel === "Excluir");
     assert.equal(deletes.length, status === "C" ? 1 : 0);
     if (deletes.length) deletes[0].props.onPress();
     assert.equal(clicked, status === "C");
@@ -109,9 +109,11 @@ test("paid orders cannot expose deletion even when cancelled; unknown finance is
       pedido: { id: 279, status: "C", id_cliente: 1, id_produto: 1, qtde: 1, financial_user_id: "owner", financeiro },
       iconDetails() {}, iconEdit() {}, iconDelete() {},
     });
-    const deletes = page.nodes("Pressable").filter(node => page.nodes("Text", node).some(text => text.props.children === "Excluir"));
+    const deletes = page.nodes("Pressable").filter(node => node.props.accessibilityLabel === "Excluir");
     assert.equal(deletes.length, expected);
-    if (financeiro?.status === "paid") assert.match(JSON.stringify(page.nodes("Text")), /exclusão bloqueada/);
+    if (financeiro?.status === "paid") {
+      assert.ok(page.nodes("View").some(node => node.props.accessibilityLabel === "Recebimento realizado: exclusão bloqueada"));
+    }
   }
 });
 
