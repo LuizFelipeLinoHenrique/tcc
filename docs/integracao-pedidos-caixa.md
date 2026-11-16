@@ -1,5 +1,23 @@
 # Integração entre pedidos e fluxo de caixa
 
+## Remoção de produtos — 16/11/2026
+
+A migration `20261116034117_allow_order_product_removal.sql`, aplicada ao Supabase conectado, permite remover produtos de pedidos com recebimento pendente. A tela apresenta uma lixeira por item e impede remover o último produto. O texto explicativo de acréscimos e o rótulo visível “Remover” foram retirados; os botões mantêm rótulos de acessibilidade.
+
+A RPC salva a lista restante, mantém os preços históricos e sincroniza os totais do pedido e do caixa na mesma transação. Se o primeiro produto for removido, o cabeçalho passa a apontar para um item restante. O pedido deve manter ao menos um produto e total financeiro positivo. Pedidos pagos ou cancelados bloqueiam remoções. A validação diferida cobre também DELETE direto, e os testes de exclusão por cascata continuam passando.
+
+Validação: 75 testes JavaScript, checagem de tipos e os quatro roteiros SQL passaram. A suite `order_product_removal.sql` foi repetida após aplicar a migration, sempre com rollback dos dados temporários. ESLint do formulário sem erros, com o aviso de hook preexistente. Não houve teste manual em navegador autenticado.
+
+## Acréscimos após criação — 16/11/2026
+
+A migration `20261116033152_allow_order_product_additions.sql`, aplicada ao projeto conectado, permite adicionar novos produtos quando o recebimento ainda está pendente. A tela consulta o recebimento para liberar o botão e os campos dos novos itens. Cliente, vencimento, quantidades e preços dos itens já registrados permanecem preservados; pedidos pagos ou cancelados não aceitam acréscimos.
+
+A RPC `save_order_items` recebe a lista completa, insere apenas os produtos novos com o preço atual do catálogo e atualiza o total do pedido e o mesmo lançamento pendente na mesma transação. Repetir o payload não duplica itens nem receita. Locks no pedido e no recebimento protegem as operações concorrentes; um trigger diferido rejeita inclusões diretas que deixem os totais inconsistentes. Produtos de preço zero são aceitos. A edição de legados e a exclusão de cancelados sem recebimento continuam funcionando.
+
+Validação: 74 testes JavaScript e a checagem de tipos passaram. O ESLint do formulário passou sem erros, com um aviso preexistente de dependência de hook. Os três roteiros SQL (`order_product_additions.sql`, `order_cash_integration.sql` e `delete_cancelled_orders.sql`) passaram no banco conectado com assertions e rollback, cobrindo preços históricos, retry, totais, limites, falhas, pagamento, cancelamento e RLS. Não houve teste manual em navegador autenticado nem teste com duas conexões simultâneas.
+
+As seções abaixo registram a implementação anterior; a restrição absoluta de acréscimos foi substituída pelo comportamento acima.
+
 ## Comportamento implementado
 
 - Novos pedidos são gravados por `save_order_items` com itens, preços efetivos em centavos, vencimento informado e uma chave UUID da requisição.

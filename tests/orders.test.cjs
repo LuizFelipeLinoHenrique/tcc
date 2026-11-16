@@ -168,16 +168,63 @@ test("editing preserves all items and saves quantities and status in one operati
   assert.equal(saved, true);
 });
 
-test("integrated order editing preserves customer and items while allowing delivery status", async () => {
+test("integrated order editing permits new products and preserves recorded items", async () => {
   const page = screen("src/components/OrdersEdit.tsx", { idPedido: 42 });
   page.runEffects();
-  page.requests[0].resolve({ data: { id: 42, id_cliente: 5, id_produto: 10, qtde: 2, status: "P", financial_user_id: "owner", itens: [{ id_produto: 10, qtde: 2 }] } });
+  page.requests[0].resolve({ data: { id: 42, id_cliente: 5, id_produto: 10, qtde: 2, status: "P", financial_user_id: "owner", financeiro: { status: "pending" }, itens: [{ id_produto: 10, qtde: 2 }] } });
   await new Promise(resolve => setImmediate(resolve));
   page.render();
   assert.equal(page.nodes("TextInput")[0].props.editable, false);
   assert.equal(page.nodes("TextInput").find(node => node.props.accessibilityLabel === "Quantidade do produto 1").props.editable, false);
-  assert.equal(page.nodes("AnimatedButton").find(node => node.props.title === "Adicionar outro produto").props.disabled, true);
+  assert.equal(page.nodes("AnimatedButton").find(node => node.props.title === "Adicionar outro produto").props.disabled, false);
   assert.equal(page.nodes("TextInput")[1].props.editable, true);
+  page.nodes("AnimatedButton").find(node => node.props.title === "Adicionar outro produto").props.onPress();
+  page.render();
+  for (const [label, value] of [["Produto 2", "20"], ["Quantidade do produto 2", "3"]]) {
+    const input = page.nodes("TextInput").find(node => node.props.accessibilityLabel === label);
+    assert.equal(input.props.editable, true);
+    input.props.onChangeText(value);
+    page.render();
+  }
+  assert.equal(page.nodes("Pressable").find(node => node.props.accessibilityLabel === "Remover produto 1").props.disabled, false);
+  assert.equal(page.nodes("Pressable").find(node => node.props.accessibilityLabel === "Remover produto 2").props.disabled, false);
+  const saving = page.nodes("AnimatedButton").find(node => node.props.title === "Salvar Alterações").props.onPress();
+  assert.deepEqual(page.requests.at(-1).calls[0][2].p_itens, [{ id_produto: 10, qtde: 2 }, { id_produto: 20, qtde: 3 }]);
+  page.requests.at(-1).resolve({ error: { message: "Falha ao salvar" } });
+  await saving;
+  page.render();
+  assert.equal(page.nodes("TextInput").find(node => node.props.accessibilityLabel === "Produto 2").props.value, "20");
+  assert.equal(page.nodes("AnimatedButton").find(node => node.props.title === "Adicionar outro produto").props.disabled, false);
+});
+
+test("paid, cancelled and unavailable receipts block product additions", async () => {
+  for (const [status, financeiro] of [["P", { status: "paid" }], ["C", { status: "cancelled" }], ["P", null]]) {
+    const page = screen("src/components/OrdersEdit.tsx", { idPedido: 42 });
+    page.runEffects();
+    page.requests[0].resolve({ data: { id: 42, id_cliente: 5, id_produto: 10, qtde: 2, status, financial_user_id: "owner", financeiro, itens: [{ id_produto: 10, qtde: 2 }] } });
+    await new Promise(resolve => setImmediate(resolve));
+    page.render();
+    assert.equal(page.nodes("AnimatedButton").find(node => node.props.title === "Adicionar outro produto").props.disabled, true);
+  }
+});
+
+test("recorded product removal preserves remaining field locks and saves the reduced cart", async () => {
+  const page = screen("src/components/OrdersEdit.tsx", { idPedido: 42, onSaveSuccess() {} });
+  page.runEffects();
+  page.requests[0].resolve({ data: { id: 42, id_cliente: 5, id_produto: 10, qtde: 2, status: "P", financial_user_id: "owner", financeiro: { status: "pending" }, itens: [{ id_produto: 10, qtde: 2 }, { id_produto: 20, qtde: 3 }] } });
+  await new Promise(resolve => setImmediate(resolve));
+  page.render();
+  assert.ok(!JSON.stringify(page.nodes("Text")).includes("Adicione novos produtos enquanto"));
+  assert.ok(!page.nodes("Text").some(node => node.props.children === "Remover"));
+  page.nodes("Pressable").find(node => node.props.accessibilityLabel === "Remover produto 1").props.onPress();
+  page.render();
+  assert.equal(page.nodes("TextInput").find(node => node.props.accessibilityLabel === "Produto 1").props.value, "20");
+  assert.equal(page.nodes("TextInput").find(node => node.props.accessibilityLabel === "Produto 1").props.editable, false);
+  assert.equal(page.nodes("Pressable").find(node => node.props.accessibilityLabel === "Remover produto 1").props.disabled, true);
+  const saving = page.nodes("AnimatedButton").find(node => node.props.title === "Salvar Alterações").props.onPress();
+  assert.deepEqual(page.requests.at(-1).calls[0][2].p_itens, [{ id_produto: 20, qtde: 3 }]);
+  page.requests.at(-1).resolve({ data: 42 });
+  await saving;
 });
 
 async function addProduct(page, id, quantity) {

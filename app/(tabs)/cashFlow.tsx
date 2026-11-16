@@ -2,7 +2,9 @@ import { useCallback, useMemo, useRef, useState } from "react";
 import { useFocusEffect } from "expo-router";
 import { ActivityIndicator, FlatList, Platform, Pressable, Share, StyleSheet, Text, TextInput, View, useWindowDimensions } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { CashChoices, CashEntryForm } from "@/src/components/CashEntryForm";
+import { CashEntryForm } from "@/src/components/CashEntryForm";
+import { FilterChoices, FilterPanel, filterStyles } from "@/src/components/FilterPanel";
+import { pagesStyles } from "@/src/components/ScreensLayout";
 import { CashProjection } from "@/src/components/CashProjection";
 import { CashAnalyticsPanels } from "@/src/components/CashAnalyticsPanels";
 import { RecordModal } from "@/src/components/RecordModal";
@@ -138,11 +140,18 @@ export default function CashFlowScreen() {
       </View>
     </>}
     <View style={styles.panel}><View style={styles.between}><View><Text style={styles.panelTitle}>Movimentações</Text><Text style={styles.small}>{filtered.length} lançamento(s) no mês</Text></View><View style={styles.row}>{button("Atualizar", "refresh-outline", load, false, loading)}{button("Exportar CSV", "download-outline", exportCsv, false, !loaded || loading || !!error || !filtered.length)}</View></View>
-      <TextInput accessibilityLabel="Buscar movimentações" placeholder="Buscar descrição, categoria ou observações" placeholderTextColor={Colors.hex94A3B8} value={search} onChangeText={value => { setSearch(value); setPage(1); }} style={styles.input} />
-      <CashChoices values={[{ value: "all", label: "Todos os tipos" }, { value: "income", label: "Entradas" }, { value: "expense", label: "Saídas" }]} value={type} onChange={value => { setType(value); setPage(1); }} />
-      <CashChoices values={[{ value: "all", label: "Todas as situações" }, { value: "pending", label: "Pendentes" }, { value: "paid", label: "Realizados" }, { value: "overdue", label: "Vencidos" }, { value: "cancelled", label: "Cancelados" }]} value={status} onChange={value => { setStatus(value); setPage(1); }} />
-      {!!categories.length && <CashChoices values={[ALL, ...categories].map(value => ({ value, label: value === ALL ? "Todas as categorias" : value }))} value={category} onChange={value => { setCategory(value); setPage(1); }} />}
-      <View style={styles.between}><Text style={[styles.small, { flex: 1 }]}>Realizados são filtrados pela data do pagamento; pendentes e cancelados, pelo vencimento. Os indicadores acima consideram o mês selecionado.</Text>{button("Limpar filtros", "close-circle-outline", resetFilters)}</View>
+      <FilterPanel testID="cash-filters" isMobile={compact} onClear={resetFilters} additionalFiltersLabel="Tipo, status e categoria"
+        additionalFilters={<>
+          <View style={filterStyles.group}><Text style={pagesStyles.label}>Tipo</Text><FilterChoices items={[["all", "Todos os tipos"], ["income", "Entradas"], ["expense", "Saídas"]]} value={type} onChange={value => { setType(value); setPage(1); }} /></View>
+          <View style={filterStyles.group}><Text style={pagesStyles.label}>Status</Text><FilterChoices items={[["all", "Todas as situações"], ["pending", "Pendentes"], ["paid", "Realizados"], ["overdue", "Vencidos"], ["cancelled", "Cancelados"]]} value={status} onChange={value => { setStatus(value); setPage(1); }} /></View>
+          {!!categories.length && <View style={filterStyles.group}><Text style={pagesStyles.label}>Categoria</Text><FilterChoices items={[ALL, ...categories].map(value => [value, value === ALL ? "Todas as categorias" : value] as const)} value={category} onChange={value => { setCategory(value); setPage(1); }} /></View>}
+        </>}>
+        <View style={filterStyles.group}>
+          <Text style={pagesStyles.label}>Pesquisa</Text>
+          <TextInput accessibilityLabel="Buscar movimentações" placeholder="Buscar descrição, categoria ou observações" placeholderTextColor={Colors.hex94A3B8} value={search} onChangeText={value => { setSearch(value); setPage(1); }} style={[pagesStyles.input, { paddingHorizontal: 10 }]} />
+        </View>
+      </FilterPanel>
+      <Text style={styles.small}>Realizados são filtrados pela data do pagamento; pendentes e cancelados, pelo vencimento. Os indicadores acima consideram o mês selecionado.</Text>
     </View>
   </View>;
 

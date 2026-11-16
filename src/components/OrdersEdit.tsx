@@ -35,6 +35,7 @@ type Order = {
     qtde: number;
     id_produto: number;
     status: string;
+    financeiro?: { status: string } | null;
 };
 
 const STATUS_OPTIONS = [
@@ -51,11 +52,13 @@ export function EditOrderCard({
 
     const [pedido, setPedido] = useState<Order | null>(null);
     const [idCliente, setIdCliente] = useState("");
-    const [itens, setItens] = useState<{ id_produto: string; qtde: string }[]>([]);
+    const [itens, setItens] = useState<{ id_produto: string; qtde: string; registered?: boolean }[]>([]);
     const [status, setStatus] = useState("");
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string>("");
+    const additionsBlocked = !!pedido?.financial_user_id &&
+        (pedido.status === "C" || status === "C" || pedido.financeiro?.status !== "pending");
 
     useEffect(() => {
         buscarPedido();
@@ -66,7 +69,7 @@ export function EditOrderCard({
 
         const { data, error } = await supabase
             .from("pedidos")
-            .select("*, itens:pedido_itens(id_produto, qtde)")
+            .select("*, itens:pedido_itens(id_produto, qtde), financeiro:cash_flow_entries(status)")
             .is("deleted_at", null)
             .eq("id", idPedido)
             .single();
@@ -80,7 +83,7 @@ export function EditOrderCard({
 
         setPedido(data);
         setIdCliente(String(data.id_cliente ?? ""));
-        setItens(orderItems(data).map(item => ({ id_produto: String(item.id_produto), qtde: String(item.qtde) })));
+        setItens(orderItems(data).map(item => ({ id_produto: String(item.id_produto), qtde: String(item.qtde), registered: !!data.financial_user_id })));
         setStatus(data.status ?? "");
         setLoading(false);
     }
@@ -266,21 +269,20 @@ export function EditOrderCard({
                     <View key={index} style={styles.fields}>
                         <View style={[styles.field, isMobile && styles.fieldMobile]}>
                             <Text style={pagesStyles.label}>ID DO PRODUTO {index + 1}</Text>
-                            <TextInput accessibilityLabel={`Produto ${index + 1}`} value={item.id_produto} editable={!saving && !pedido.financial_user_id} keyboardType="number-pad" style={[styles.inputWrapper, styles.input]}
+                            <TextInput accessibilityLabel={`Produto ${index + 1}`} value={item.id_produto} editable={!saving && !additionsBlocked && !item.registered} keyboardType="number-pad" style={[styles.inputWrapper, styles.input]}
                                 onChangeText={value => setItens(prev => prev.map((entry, i) => i === index ? { ...entry, id_produto: value } : entry))} />
                         </View>
                         <View style={[styles.field, isMobile && styles.fieldMobile]}>
                             <Text style={pagesStyles.label}>QUANTIDADE</Text>
-                            <TextInput accessibilityLabel={`Quantidade do produto ${index + 1}`} value={item.qtde} editable={!saving && !pedido.financial_user_id} keyboardType="number-pad" style={[styles.inputWrapper, styles.input]}
+                            <TextInput accessibilityLabel={`Quantidade do produto ${index + 1}`} value={item.qtde} editable={!saving && !additionsBlocked && !item.registered} keyboardType="number-pad" style={[styles.inputWrapper, styles.input]}
                                 onChangeText={value => setItens(prev => prev.map((entry, i) => i === index ? { ...entry, qtde: value } : entry))} />
                         </View>
-                        <Pressable accessibilityRole="button" accessibilityLabel={`Remover produto ${index + 1}`} disabled={saving || !!pedido.financial_user_id || itens.length === 1} onPress={() => setItens(prev => prev.filter((_, i) => i !== index))}>
-                            <Text style={pagesStyles.label}>Remover</Text>
+                        <Pressable accessibilityRole="button" accessibilityLabel={`Remover produto ${index + 1}`} disabled={saving || additionsBlocked || itens.length === 1} style={[styles.removeButton, (saving || additionsBlocked || itens.length === 1) && styles.removeButtonDisabled]} onPress={() => setItens(prev => prev.filter((_, i) => i !== index))}>
+                            <Ionicons name="trash-outline" size={20} color={Colors.hexB91C1C} />
                         </Pressable>
                     </View>
                 ))}
-                {!!pedido.financial_user_id && <Text style={pagesStyles.description}>Itens, preços e vencimento preservados. Entregar não confirma pagamento. Cancelar encerra apenas o recebimento pendente; valores já recebidos permanecem no caixa.</Text>}
-                <AnimatedButton title="Adicionar outro produto" disabled={saving || !!pedido.financial_user_id} onPress={() => setItens(prev => [...prev, { id_produto: "", qtde: "" }])} stylesPressable={pagesStyles.primaryButton} stylesText={pagesStyles.primaryButtonText} />
+                <AnimatedButton title="Adicionar outro produto" disabled={saving || additionsBlocked} onPress={() => setItens(prev => [...prev, { id_produto: "", qtde: "" }])} stylesPressable={pagesStyles.primaryButton} stylesText={pagesStyles.primaryButtonText} />
             </View>
 
             {/* ERRO */}
@@ -312,6 +314,18 @@ export function EditOrderCard({
 }
 
 const styles = StyleSheet.create({
+    removeButton: {
+        width: 44,
+        height: 44,
+        alignItems: "center",
+        justifyContent: "center",
+        alignSelf: "flex-end",
+        borderRadius: 8,
+        backgroundColor: Colors.hexFEE2E2,
+    },
+    removeButtonDisabled: {
+        opacity: 0.35,
+    },
     card: {
         width: "100%",
         alignSelf: "center",
