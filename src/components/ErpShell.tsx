@@ -19,7 +19,7 @@ export function ErpShell({ children, onSignOut }: PropsWithChildren<{ onSignOut:
   const { width } = useWindowDimensions();
   const desktop = width >= 1000;
   const pathname = usePathname().toLowerCase();
-  const active = modules.find(item => pathname.includes(item.path.toLowerCase()));
+  const active = modules.find(item => (item.path === "homeScreen" ? pathname === "/" || pathname.includes("homescreen") : pathname.includes(item.path.toLowerCase())));
   const navigation = modules.map(item => {
     const selected = item === active;
     return <Pressable key={item.path} accessibilityRole="tab" accessibilityState={{ selected }} accessibilityLabel={item.label}
@@ -35,11 +35,11 @@ export function ErpShell({ children, onSignOut }: PropsWithChildren<{ onSignOut:
         <View style={styles.brand}><View style={styles.brandIcon}><Ionicons name="cube" size={23} color={Colors.white} /></View><View><Text style={styles.brandName}>PalletCore</Text><Text style={styles.brandCaption}>GESTÃO EMPRESARIAL</Text></View></View>
         <Text style={styles.section}>ÁREA DE TRABALHO</Text>
         <View style={styles.nav}>{navigation}</View>
-        <View style={styles.sidebarFooter}><Text style={styles.footerTitle}>Gestão integrada</Text><Text style={styles.footerText}>Sua operação em um só lugar.</Text></View>
+        <View style={styles.sidebarFooter}><Text style={styles.footerTitle}>Gestão integrada</Text><Text style={styles.footerText}>Pedidos, cadastros e financeiro.</Text></View>
       </View>}
       <View style={styles.main}>
         <View style={[styles.header, !desktop && styles.mobileHeader]}>
-          <View><Text style={styles.breadcrumb}>{desktop ? "PalletCore / Workspace" : "PALLETCORE"}</Text><Text style={styles.headerTitle}>{active?.label ?? "Área de trabalho"}</Text></View>
+          <View><Text style={styles.breadcrumb}>{desktop ? "PalletCore / Gestão empresarial" : "PALLETCORE"}</Text><Text style={styles.headerTitle}>{active?.label ?? "Área de trabalho"}</Text></View>
           <Pressable accessibilityRole="button" accessibilityLabel="Sair da conta" onPress={onSignOut} style={({ pressed }) => [styles.signOut, pressed && { opacity: 0.6 }]}><Ionicons name="log-out-outline" size={19} color={Colors.hex475569} /><Text style={styles.signOutText}>Sair</Text></Pressable>
         </View>
         {!desktop && <View style={styles.mobileNav}><ScrollView showsVerticalScrollIndicator={false} horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.mobileNavContent}>{navigation}</ScrollView></View>}
@@ -51,7 +51,7 @@ export function ErpShell({ children, onSignOut }: PropsWithChildren<{ onSignOut:
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: Colors.hexF4F7F9 },
   shell: { flex: 1, flexDirection: "row" },
-  sidebar: { width: 236, backgroundColor: Colors.hex0F172A, padding: 16 },
+  sidebar: { width: 236, backgroundColor: Colors.hex1E293B, padding: 16 },
   brand: { flexDirection: "row", alignItems: "center", gap: 10, paddingVertical: 18, paddingHorizontal: 8, marginBottom: 26 },
   brandIcon: { width: 38, height: 38, borderRadius: 10, backgroundColor: Colors.hex0B4F6C, alignItems: "center", justifyContent: "center" },
   brandName: { color: Colors.white, fontSize: 20, fontFamily: "WorksansBold" },
@@ -67,7 +67,7 @@ const styles = StyleSheet.create({
   footerTitle: { color: Colors.hexCBD8E2, fontSize: 12, fontFamily: "WorksansSemiBold" },
   footerText: { color: Colors.hex94A3B8, fontSize: 11, marginTop: 5, fontFamily: "WorksansRegular" },
   main: { flex: 1, minWidth: 0 },
-  header: { minHeight: 80, backgroundColor: Colors.white, borderBottomWidth: 1, borderBottomColor: Colors.hexDCE7EE, flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 28, paddingVertical: 12 },
+  header: { minHeight: 68, backgroundColor: Colors.white, borderBottomWidth: 1, borderBottomColor: Colors.hexDCE7EE, flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 28, paddingVertical: 12 },
   mobileHeader: { paddingHorizontal: 18, minHeight: 70 },
   breadcrumb: { fontSize: 11, color: Colors.hex64748B, fontFamily: "WorksansRegular", marginBottom: 5 },
   headerTitle: { fontSize: 18, color: Colors.hex0F172A, fontFamily: "WorksansSemiBold" },

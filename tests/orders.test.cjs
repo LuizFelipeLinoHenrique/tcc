@@ -60,6 +60,7 @@ function screen(file, props = {}) {
     if (name.endsWith("/orderItems")) return compile("src/lib/orderItems.ts", load);
     if (name.endsWith("/orderValidation")) return compile("src/lib/orderValidation.ts", load);
     if (name.endsWith("/cashFlow")) return compile("src/lib/cashFlow.ts", load);
+    if (name.endsWith("/dates")) return compile("src/lib/dates.ts", load);
     if (name.endsWith("/pagination")) return compile("src/lib/pagination.ts", load);
     if (name.endsWith("/tableActions")) return compile("src/lib/tableActions.ts", load);
     if (name.endsWith("/colors")) return { Colors: {} };
@@ -70,7 +71,7 @@ function screen(file, props = {}) {
     return { [key]: key, Ionicons: "Ionicons" };
   };
   const exports = compile(file, load);
-  const Component = exports.default ?? exports.EditOrderCard ?? exports.OrderTableRow;
+  const Component = exports.default ?? exports.EditOrderCard ?? exports.OrderTableRow ?? exports.CashEntryForm;
   let tree;
   function render() { index = 0; tree = Component(props); }
   function nodes(type, node = tree) {
@@ -88,6 +89,40 @@ const addScreen = () => {
   page.render();
   return page;
 };
+
+test("order dates display calendar days, creation timestamps and missing values", () => {
+  for (const [dates, expected] of [
+    [{ data_pedido: "2026-11-15" }, "15/11/2026"],
+    [{ data_pedido: null, created_at: "2026-11-15T02:00:00Z" }, "14/11/2026"],
+    [{ data_pedido: "", created_at: "2026-11-15T15:00:00Z" }, "15/11/2026"],
+    [{ data_pedido: "2026-11-10", created_at: "2026-11-15T15:00:00Z" }, "10/11/2026"],
+    [{}, "Não informada"],
+    [{ data_pedido: "invalid" }, "Não informada"],
+  ]) {
+    const page = screen("src/components/OrdersCard.tsx", {
+      pedido: { id: 266, status: "P", id_cliente: 1, id_produto: 1, qtde: 1, ...dates },
+      iconDetails() {}, iconEdit() {},
+    });
+    assert.ok(page.nodes("Text").some(node => node.props.children === expected), expected);
+  }
+});
+
+test("order and cash date fields apply the date mask while typing and pasting", () => {
+  const order = addScreen();
+  const cash = screen("src/components/CashEntryForm.tsx", {
+    initialType: "income", entry: { due_date: "2026-11-15", paid_date: "2026-11-15", status: "paid", amount_cents: 100 },
+    onSaved() {}, onBusy() {},
+  });
+  for (const [page, label] of [[order, "Vencimento do recebimento"], [cash, "Vencimento *"], [cash, "Data do pagamento / recebimento *"]]) {
+    for (const [input, expected] of [["1", "1"], ["151", "15/1"], ["15112026", "15/11/2026"], ["15/11/2026", "15/11/2026"], ["15/11/202", "15/11/202"], ["", ""]]) {
+      const field = () => page.nodes("TextInput").find(node => node.props.accessibilityLabel === label);
+      field().props.onChangeText(input);
+      page.render();
+      assert.equal(field().props.value, expected);
+      assert.equal(field().props.keyboardType, "number-pad");
+    }
+  }
+});
 
 test("delete action appears only for cancelled orders", () => {
   for (const status of ["P", "E", "C"]) {

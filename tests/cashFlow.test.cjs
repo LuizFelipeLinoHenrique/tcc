@@ -6,7 +6,13 @@ const ts = require("typescript");
 const source = fs.readFileSync(path.join(__dirname, "../src/lib/cashFlow.ts"), "utf8");
 const { outputText } = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } });
 const mod = { exports: {} };
-new Function("module", "exports", outputText)(mod, mod.exports);
+const datesCode = ts.transpileModule(fs.readFileSync(path.join(__dirname, "../src/lib/dates.ts"), "utf8"), { compilerOptions: { module: ts.ModuleKind.CommonJS } }).outputText;
+const datesModule = { exports: {} };
+new Function("module", "exports", datesCode)(datesModule, datesModule.exports);
+new Function("require", "module", "exports", outputText)(name => {
+  assert.equal(name, "./dates");
+  return datesModule.exports;
+}, mod, mod.exports);
 const { cashToday, parseMoney, parseDate, addMonths, summarizeCash, projectCash, cashMonthData, cashCsv, effectiveDate } = mod.exports;
 const entry = (overrides = {}) => ({ id: "1", user_id: "user", description: "Venda", amount_cents: 10000, type: "income", category: "Vendas", account: "Caixa", due_date: "2026-11-10", paid_date: null, status: "pending", notes: "", created_at: "", ...overrides });
 

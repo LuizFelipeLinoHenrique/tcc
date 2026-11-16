@@ -1,7 +1,9 @@
+import { router } from "expo-router";
 import { Colors } from "@/src/theme/colors";
 import { useEffect, useRef, useState } from "react";
 import { parsePositiveInteger } from "@/src/lib/orderValidation";
 import { parseDate } from "@/src/lib/cashFlow";
+import { maskDate } from "@/src/lib/dates";
 import { recordError } from "@/src/lib/tableActions";
 import {
     ActivityIndicator,
@@ -21,7 +23,7 @@ import { supabase } from "@/src/lib/supabase";
 type ValidationState = "idle" | "loading" | "success" | "error";
 
 export default function OrdersManager() {
-    const { maxCardWidth } = useResponsive();
+    const { maxCardWidth, isMobile } = useResponsive();
 
     const [idCliente, setIdCliente] = useState("");
     const [idProduto, setIdProduto] = useState("");
@@ -480,12 +482,6 @@ export default function OrdersManager() {
                             )}
                         </View>
 
-                        <View style={pagesStyles.field}>
-                            <Text style={pagesStyles.label}>VENCIMENTO DO RECEBIMENTO *</Text>
-                            <TextInput accessibilityLabel="Vencimento do recebimento" value={vencimento}
-                                onChangeText={setVencimento} editable={!loading} placeholder="DD/MM/AAAA"
-                                maxLength={10} style={[styles.inputWrapper, styles.input]} />
-                        </View>
                         <AnimatedButton
                             title="Adicionar produto ao pedido"
                             onPress={adicionarProduto}
@@ -523,6 +519,13 @@ export default function OrdersManager() {
                                 ))}
                             </View>
                         )}
+                        <View style={pagesStyles.field}>
+                            <Text style={pagesStyles.label}>VENCIMENTO DO RECEBIMENTO *</Text>
+                            <TextInput accessibilityLabel="Vencimento do recebimento" value={vencimento}
+                                onChangeText={value => setVencimento(maskDate(value))} editable={!loading} placeholder="DD/MM/AAAA"
+                                keyboardType="number-pad" maxLength={10} style={[styles.inputWrapper, styles.input]} />
+                        </View>
+
                         {/* STATUS INICIAL INFORMATIVO */}
                         <View style={styles.statusContainer}>
                             <View style={styles.statusIcon}>
@@ -557,6 +560,8 @@ export default function OrdersManager() {
                         )}
 
                         {/* BOTÃO CADASTRAR */}
+                        <View style={{ width: "100%", flexDirection: isMobile ? "column-reverse" : "row", justifyContent: "flex-end", gap: 12, borderTopWidth: 1, borderTopColor: Colors.hexDCE7EE, paddingTop: 20 }}>
+                          <AnimatedButton title="Cancelar" stylesPressable={pagesStyles.secondaryButton} stylesText={pagesStyles.secondaryButtonText} disabled={loading} onPress={() => router.push("/(tabs)/(order)/orders")} />
                         <AnimatedButton
                             stylesPressable={[
                                 pagesStyles.primaryButton,
@@ -573,6 +578,7 @@ export default function OrdersManager() {
                                 )
                             }
                         />
+                        </View>
                     </View>
                 </View>
             </View>
@@ -587,7 +593,7 @@ const styles = StyleSheet.create({
     container: {
         width: "100%",
         alignItems: "center",
-        paddingHorizontal: 10,
+        paddingHorizontal: 0,
     },
     header: {
         flexDirection: "row",

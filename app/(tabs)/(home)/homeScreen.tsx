@@ -1,40 +1,65 @@
 import { orderItems, orderQuantity } from "@/src/lib/orderItems";
 import { Colors } from "@/src/theme/colors";
-import { AnimatedButton } from "@/src/components/AnimatedButton";
-import { BarGraph, BarGraphItem } from "@/src/components/BarGraph";
-import { LineGraph } from "@/src/components/LineGraph";
-import { PieGraph, PieGraphItem } from "@/src/components/PieGraph";
-import { PagesLayout, pagesStyles } from "@/src/components/ScreensLayout";
+import { BarGraphItem } from "@/src/components/BarGraph";
+import { DashboardTrend, DashboardRanking, DashboardOrderMix } from "@/src/components/DashboardCharts";
+import { PieGraphItem } from "@/src/components/PieGraph";
+import { PagesLayout } from "@/src/components/ScreensLayout";
 import useResponsive from "@/src/hooks/useResponsive";
 import { supabase } from "@/src/lib/supabase";
 import { Ionicons } from "@expo/vector-icons";
-import React, { useEffect, useState } from "react";
-import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
+import React, { useCallback, useState } from "react";
+import { useFocusEffect } from "expo-router";
+import { dashboardCash } from "@/src/lib/dashboardCash";
+import { cashToday, money } from "@/src/lib/cashFlow";
+import { cashError, loadCashEntries } from "@/src/lib/cashFlowRepository";
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
 import { lineDataItem } from "react-native-gifted-charts";
 
+function buildTimelineData(pedidos: any[], monthsCount: number): lineDataItem[] {
+    const today = cashToday();
+    const [year, month] = today.split("-").map(Number);
+    return Array.from({ length: monthsCount }, (_, index) => {
+        const date = new Date(year, month - monthsCount + index, 1, 12);
+        const key = date.getFullYear() + "-" + String(date.getMonth() + 1).padStart(2, "0");
+        return {
+            label: date.toLocaleDateString("pt-BR", { month: "2-digit", year: "2-digit" }),
+            value: pedidos.filter(pedido => {
+                const day = String(pedido.data_pedido ?? pedido.created_at ?? "").slice(0, 10);
+                return day.startsWith(key) && day <= today;
+            }).length,
+        };
+    });
+}
+
 export default function HomeScreen() {
-    const { width, isMobile, graphWidth, maxCardWidth } = useResponsive();
+    const { width } = useResponsive();
+    const [contentWidth, setContentWidth] = useState(Math.min(1440, Math.max(0, width - 48)));
+    const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+    const compact = contentWidth < 640;
+    const gridWidth = (columns: number) => (contentWidth - 16 * (columns - 1)) / columns;
+    const metricWidth = compact ? "100%" as const : gridWidth(3);
+    const chartColumns = contentWidth >= 1100 ? 3 : contentWidth >= 720 ? 2 : 1;
+    const chartWidth = gridWidth(chartColumns);
+    const pairWidth = contentWidth >= 720 ? gridWidth(2) : contentWidth;
+    const today = cashToday();
+    const monthLabel = new Date(today + "T12:00:00").toLocaleDateString("pt-BR", { month: "long", year: "numeric" });
 
     const [ordersNum, setOrdersNum] = useState<lineDataItem[]>([]);
-    const [revenueTimeline, setRevenueTimeline] = useState<lineDataItem[]>([]);
+    const [financials, setFinancials] = useState(() => dashboardCash([], 3));
+    const [loadError, setLoadError] = useState("");
+    const [refreshKey, setRefreshKey] = useState(0);
     const [loadingData, setLoadingData] = useState<boolean>(true);
-    const [maxValue, setMaxValue] = useState<number>(10);
-    const [maxRevenueValue, setMaxRevenueValue] = useState<number>(10);
 
     // Métricas calculadas sobre os pedidos
     const [totalPedidos, setTotalPedidos] = useState<number>(0);
     const [pedidosPendentes, setPedidosPendentes] = useState<number>(0);
     const [pedidosEntregues, setPedidosEntregues] = useState<number>(0);
     const [pedidosCancelados, setPedidosCancelados] = useState<number>(0);
-    const [totalUnidades, setTotalUnidades] = useState<number>(0);
-    const [faturamentoEstimado, setFaturamentoEstimado] = useState<number>(0);
-    const [ticketMedio, setTicketMedio] = useState<number>(0);
 
     // Métricas de catálogo e parceiros
     const [totalClientes, setTotalClientes] = useState<number>(0);
     const [totalMateriais, setTotalMateriais] = useState<number>(0);
     const [totalFornecedores, setTotalFornecedores] = useState<number>(0);
-    const [precoMedioMateriais, setPrecoMedioMateriais] = useState<number>(0);
 
     // Dados para os gráficos
     const [statusPieData, setStatusPieData] = useState<PieGraphItem[]>([]);
@@ -43,73 +68,34 @@ export default function HomeScreen() {
 
     const [active, setActive] = useState<number>(3);
 
-    const spacing =
-        ordersNum.length > 1
-            ? Math.max((graphWidth - 40) / (ordersNum.length - 1), 20)
-            : 50;
-
-    // Espaco interno real: largura da tela - paddings externos, gaps e paddings dos tres cards.
-    const tripleGraphWidth = isMobile
-        ? graphWidth
-        : Math.max(140, Math.floor((width - 40 - 28 - 96) / 3));
-
-    useEffect(() => {
-        async function loadAllMetrics() {
-            setLoadingData(true);
+    useFocusEffect(useCallback(() => {
+        let disposed = false;
+        let running = false;
+        async function loadAllMetrics(showLoading = false) {
+            if (running) return;
+            running = true;
+            if (showLoading) setLoadingData(true);
 
             try {
-                // 1. Carregar Pedidos
-                const { data: pedidos, error: pedidosError } = await supabase
-                    .from("pedidos")
-                    .select("*, itens:pedido_itens(id_produto, qtde, unit_price_cents)")
-                    .is("deleted_at", null);
-
-                if (pedidosError) {
-                    console.error("Erro ao carregar pedidos no dashboard:", pedidosError);
+                const [cashEntries, ordersResult, productsResult, clientsResult, suppliersResult] = await Promise.all([
+                    loadCashEntries(),
+                    supabase.from("pedidos").select("*, itens:pedido_itens(id_produto, qtde, unit_price_cents)").is("deleted_at", null),
+                    supabase.from("produtos").select("*"),
+                    supabase.from("clientes").select("id, nome"),
+                    supabase.from("fornecedores").select("*", { count: "exact", head: true }),
+                ]);
+                if (disposed) return;
+                for (const result of [ordersResult, productsResult, clientsResult, suppliersResult]) {
+                    if (result.error) throw result.error;
                 }
-
-                const listaPedidos = pedidos ?? [];
-
-                // 2. Carregar Produtos
-                const { data: produtos } = await supabase
-                    .from("produtos")
-                    .select("*");
-
-                const listaProdutos = produtos ?? [];
-
-                // 3. Carregar Clientes
-                const { data: clientes } = await supabase
-                    .from("clientes")
-                    .select("id, nome");
-
-                // 4. Carregar Fornecedores
-                const { count: countFornecedores } = await supabase
-                    .from("fornecedores")
-                    .select("*", { count: "exact", head: true });
-
-                const listaClientes = clientes ?? [];
+                const listaPedidos = ordersResult.data ?? [];
+                const listaProdutos = productsResult.data ?? [];
+                const listaClientes = clientsResult.data ?? [];
+                setFinancials(dashboardCash(cashEntries, active));
+                setLoadError("");
                 setTotalClientes(listaClientes.length);
-                setTotalFornecedores(countFornecedores || 0);
-
-                // Mapeamento de produtos por ID e cálculo de preço médio
-                const produtosMap = new Map<number, { nome: string; preco: number }>();
-                let somaPrecos = 0;
-
-                if (listaProdutos.length > 0) {
-                    setTotalMateriais(listaProdutos.length);
-                    listaProdutos.forEach((p: any) => {
-                        const preco = Number(p.preco ?? p["preço"] ?? p.preco_unit ?? 0);
-                        somaPrecos += preco;
-                        produtosMap.set(p.id, {
-                            nome: p.nome ?? `Produto #${p.id}`,
-                            preco,
-                        });
-                    });
-                    setPrecoMedioMateriais(somaPrecos / listaProdutos.length);
-                } else {
-                    setTotalMateriais(0);
-                    setPrecoMedioMateriais(0);
-                }
+                setTotalFornecedores(suppliersResult.count ?? 0);
+                setTotalMateriais(listaProdutos.length);
 
                 // Processamento dos pedidos
                 const total = listaPedidos.length;
@@ -118,11 +104,8 @@ export default function HomeScreen() {
                 let countP = 0;
                 let countE = 0;
                 let countC = 0;
-                let somaQtde = 0;
-                let somaFaturamento = 0;
                 const demandaPorProduto = new Map<number, number>();
                 const demandaPorCliente = new Map<number, number>();
-                const faturamentoPorPedido = new Map<number, number>();
 
                 listaPedidos.forEach((ped: any) => {
                     const rawStatus = String(ped.status || "").trim().toUpperCase();
@@ -136,17 +119,11 @@ export default function HomeScreen() {
 
                     const itens = orderItems(ped);
                     const qtde = orderQuantity(ped);
-                    const valorPedido = itens.reduce((total, item) => total + Number(item.qtde) * (item.unit_price_cents != null ? Number(item.unit_price_cents) / 100 : produtosMap.get(item.id_produto)?.preco ?? 0), 0);
-                    faturamentoPorPedido.set(ped.id, rawStatus === "C" || rawStatus.startsWith("CANC") ? 0 : valorPedido);
-
                     // Pedidos cancelados sao mantidos no historico de status, mas nao
                     // entram em demanda, volume ou receita operacional.
                     if (rawStatus === "C" || rawStatus.startsWith("CANC")) {
                         return;
                     }
-
-                    somaQtde += qtde;
-                    somaFaturamento += valorPedido;
 
                     itens.forEach(item => {
                         demandaPorProduto.set(item.id_produto, (demandaPorProduto.get(item.id_produto) || 0) + Number(item.qtde));
@@ -161,11 +138,6 @@ export default function HomeScreen() {
                 setPedidosPendentes(countP);
                 setPedidosEntregues(countE);
                 setPedidosCancelados(countC);
-                setTotalUnidades(somaQtde);
-                setFaturamentoEstimado(somaFaturamento);
-                const pedidosAtivos = total - countC;
-                setTicketMedio(pedidosAtivos > 0 ? somaFaturamento / pedidosAtivos : 0);
-
                 // Gráfico Donut de Status
                 setStatusPieData([
                     { label: "Pendente", value: countP, color: Colors.hexD97706 },
@@ -188,20 +160,13 @@ export default function HomeScreen() {
                     sortedProds.slice(0, 4).forEach((prod, index) => {
                         const dem = demandaPorProduto.get(prod.id) || 0;
                         const nomeRaw = prod.nome ?? `Item #${prod.id}`;
-                        const label =
-                            nomeRaw.length > 8 ? nomeRaw.slice(0, 7) + "…" : nomeRaw;
+                        const label = nomeRaw;
 
                         topBars.push({
-                            value: dem > 0 ? dem : somaQtde > 0 && index === 0 ? somaQtde : 1,
+                            value: dem,
                             label,
                             frontColor: coresBarras[index % coresBarras.length],
                         });
-                    });
-                } else if (listaPedidos.length > 0) {
-                    topBars.push({
-                        value: somaQtde > 0 ? somaQtde : 1,
-                        label: "Pedido #1",
-                        frontColor: Colors.hex0B4F6C,
                     });
                 }
 
@@ -217,725 +182,205 @@ export default function HomeScreen() {
                         const nome = nomesClientes.get(idCliente) || `Cliente #${idCliente}`;
                         return {
                             value: volume,
-                            label: nome.length > 9 ? `${nome.slice(0, 8)}...` : nome,
+                            label: nome,
                             frontColor: coresClientes[index % coresClientes.length],
                         };
                     });
                 setTopClientesData(topClientes);
 
-                // Gráfico de Linha: Evolução Temporal com Garantia de Exibição
-                // Gera a lista dos N meses selecionados
+                // Mantém o histórico no período atual, inclusive meses sem pedidos.
                 const timelinePoints = buildTimelineData(listaPedidos, active);
                 setOrdersNum(timelinePoints);
 
-                const maiorValor = Math.max(...timelinePoints.map((p) => p.value ?? 0), 0);
-                setMaxValue(Math.max(Math.ceil((maiorValor + 2) / 2) * 2, 5));
+                setLastUpdated(new Date());
 
-                const revenuePoints = buildTimelineData(
-                    listaPedidos,
-                    active,
-                    (pedido) => faturamentoPorPedido.get(pedido.id) || 0,
-                );
-                setRevenueTimeline(revenuePoints);
-                const maiorReceita = Math.max(...revenuePoints.map((p) => p.value ?? 0), 0);
-                setMaxRevenueValue(Math.max(Math.ceil(maiorReceita / 5) * 5, 5));
             } catch (err) {
-                console.error("Erro geral ao processar métricas do dashboard:", err);
+                if (!disposed) setLoadError(cashError(err));
             } finally {
-                setLoadingData(false);
+                running = false;
+                if (!disposed) setLoadingData(false);
             }
         }
-
-        loadAllMetrics();
-    }, [active]);
-
-    // Função para gerar os pontos mensais do gráfico de linha
-    function buildTimelineData(
-        pedidos: any[],
-        monthsCount: number,
-        getValue: (pedido: any) => number = () => 1,
-    ): lineDataItem[] {
-        const now = new Date();
-        const monthsList: { key: string; label: string; value: number }[] = [];
-
-        // Verifica a data do pedido mais recente caso todos os pedidos sejam de datas antigas
-        let referenceDate = now;
-        let temPedidoNoPeriodoPadrao = false;
-
-        const defaultKeys = new Set<string>();
-        for (let i = monthsCount - 1; i >= 0; i--) {
-            const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-            defaultKeys.add(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`);
-        }
-
-        let pedidoMaisRecente: Date | null = null;
-        pedidos.forEach((p) => {
-            const dateStr = p.data_pedido ?? p.created_at;
-            if (dateStr) {
-                const pDate = new Date(dateStr);
-                if (!isNaN(pDate.getTime())) {
-                    const key = `${pDate.getFullYear()}-${String(pDate.getMonth() + 1).padStart(2, "0")}`;
-                    if (defaultKeys.has(key)) {
-                        temPedidoNoPeriodoPadrao = true;
-                    }
-                    if (!pedidoMaisRecente || pDate > pedidoMaisRecente) {
-                        pedidoMaisRecente = pDate;
-                    }
-                }
-            }
-        });
-
-        // Se nenhum pedido cai nos últimos meses atuais, ancorar na data do pedido existente
-        if (!temPedidoNoPeriodoPadrao && pedidoMaisRecente && pedidos.length > 0) {
-            referenceDate = pedidoMaisRecente;
-        }
-
-        // Gera os meses da janela
-        for (let i = monthsCount - 1; i >= 0; i--) {
-            const d = new Date(referenceDate.getFullYear(), referenceDate.getMonth() - i, 1);
-            const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
-            const label = d.toLocaleDateString("pt-BR", {
-                month: "2-digit",
-                year: "2-digit",
-            });
-            monthsList.push({ key, label, value: 0 });
-        }
-
-        // Contabiliza pedidos nos meses correspondentes
-        let pedidosContabilizados = 0;
-        pedidos.forEach((p) => {
-            const dateStr = p.data_pedido ?? p.created_at;
-            let targetKey: string;
-
-            if (dateStr) {
-                const pDate = new Date(dateStr);
-                if (!isNaN(pDate.getTime())) {
-                    targetKey = `${pDate.getFullYear()}-${String(pDate.getMonth() + 1).padStart(2, "0")}`;
-                } else {
-                    targetKey = monthsList[monthsList.length - 1].key;
-                }
-            } else {
-                targetKey = monthsList[monthsList.length - 1].key;
-            }
-
-            const monthItem = monthsList.find((m) => m.key === targetKey);
-            if (monthItem) {
-                monthItem.value += getValue(p);
-                pedidosContabilizados++;
-            }
-        });
-
-        // Se houver pedidos no banco mas nenhum caiu nas chaves geradas, atribuir ao último mês
-        if (pedidosContabilizados === 0 && pedidos.length > 0) {
-            monthsList[monthsList.length - 1].value = pedidos.length;
-        }
-
-        return monthsList.map((m) => ({
-            value: m.value,
-            label: m.label,
-        }));
-    }
-
-    function formatCurrency(val: number): string {
-        return `R$ ${val.toLocaleString("pt-BR", {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-        })}`;
-    }
+        void loadAllMetrics(true);
+        const refresh = setInterval(() => { void loadAllMetrics(); }, 30000);
+        return () => { disposed = true; clearInterval(refresh); };
+    // O botão de atualização reinicia a leitura e invalida respostas anteriores.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [active, refreshKey]));
 
     const taxaEntrega =
         totalPedidos > 0 ? ((pedidosEntregues / totalPedidos) * 100).toFixed(0) : "0";
-    const mediaUnidadesPorPedido =
-        totalPedidos > 0 ? (totalUnidades / totalPedidos).toFixed(1) : "0";
 
     return (
-        <PagesLayout scroll={true}>
-            {/* Cabeçalho do Dashboard */}
-            <View style={styles.dashboardHeader}>
-                <Text style={pagesStyles.brand}>VISÃO GERAL</Text>
-                <Text style={styles.dashboardTitle}>Painel de operações</Text>
-                <Text style={styles.dashboardSubtitle}>
-                    Métricas consolidadas de faturamento, fluxo de pedidos, produtos e parceiros
-                </Text>
-            </View>
-
-            {!loadingData ? (
-                <>
-                    {/* Linha 1 de KPIs: Faturamento, Total, Volume e Ticket Médio */}
-                    <View style={styles.kpiContainer}>
-                        {/* Faturamento Estimado */}
-                        <View style={[styles.kpiCard, styles.kpiCardHighlight, isMobile && styles.kpiCardMobile]}>
-                            <View style={[styles.kpiIconWrapper, { backgroundColor: Colors.hexE0EDF4 }]}>
-                                <Ionicons name="cash" size={22} color={Colors.hex0B4F6C} />
-                            </View>
-                            <View style={styles.kpiContent}>
-                                <Text style={styles.kpiLabel}>Faturamento dos Pedidos</Text>
-                                <Text style={[styles.kpiValue, styles.kpiValueLarge]} numberOfLines={1}>
-                                    {formatCurrency(faturamentoEstimado)}
-                                </Text>
-                                <Text style={styles.kpiFootnote}>valor total movimentado</Text>
-                            </View>
-                        </View>
-
-                        {/* Total de Pedidos */}
-                        <View style={[styles.kpiCard, isMobile && styles.kpiCardMobile]}>
-                            <View style={[styles.kpiIconWrapper, { backgroundColor: Colors.hexEAF2EA }]}>
-                                <Ionicons name="cube" size={22} color={Colors.hex4A754D} />
-                            </View>
-                            <View style={styles.kpiContent}>
-                                <Text style={styles.kpiLabel}>Total de Pedidos</Text>
-                                <Text style={styles.kpiValue}>{totalPedidos}</Text>
-                                <Text style={styles.kpiFootnote}>pedidos registrados</Text>
-                            </View>
-                        </View>
-
-                        {/* Volume Total de Itens */}
-                        <View style={[styles.kpiCard, isMobile && styles.kpiCardMobile]}>
-                            <View style={[styles.kpiIconWrapper, { backgroundColor: Colors.hexF7F1E6 }]}>
-                                <Ionicons name="layers" size={22} color={Colors.hex9C773D} />
-                            </View>
-                            <View style={styles.kpiContent}>
-                                <Text style={styles.kpiLabel}>Volume de Unidades</Text>
-                                <Text style={styles.kpiValue}>{totalUnidades.toLocaleString("pt-BR")}</Text>
-                                <Text style={styles.kpiFootnote}>méd. {mediaUnidadesPorPedido} un./pedido</Text>
-                            </View>
-                        </View>
-
-                        {/* Ticket Médio */}
-                        <View style={[styles.kpiCard, isMobile && styles.kpiCardMobile]}>
-                            <View style={[styles.kpiIconWrapper, { backgroundColor: Colors.hexEEF2F6 }]}>
-                                <Ionicons name="pricetag" size={22} color={Colors.hex3B6998} />
-                            </View>
-                            <View style={styles.kpiContent}>
-                                <Text style={styles.kpiLabel}>Ticket Médio</Text>
-                                <Text style={styles.kpiValue} numberOfLines={1}>
-                                    {formatCurrency(ticketMedio)}
-                                </Text>
-                                <Text style={styles.kpiFootnote}>média por pedido</Text>
-                            </View>
-                        </View>
+        <PagesLayout scroll={true} scrollContent={[styles.pagePadding, width < 640 && styles.pagePaddingCompact]}>
+            <View testID="dashboard-content" style={styles.content} onLayout={event => setContentWidth(event.nativeEvent.layout.width)}>
+                <View style={[styles.pageHeader, compact && styles.pageHeaderCompact]}>
+                    <View style={styles.headerCopy}>
+                        <Text style={styles.eyebrow}>VISÃO GERAL</Text>
+                        <Text accessibilityRole="header" style={[styles.pageTitle, compact && styles.pageTitleCompact]}>Painel de operações</Text>
+                        <Text style={styles.description}>Acompanhe a base do negócio, o caixa e o andamento dos pedidos.</Text>
                     </View>
-
-                    {/* Linha 2 de KPIs: Detalhamento por Status dos Pedidos */}
-                    <View style={styles.statusCardsRow}>
-                        {/* Pendentes */}
-                        <View style={[styles.statusCard, styles.statusCardPending]}>
-                            <View style={styles.statusCardHeader}>
-                                <View style={[styles.statusMiniIcon, { backgroundColor: Colors.hexFEF3C7 }]}>
-                                    <Ionicons name="time" size={16} color={Colors.hexD97706} />
-                                </View>
-                                <Text style={styles.statusCardLabel}>Pendentes</Text>
-                            </View>
-                            <Text style={[styles.statusCardNumber, { color: Colors.hexB45309 }]}>
-                                {pedidosPendentes}
-                            </Text>
-                            <Text style={styles.statusCardSub}>em processamento</Text>
-                        </View>
-
-                        {/* Entregues */}
-                        <View style={[styles.statusCard, styles.statusCardDelivered]}>
-                            <View style={styles.statusCardHeader}>
-                                <View style={[styles.statusMiniIcon, { backgroundColor: Colors.hexDCFCE7 }]}>
-                                    <Ionicons name="checkmark-circle" size={16} color={Colors.hex16A34A} />
-                                </View>
-                                <Text style={styles.statusCardLabel}>Entregues</Text>
-                            </View>
-                            <View style={styles.statusNumberRow}>
-                                <Text style={[styles.statusCardNumber, { color: Colors.hex15803D }]}>
-                                    {pedidosEntregues}
-                                </Text>
-                                <View style={styles.ratePill}>
-                                    <Text style={styles.ratePillText}>{taxaEntrega}%</Text>
-                                </View>
-                            </View>
-                            <Text style={styles.statusCardSub}>conclusão com sucesso</Text>
-                        </View>
-
-                        {/* Cancelados */}
-                        <View style={[styles.statusCard, styles.statusCardCanceled]}>
-                            <View style={styles.statusCardHeader}>
-                                <View style={[styles.statusMiniIcon, { backgroundColor: Colors.hexFEE2E2 }]}>
-                                    <Ionicons name="close-circle" size={16} color={Colors.hexDC2626} />
-                                </View>
-                                <Text style={styles.statusCardLabel}>Cancelados</Text>
-                            </View>
-                            <Text style={[styles.statusCardNumber, { color: Colors.hexB91C1C }]}>
-                                {pedidosCancelados}
-                            </Text>
-                            <Text style={styles.statusCardSub}>pedidos estornados</Text>
-                        </View>
+                    <View style={[styles.headerActions, compact && styles.headerActionsCompact]}>
+                        {lastUpdated && <Text style={styles.updateTime}>Atualizado às {lastUpdated.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", timeZone: "America/Sao_Paulo" })}</Text>}
+                        <Pressable accessibilityRole="button" accessibilityLabel="Atualizar dashboard" disabled={loadingData}
+                            onPress={() => setRefreshKey(value => value + 1)}
+                            style={({ pressed }) => [styles.refreshButton, (pressed || loadingData) && styles.pressed]}>
+                            <Ionicons name="refresh-outline" size={16} color={Colors.hex475569} /><Text style={styles.refreshText}>Atualizar</Text>
+                        </Pressable>
                     </View>
-
-                    {/* Gráfico 1: Evolução Temporal com Seletor de Período */}
-
-                    {/* Visão de Suporte Operacional (Clientes, Produtos e Fornecedores) */}
-                    <View style={[pagesStyles.card, styles.supportCard, { width: "100%" }]}>
-                        <View style={styles.supportHeader}>
-                            <View style={styles.supportIcon}>
-                                <Ionicons name="business" size={20} color={Colors.hex0B4F6C} />
-                            </View>
-                            <View>
-                                <Text style={styles.supportTitle}>Infraestrutura & Parceiros</Text>
-                                <Text style={styles.supportSubtitle}>
-                                    Base ativa de clientes, catálogo e fornecedores da cadeia
-                                </Text>
-                            </View>
-                        </View>
-                        <View style={styles.supportMetricsRow}>
-                            <View style={styles.supportMetricItem}>
-                                <Text style={styles.supportMetricNum}>{totalClientes}</Text>
-                                <Text style={styles.supportMetricLabel}>Clientes Ativos</Text>
-                            </View>
-
-                            <View style={styles.supportDivider} />
-
-                            <View style={styles.supportMetricItem}>
-                                <Text style={styles.supportMetricNum}>{totalMateriais}</Text>
-                                <Text style={styles.supportMetricLabel}>Produtos Cadastrados</Text>
-                            </View>
-
-                            <View style={styles.supportDivider} />
-
-                            <View style={styles.supportMetricItem}>
-                                <Text style={styles.supportMetricNum}>{totalFornecedores}</Text>
-                                <Text style={styles.supportMetricLabel}>Fornecedores</Text>
-                            </View>
-
-                            <View style={styles.supportDivider} />
-
-                            <View style={styles.supportMetricItem}>
-                                <Text style={styles.supportMetricNum} numberOfLines={1}>
-                                    {formatCurrency(precoMedioMateriais)}
-                                </Text>
-                                <Text style={styles.supportMetricLabel}>Preço Médio Catálogo</Text>
-                            </View>
-                        </View>
-                    </View>
-
-                    <View style={styles.sectionMargin}>
-                        <View style={styles.periodHeader}>
-                            <Ionicons name="calendar-outline" size={16} color={Colors.hex475569} />
-                            <Text style={styles.periodSectionLabel}>Filtrar Período do Histórico:</Text>
-                        </View>
-                        <View style={styles.buttonContainer}>
-                            <AnimatedButton
-                                stylesAnimatedView={pagesStyles.animatedView}
-                                title="3 MESES"
-                                stylesPressable={[
-                                    styles.periodButton,
-                                    active === 3 && styles.periodButtonActive,
-                                ]}
-                                stylesText={[
-                                    styles.periodButtonText,
-                                    active === 3 && styles.periodButtonTextActive,
-                                ]}
-                                onPress={() => setActive(3)}
-                            />
-                            <AnimatedButton
-                                stylesAnimatedView={pagesStyles.animatedView}
-                                title="6 MESES"
-                                stylesPressable={[
-                                    styles.periodButton,
-                                    active === 6 && styles.periodButtonActive,
-                                ]}
-                                stylesText={[
-                                    styles.periodButtonText,
-                                    active === 6 && styles.periodButtonTextActive,
-                                ]}
-                                onPress={() => setActive(6)}
-                            />
-                            <AnimatedButton
-                                stylesAnimatedView={pagesStyles.animatedView}
-                                title="12 MESES"
-                                stylesPressable={[
-                                    styles.periodButton,
-                                    active === 12 && styles.periodButtonActive,
-                                ]}
-                                stylesText={[
-                                    styles.periodButtonText,
-                                    active === 12 && styles.periodButtonTextActive,
-                                ]}
-                                onPress={() => setActive(12)}
-                            />
-                        </View>
-
-                        {/* Seção Gráfica 2: Distribuição por Status (Donut) & Top Produtos (Barras) */}
-                        <View style={[styles.dualGrid, isMobile && styles.dualGridMobile]}>
-                            <View style={[pagesStyles.card, styles.graphCard, { maxWidth: maxCardWidth }]}>
-                                <LineGraph
-                                    title="Evolução Temporal dos Pedidos"
-                                    subtitle={`Histórico mensal de pedidos registrados nos últimos ${active} meses`}
-                                    data={ordersNum}
-                                    width={graphWidth}
-                                    maxValue={maxValue}
-                                    spacing={spacing}
-                                    noOfSections={5}
-                                />
-                            </View>
-                            {/* Donut Chart - Status dos Pedidos */}
-                            <View style={[pagesStyles.card, styles.dualCard, isMobile && styles.dualCardMobile]}>
-                                <PieGraph
-                                    title="Status dos Pedidos"
-                                    subtitle="Proporção e taxa de conclusão da operação"
-                                    data={statusPieData}
-                                    totalCount={totalPedidos}
-                                    centerLabelTitle={String(totalPedidos)}
-                                    centerLabelSub="Pedidos"
-                                />
-                            </View>
-                        </View>
-
-                        {/* Indicadores de receita, clientes e produtos */}
-                        <View style={[styles.tripleGrid, isMobile && styles.tripleGridMobile]}>
-                            <View style={[pagesStyles.card, styles.tripleCard, isMobile && styles.tripleCardMobile]}>
-                                <LineGraph
-                                    title="Receita Mensal"
-                                    subtitle="Valor dos pedidos pendentes e entregues"
-                                    data={revenueTimeline}
-                                    width={tripleGraphWidth - 40}
-                                    maxValue={maxRevenueValue}
-                                    spacing={isMobile ? spacing : Math.max((tripleGraphWidth - 80) / Math.max(revenueTimeline.length - 1, 1), 20)}
-                                    noOfSections={5}
-                                />
-                            </View>
-                            <View style={[pagesStyles.card, styles.tripleCard, isMobile && styles.tripleCardMobile]}>
-                                <BarGraph
-                                    title="Clientes com Maior Volume"
-                                    subtitle="Unidades em pedidos nao cancelados"
-                                    badgeText="Volume"
-                                    badgeIcon="people"
-                                    data={topClientesData}
-                                    width={tripleGraphWidth - 120}
-                                />
-                            </View>
-                            <View style={[pagesStyles.card, styles.tripleCard, isMobile && styles.tripleCardMobile]}>
-                                <BarGraph
-                                    title="Produtos Mais Solicitados"
-                                    subtitle="Unidades demandadas nos pedidos"
-                                    badgeText="Demanda"
-                                    badgeIcon="trending-up"
-                                    data={topMateriaisData}
-                                    width={tripleGraphWidth - 120}
-                                />
-                            </View>
-                        </View>
-                    </View>
-                </>
-            ) : (
-                <View style={styles.loadingContainer}>
-                    <ActivityIndicator size="large" color={Colors.hex0B4F6C} />
-                    <Text style={styles.loadingText}>Carregando métricas...</Text>
                 </View>
-            )
-            }
-        </PagesLayout >
+                {!!loadError && <View style={styles.errorBox}><Ionicons name="alert-circle-outline" size={20} color={Colors.hexB91C1C} /><Text accessibilityRole="alert" style={styles.errorText}>{loadError} Atualize para tentar novamente.</Text></View>}
+                {loadingData ? <View style={styles.loading}><ActivityIndicator size="large" color={Colors.hex0B4F6C} /><Text style={styles.description}>Carregando indicadores…</Text></View> : !loadError && <>
+                    <View testID="dashboard-partners" style={styles.partnersPanel}>
+                        <View style={styles.panelHeading}>
+                            <View style={styles.panelIcon}><Ionicons name="business-outline" size={20} color={Colors.hex0B4F6C} /></View>
+                            <View style={styles.flexCopy}><Text accessibilityRole="header" style={styles.panelTitle}>Cadastros da operação</Text><Text style={styles.panelDescription}>Clientes, produtos e fornecedores cadastrados</Text></View>
+                        </View>
+                        <View style={[styles.partnerGrid, compact && styles.partnerGridCompact]}>
+                            {([
+                                { label: "Clientes", caption: "na sua base de relacionamento", value: totalClientes, icon: "people-outline" },
+                                { label: "Produtos", caption: "cadastrados no catálogo", value: totalMateriais, icon: "layers-outline" },
+                                { label: "Fornecedores", caption: "na sua rede de parceiros", value: totalFornecedores, icon: "business-outline" },
+                            ] as const).map((item, index) => <View key={item.label} style={[styles.partnerItem, index > 0 && (compact ? styles.partnerTopBorder : styles.partnerLeftBorder)]}>
+                                <View style={styles.partnerLabelRow}><Ionicons name={item.icon} size={16} color={Colors.hex64748B} /><Text style={styles.partnerLabel}>{item.label}</Text></View>
+                                <Text style={styles.partnerValue}>{item.value.toLocaleString("pt-BR")}</Text>
+                                <Text style={styles.caption}>{item.caption}</Text>
+                            </View>)}
+                        </View>
+                    </View>
+
+                    <View testID="dashboard-financial" style={styles.section}>
+                        <View style={styles.sectionHeading}><View style={styles.flexCopy}><Text accessibilityRole="header" style={styles.sectionTitle}>Situação financeira</Text><Text style={styles.description}>Saldo realizado até hoje e compromissos do mês.</Text></View><View style={styles.monthBadge}><Ionicons name="calendar-outline" size={13} color={Colors.hex64748B} /><Text style={styles.monthBadgeText}>{monthLabel}</Text></View></View>
+                        <View style={styles.grid}>
+                            {([
+                                { label: "Saldo atual", value: financials.summary.current, note: "Realizado acumulado até hoje", icon: "wallet-outline", color: financials.summary.current < 0 ? Colors.hexB91C1C : Colors.hex0B4F6C, background: Colors.hexE0EDF4, primary: true },
+                                { label: "A receber", value: financials.summary.receivable, note: "Pendências com vencimento no mês", icon: "arrow-down-outline", color: Colors.hex15803D, background: Colors.hexDCFCE7, primary: false },
+                                { label: "A pagar", value: financials.summary.payable, note: "Pendências com vencimento no mês", icon: "arrow-up-outline", color: Colors.hexB45309, background: Colors.hexFEF3C7, primary: false },
+                            ] as const).map(item => <View key={item.label} testID="dashboard-financial-card" style={[styles.metricCard, { width: metricWidth }, item.primary && styles.balanceCard]}>
+                                <View style={styles.metricHeading}><Text style={styles.metricLabel}>{item.label}</Text><View style={[styles.metricIcon, { backgroundColor: item.background }]}><Ionicons name={item.icon} size={18} color={item.color} /></View></View>
+                                <Text style={[styles.moneyValue, { color: item.color }]} numberOfLines={1} adjustsFontSizeToFit>{money(item.value)}</Text>
+                                <Text style={styles.caption}>{item.note}</Text>
+                            </View>)}
+                        </View>
+                    </View>
+
+                    <View testID="dashboard-orders" style={styles.section}>
+                        <View><Text accessibilityRole="header" style={styles.sectionTitle}>Situação dos pedidos</Text><Text style={styles.description}>Visão consolidada de todos os pedidos registrados.</Text></View>
+                        <View style={styles.grid}>
+                            {([
+                                { label: "Pendentes", value: pedidosPendentes, note: "Em processamento", icon: "time-outline", color: Colors.hexB45309, background: Colors.hexFEF3C7 },
+                                { label: "Entregues", value: pedidosEntregues, note: taxaEntrega + "% dos pedidos registrados", icon: "checkmark-circle-outline", color: Colors.hex15803D, background: Colors.hexDCFCE7 },
+                                { label: "Cancelados", value: pedidosCancelados, note: "Cancelados na operação", icon: "close-circle-outline", color: Colors.hexB91C1C, background: Colors.hexFEE2E2 },
+                            ] as const).map(item => <View key={item.label} style={[styles.orderCard, { width: metricWidth }]}>
+                                <View style={[styles.metricIcon, { backgroundColor: item.background }]}><Ionicons name={item.icon} size={20} color={item.color} /></View>
+                                <View style={styles.flexCopy}><Text style={styles.metricLabel}>{item.label}</Text><Text style={styles.caption}>{item.note}</Text></View>
+                                <Text style={[styles.orderValue, { color: item.color }]}>{item.value.toLocaleString("pt-BR")}</Text>
+                            </View>)}
+                        </View>
+                    </View>
+
+                    <View style={styles.history}>
+                        <View style={[styles.historyHeader, compact && styles.historyHeaderCompact]}>
+                            <View style={styles.flexCopy}><Text style={styles.eyebrow}>ANÁLISE DO HISTÓRICO</Text><Text accessibilityRole="header" style={styles.sectionTitle}>Como o negócio evoluiu</Text><Text style={styles.description}>Compare os últimos {active} meses, incluindo o mês atual.</Text></View>
+                            <View accessibilityRole="tablist" accessibilityLabel="Período dos gráficos de evolução" style={styles.periodControl}>
+                                {([3, 6, 12] as const).map(value => <Pressable key={value} accessibilityRole="tab" accessibilityLabel={value + " meses"} accessibilityState={{ selected: active === value }} aria-selected={active === value} onPress={() => setActive(value)}
+                                    style={({ pressed }) => [styles.periodButton, active === value && styles.periodButtonActive, pressed && styles.pressed]}><Text style={[styles.periodText, active === value && styles.periodTextActive]}>{value} meses</Text></Pressable>)}
+                            </View>
+                        </View>
+                        <View style={styles.section}>
+                            <Text accessibilityRole="header" style={styles.groupTitle}>Movimentação financeira</Text>
+                            <View style={styles.grid}>
+                                {([
+                                    { title: "Entradas realizadas", field: "income", subtitle: "Recebimentos por mês · R$", color: Colors.hex15803D },
+                                    { title: "Saídas realizadas", field: "expense", subtitle: "Pagamentos por mês · R$", color: Colors.hexB45309 },
+                                    { title: "Resultado realizado", field: "balance", subtitle: "Entradas menos saídas · R$", color: Colors.hex0B4F6C },
+                                ] as const).map((item, index) => <View key={item.field} testID="dashboard-financial-chart" style={[styles.chartPanel, { width: chartColumns === 2 && index === 2 ? contentWidth : chartWidth }]}>
+                                    <Text style={styles.panelTitle}>{item.title}</Text><Text style={styles.panelDescription}>{item.subtitle}</Text>
+                                    <DashboardTrend monetary color={item.color} data={financials.months.map(month => ({ label: month.label, value: month[item.field] / 100 }))} />
+                                </View>)}
+                            </View>
+                        </View>
+                        <View style={styles.section}>
+                            <Text accessibilityRole="header" style={styles.groupTitle}>Atividade dos pedidos</Text>
+                            <View style={styles.grid}>
+                                <View testID="dashboard-orders-chart" style={[styles.chartPanel, { width: pairWidth }]}><Text style={styles.panelTitle}>Evolução dos pedidos</Text><Text style={styles.panelDescription}>Pedidos registrados por mês</Text><DashboardTrend data={ordersNum.map(point => ({ label: String(point.label ?? ""), value: point.value ?? 0 }))} /></View>
+                                <View style={[styles.chartPanel, { width: pairWidth }]}><Text style={styles.panelTitle}>Distribuição por status</Text><Text style={styles.panelDescription}>Todos os pedidos · posição atual</Text><DashboardOrderMix data={statusPieData} /></View>
+                            </View>
+                        </View>
+                        <View style={styles.section}>
+                            <View><Text accessibilityRole="header" style={styles.groupTitle}>Clientes e produtos em destaque</Text><Text style={styles.description}>Ranking geral por unidades em pedidos não cancelados.</Text></View>
+                            <View style={styles.grid}>
+                                <View testID="dashboard-ranking" style={[styles.chartPanel, { width: pairWidth }]}><Text style={styles.panelTitle}>Clientes com maior volume</Text><Text style={styles.panelDescription}>Os quatro clientes com mais unidades em pedidos</Text><DashboardRanking data={topClientesData} emptyLabel="Nenhum cliente com pedidos ativos." /></View>
+                                <View testID="dashboard-ranking" style={[styles.chartPanel, { width: pairWidth }]}><Text style={styles.panelTitle}>Produtos mais solicitados</Text><Text style={styles.panelDescription}>Os quatro produtos com maior demanda</Text><DashboardRanking data={topMateriaisData} emptyLabel="Nenhum produto com demanda registrada." /></View>
+                            </View>
+                        </View>
+                    </View>
+                    <View style={styles.footer}><View style={styles.liveDot} /><Text style={styles.caption}>Atualização automática a cada 30 segundos enquanto esta tela estiver aberta.</Text></View>
+                </>}
+            </View>
+        </PagesLayout>
     );
 }
 
 const styles = StyleSheet.create({
-    dashboardHeader: {
-        marginBottom: 18,
-    },
-    dashboardTitle: {
-        fontSize: 24,
-        fontFamily: "WorksansBold",
-        color: Colors.hex0F172A,
-        marginTop: 4,
-    },
-    dashboardSubtitle: {
-        fontSize: 13,
-        fontFamily: "WorksansRegular",
-        color: Colors.hex475569,
-        marginTop: 2,
-    },
-    kpiContainer: {
-        flexDirection: "row",
-        flexWrap: "wrap",
-        gap: 12,
-        marginBottom: 14,
-    },
-    kpiCard: {
-        flex: 1,
-        minWidth: 155,
-        backgroundColor: Colors.white,
-        borderRadius: 8,
-        padding: 16,
-        borderWidth: 1,
-        borderColor: Colors.hexDCE7EE,
-        flexDirection: "row",
-        alignItems: "center",
-        gap: 14,
-        shadowColor: Colors.hex082F42,
-        shadowOffset: { width: 0, height: 3 },
-        shadowOpacity: 0.05,
-        shadowRadius: 10,
-        elevation: 2,
-    },
-    kpiCardHighlight: {
-        borderColor: Colors.hexCBD8E2,
-        backgroundColor: Colors.white,
-    },
-    kpiCardMobile: {
-        minWidth: "100%",
-    },
-    kpiIconWrapper: {
-        width: 46,
-        height: 46,
-        borderRadius: 8,
-        alignItems: "center",
-        justifyContent: "center",
-    },
-    kpiContent: {
-        flex: 1,
-    },
-    kpiLabel: {
-        fontSize: 12,
-        fontFamily: "WorksansMedium",
-        color: Colors.hex475569,
-    },
-    kpiValue: {
-        fontSize: 20,
-        fontFamily: "WorksansBold",
-        color: Colors.hex0F172A,
-        marginTop: 2,
-    },
-    kpiValueLarge: {
-        fontSize: 18,
-        color: Colors.hex0B4F6C,
-    },
-    kpiFootnote: {
-        fontSize: 11,
-        fontFamily: "WorksansRegular",
-        color: Colors.hex64748B,
-        marginTop: 1,
-    },
-    statusCardsRow: {
-        flexDirection: "row",
-        gap: 10,
-        marginBottom: 20,
-        flexWrap: "wrap",
-    },
-    statusCard: {
-        flex: 1,
-        minWidth: 110,
-        padding: 12,
-        borderRadius: 8,
-        borderWidth: 1,
-    },
-    statusCardPending: {
-        backgroundColor: Colors.hexFFFBEB,
-        borderColor: Colors.hexFDE68A,
-    },
-    statusCardDelivered: {
-        backgroundColor: Colors.hexF0FDF4,
-        borderColor: Colors.hexBBF7D0,
-    },
-    statusCardCanceled: {
-        backgroundColor: Colors.hexFEF2F2,
-        borderColor: Colors.hexFECACA,
-    },
-    statusCardHeader: {
-        flexDirection: "row",
-        alignItems: "center",
-        gap: 6,
-    },
-    statusMiniIcon: {
-        width: 24,
-        height: 24,
-        borderRadius: 6,
-        alignItems: "center",
-        justifyContent: "center",
-    },
-    statusCardLabel: {
-        fontSize: 12,
-        fontFamily: "WorksansSemiBold",
-        color: Colors.hex1E293B,
-    },
-    statusNumberRow: {
-        flexDirection: "row",
-        alignItems: "baseline",
-        justifyContent: "space-between",
-    },
-    statusCardNumber: {
-        fontSize: 20,
-        fontFamily: "WorksansBold",
-        marginTop: 4,
-    },
-    ratePill: {
-        backgroundColor: Colors.hexDCFCE7,
-        paddingHorizontal: 6,
-        paddingVertical: 2,
-        borderRadius: 6,
-    },
-    ratePillText: {
-        fontSize: 11,
-        fontFamily: "WorksansBold",
-        color: Colors.hex15803D,
-    },
-    statusCardSub: {
-        fontSize: 10,
-        fontFamily: "WorksansRegular",
-        color: Colors.hex78716C,
-        marginTop: 2,
-    },
-    sectionMargin: {
-        marginBottom: 20,
-    },
-    periodHeader: {
-        flexDirection: "row",
-        alignItems: "center",
-        gap: 6,
-        marginBottom: 8,
-    },
-    periodSectionLabel: {
-        fontSize: 12,
-        fontFamily: "WorksansSemiBold",
-        color: Colors.hex475569,
-    },
-    buttonContainer: {
-        flexDirection: "row",
-        backgroundColor: Colors.hexD9E5EC,
-        borderRadius: 8,
-        padding: 4,
-        gap: 4,
-        marginBottom: 12,
-    },
-    periodButton: {
-        minHeight: 40,
-        alignItems: "center",
-        justifyContent: "center",
-        borderRadius: 10,
-        paddingHorizontal: 8,
-    },
-    periodButtonActive: {
-        backgroundColor: Colors.white,
-        shadowColor: Colors.hex082F42,
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.04,
-        shadowRadius: 4,
-        elevation: 2,
-    },
-    periodButtonText: {
-        fontSize: 12,
-        fontFamily: "WorksansSemiBold",
-        color: Colors.hex475569,
-    },
-    periodButtonTextActive: {
-        color: Colors.hex0B4F6C,
-        fontFamily: "WorksansBold",
-    },
-    graphCard: {
-        width: "100%",
-        padding: 20,
-    },
-    dualGrid: {
-        flexDirection: "row",
-        gap: 14,
-        marginBottom: 20,
-    },
-    dualGridMobile: {
-        flexDirection: "column",
-    },
-    dualCard: {
-        flex: 1,
-        padding: 20,
-    },
-    dualCardMobile: {
-        width: "100%",
-    },
-    tripleGrid: {
-        flexDirection: "row",
-        gap: 14,
-        marginBottom: 20,
-    },
-    tripleGridMobile: {
-        flexDirection: "column",
-    },
-    tripleCard: {
-        flex: 1,
-        flexBasis: 0,
-        width: "auto",
-        minWidth: 0,
-        padding: 16,
-    },
-    tripleCardMobile: {
-        width: "100%",
-    },
-    supportCard: {
-        width: "100%",
-        padding: 20,
-        backgroundColor: Colors.white,
-        marginBottom: 30,
-    },
-    supportHeader: {
-        flexDirection: "row",
-        alignItems: "center",
-        gap: 12,
-        marginBottom: 16,
-    },
-    supportIcon: {
-        width: 40,
-        height: 40,
-        borderRadius: 10,
-        backgroundColor: Colors.hexE8F1F5,
-        alignItems: "center",
-        justifyContent: "center",
-    },
-    supportTitle: {
-        fontSize: 16,
-        fontFamily: "WorksansBold",
-        color: Colors.hex0F172A,
-    },
-    supportSubtitle: {
-        fontSize: 12,
-        fontFamily: "WorksansRegular",
-        color: Colors.hex475569,
-    },
-    supportMetricsRow: {
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "space-between",
-        backgroundColor: Colors.hexF8FAFC,
-        borderRadius: 8,
-        borderWidth: 1,
-        borderColor: Colors.hexDDE8EF,
-        paddingVertical: 14,
-        paddingHorizontal: 12,
-        flexWrap: "wrap",
-        gap: 8,
-    },
-    supportMetricItem: {
-        flex: 1,
-        minWidth: 70,
-        alignItems: "center",
-    },
-    supportDivider: {
-        width: 1,
-        height: 28,
-        backgroundColor: Colors.hexCFDDE6,
-    },
-    supportMetricNum: {
-        fontSize: 16,
-        fontFamily: "WorksansBold",
-        color: Colors.hex0B4F6C,
-    },
-    supportMetricLabel: {
-        fontSize: 11,
-        fontFamily: "WorksansMedium",
-        color: Colors.hex64748B,
-        marginTop: 2,
-        textAlign: "center",
-    },
-    loadingContainer: {
-        flex: 1,
-        minHeight: 300,
-        justifyContent: "center",
-        alignItems: "center",
-        gap: 12,
-    },
-    loadingText: {
-        fontSize: 14,
-        fontFamily: "WorksansRegular",
-        color: Colors.hex0B4F6C,
-    },
+    pagePadding: { padding: 24, paddingBottom: 36 },
+    pagePaddingCompact: { padding: 16, paddingBottom: 28 },
+    content: { width: "100%", maxWidth: 1440, alignSelf: "center", gap: 28, minWidth: 0 },
+    pageHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", gap: 20 },
+    pageHeaderCompact: { flexDirection: "column", alignItems: "stretch", gap: 16 },
+    headerCopy: { flex: 1, minWidth: 0, gap: 5 },
+    eyebrow: { fontSize: 10, letterSpacing: 1.6, fontFamily: "WorksansSemiBold", color: Colors.hex0B4F6C, marginBottom: 4 },
+    pageTitle: { fontSize: 28, lineHeight: 36, fontFamily: "WorksansSemiBold", color: Colors.hex0F172A },
+    pageTitleCompact: { fontSize: 25, lineHeight: 32 },
+    description: { fontSize: 12, lineHeight: 19, fontFamily: "WorksansRegular", color: Colors.hex64748B },
+    headerActions: { alignItems: "flex-end", gap: 8 },
+    headerActionsCompact: { flexDirection: "row-reverse", justifyContent: "space-between", alignItems: "center" },
+    updateTime: { fontSize: 10, fontFamily: "WorksansRegular", color: Colors.hex64748B },
+    refreshButton: { flexDirection: "row", gap: 8, alignItems: "center", justifyContent: "center", backgroundColor: Colors.white, borderWidth: 1, borderColor: Colors.hexDCE7EE, paddingHorizontal: 14, minHeight: 42, borderRadius: 10 },
+    refreshText: { fontSize: 12, color: Colors.hex475569, fontFamily: "WorksansMedium" },
+    pressed: { opacity: 0.55 },
+    section: { gap: 14 },
+    sectionHeading: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 },
+    sectionTitle: { fontSize: 18, lineHeight: 26, fontFamily: "WorksansSemiBold", color: Colors.hex0F172A },
+    groupTitle: { fontSize: 14, lineHeight: 22, fontFamily: "WorksansSemiBold", color: Colors.hex334155 },
+    monthBadge: { flexDirection: "row", alignItems: "center", gap: 6, paddingVertical: 6, paddingHorizontal: 10, backgroundColor: Colors.hexEEF2F6, borderRadius: 8 },
+    monthBadgeText: { fontSize: 10, fontFamily: "WorksansMedium", color: Colors.hex475569, textTransform: "capitalize" },
+    grid: { flexDirection: "row", flexWrap: "wrap", gap: 16, alignItems: "stretch" },
+    partnersPanel: { borderWidth: 1, borderColor: Colors.hexDCE7EE, borderRadius: 14, backgroundColor: Colors.white, padding: 20, gap: 20 },
+    panelHeading: { flexDirection: "row", alignItems: "center", gap: 12 },
+    panelIcon: { width: 40, height: 40, backgroundColor: Colors.hexE0EDF4, borderRadius: 8, alignItems: "center", justifyContent: "center" },
+    flexCopy: { flex: 1, minWidth: 0, gap: 3 },
+    panelTitle: { fontSize: 14, lineHeight: 21, fontFamily: "WorksansSemiBold", color: Colors.hex1E293B },
+    panelDescription: { fontSize: 11, lineHeight: 17, fontFamily: "WorksansRegular", color: Colors.hex64748B, marginTop: 3 },
+    partnerGrid: { flexDirection: "row" },
+    partnerGridCompact: { flexDirection: "column" },
+    partnerItem: { flex: 1, paddingHorizontal: 16, paddingVertical: 10, gap: 4, minWidth: 0 },
+    partnerLeftBorder: { borderLeftWidth: 1, borderLeftColor: Colors.hexE2EBF0 },
+    partnerTopBorder: { borderTopWidth: 1, borderTopColor: Colors.hexE2EBF0 },
+    partnerLabelRow: { flexDirection: "row", alignItems: "center", gap: 7 },
+    partnerLabel: { fontSize: 12, color: Colors.hex475569, fontFamily: "WorksansMedium" },
+    partnerValue: { fontSize: 27, lineHeight: 36, fontFamily: "WorksansSemiBold", color: Colors.hex0F172A },
+    caption: { fontSize: 10, lineHeight: 16, color: Colors.hex64748B, fontFamily: "WorksansRegular" },
+    metricCard: { borderWidth: 1, borderColor: Colors.hexDCE7EE, borderRadius: 8, backgroundColor: Colors.white, padding: 20, gap: 10, minWidth: 0 },
+    balanceCard: { borderColor: Colors.hexCBD8E2, backgroundColor: Colors.hexEDF3F7 },
+    metricHeading: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", gap: 10 },
+    metricLabel: { fontSize: 12, fontFamily: "WorksansMedium", color: Colors.hex475569 },
+    metricIcon: { width: 34, height: 34, borderRadius: 10, justifyContent: "center", alignItems: "center", flexShrink: 0 },
+    moneyValue: { fontSize: 26, lineHeight: 34, fontFamily: "WorksansSemiBold", fontVariant: ["tabular-nums"] },
+    orderCard: { flexDirection: "row", alignItems: "center", gap: 12, padding: 16, borderWidth: 1, borderColor: Colors.hexDCE7EE, borderRadius: 8, backgroundColor: Colors.white, minWidth: 0 },
+    orderValue: { fontSize: 24, fontFamily: "WorksansSemiBold", fontVariant: ["tabular-nums"] },
+    history: { borderTopWidth: 1, borderTopColor: Colors.hexDCE7EE, paddingTop: 28, gap: 24 },
+    historyHeader: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 20 },
+    historyHeaderCompact: { flexDirection: "column", alignItems: "stretch", gap: 16 },
+    periodControl: { flexDirection: "row", padding: 4, borderWidth: 1, borderColor: Colors.hexDCE7EE, borderRadius: 11, backgroundColor: Colors.hexEEF2F6, gap: 4 },
+    periodButton: { flex: 1, minWidth: 76, minHeight: 40, justifyContent: "center", alignItems: "center", paddingHorizontal: 12, borderRadius: 8 },
+    periodButtonActive: { backgroundColor: Colors.white, shadowColor: Colors.hex082F42, shadowOpacity: 0, shadowRadius: 4, shadowOffset: { width: 0, height: 1 }, elevation: 0 },
+    periodText: { fontSize: 11, fontFamily: "WorksansMedium", color: Colors.hex64748B },
+    periodTextActive: { fontFamily: "WorksansSemiBold", color: Colors.hex0B4F6C },
+    chartPanel: { backgroundColor: Colors.white, borderWidth: 1, borderColor: Colors.hexDCE7EE, borderRadius: 8, padding: 20, minWidth: 0, overflow: "hidden" },
+    footer: { flexDirection: "row", alignItems: "center", gap: 8, justifyContent: "center", paddingVertical: 4 },
+    liveDot: { width: 5, height: 5, borderRadius: 3, backgroundColor: Colors.hex16A34A, flexShrink: 0 },
+    errorBox: { flexDirection: "row", alignItems: "center", gap: 10, borderWidth: 1, borderColor: Colors.hexFECACA, backgroundColor: Colors.hexFEF2F2, padding: 16, borderRadius: 8 },
+    errorText: { flex: 1, color: Colors.hexB91C1C, fontSize: 12, lineHeight: 19, fontFamily: "WorksansRegular" },
+    loading: { alignItems: "center", justifyContent: "center", minHeight: 300, gap: 16 },
 });

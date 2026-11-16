@@ -1,3 +1,6 @@
+import { displayDate } from "./dates";
+export { displayDate } from "./dates";
+
 export type CashEntry = {
   order_id?: number | null;
   id: string;
@@ -31,8 +34,6 @@ export function cashToday(now = new Date()): string {
   const day = parts.find(part => part.type === "day")?.value;
   return `${year}-${month}-${day}`;
 }
-
-export const displayDate = (date: string) => date.split("-").reverse().join("/");
 
 export function parseDate(value: string): string | null {
   const match = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(value.trim());

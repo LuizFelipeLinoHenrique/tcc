@@ -1,10 +1,12 @@
 import { createPagination, mergeById } from "@/src/lib/pagination";
 import { parsePositiveInteger } from "@/src/lib/orderValidation";
+import { displayDate } from "@/src/lib/dates";
 import { OrderItem } from "@/src/lib/orderItems";
 import { RecordModal } from "@/src/components/RecordModal";
 import { useRecordDeletion } from "@/src/hooks/useRecordDeletion";
 import { getOrderDetails, recordError } from "@/src/lib/tableActions";
 import { Colors } from "@/src/theme/colors";
+import { router } from "expo-router";
 import { AnimatedButton } from "@/src/components/AnimatedButton";
 import { OrderCard, OrderTableHeader } from "@/src/components/OrdersCard";
 import {
@@ -326,7 +328,7 @@ export default function Orders() {
               },
               {
                   label: "Data do Pedido",
-                  value: pedidoSelecionado.data_pedido,
+                  value: displayDate(pedidoSelecionado.data_pedido),
               },
               {
                   label: "Status",
@@ -337,12 +339,17 @@ export default function Orders() {
 
     return (
         <PagesLayout
-            scroll={false}
+            scroll={isMobile}
+            scrollContent={{ paddingVertical: 10 }}
             noScrollContent={{
                 paddingVertical: 10,
             }}
         >
-            <View style={styles.container}>
+            <View style={[styles.container, isMobile && { flex: 0 }]}>
+                <View style={[styles.pageHeader, isMobile && { flexDirection: "column", alignItems: "stretch" }]}>
+                    <View><Text accessibilityRole="header" style={pagesStyles.title}>Pedidos</Text><Text style={pagesStyles.description}>Consulte e acompanhe os pedidos da operação.</Text></View>
+                    <AnimatedButton title="Novo pedido" stylesPressable={pagesStyles.primaryButton} stylesText={pagesStyles.primaryButtonText} onPress={() => router.push("/(tabs)/(order)/addOrder")} />
+                </View>
                 <OrdersFilters
                     pesquisa={pesquisa}
                     setPesquisa={setPesquisa}
@@ -374,8 +381,8 @@ export default function Orders() {
                 <ScrollView
                     showsVerticalScrollIndicator={false}
                     horizontal
-                    showsHorizontalScrollIndicator={false}
-                    style={styles.tableScroll}
+                    showsHorizontalScrollIndicator={true}
+                    style={[styles.tableScroll, isMobile && { height: 420, flex: 0 }]}
                     contentContainerStyle={styles.tableScrollContent}
                 >
                     <View style={styles.tableContainer}>
@@ -383,6 +390,7 @@ export default function Orders() {
                             showsHorizontalScrollIndicator={false}
                             data={pedidos}
                             ListHeaderComponent={<OrderTableHeader />}
+                            ListEmptyComponent={<View style={{ padding: 24 }}><Text style={pagesStyles.description}>{loading ? "Carregando pedidos…" : listError ? "Não foi possível exibir os pedidos." : "Nenhum pedido encontrado. Ajuste os filtros ou crie um novo pedido."}</Text></View>}
                             keyExtractor={(item) => item.id.toString()}
                             renderItem={({ item, index }) => (
                                 <OrderCard
@@ -496,6 +504,7 @@ export default function Orders() {
 }
 
 const styles = StyleSheet.create({
+    pageHeader: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 12, marginBottom: 20 },
     container: {
         flex: 1,
         width: "100%",
@@ -519,8 +528,8 @@ const styles = StyleSheet.create({
         overflow: "hidden",
         shadowColor: Colors.hex082F42,
         shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.05,
+        shadowOpacity: 0,
         shadowRadius: 8,
-        elevation: 2,
+        elevation: 0,
     },
 });

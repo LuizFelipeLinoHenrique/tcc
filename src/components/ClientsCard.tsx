@@ -176,11 +176,11 @@ const styles = StyleSheet.create({
     headerRow: {
         flexDirection: "row",
         alignItems: "center",
-        backgroundColor: Colors.hexE8F1F5,
+        backgroundColor: Colors.hexF8FAFC,
         paddingVertical: 12,
         paddingHorizontal: 24,
         columnGap: 24,
-        borderBottomWidth: 1.5,
+        borderBottomWidth: 1,
         borderColor: Colors.hexCFDDE6,
         minWidth: 1180,
     },
@@ -302,7 +302,7 @@ const styles = StyleSheet.create({
         transform: [{ scale: 0.97 }],
     },
     detailsBtn: {
-        backgroundColor: Colors.hexE8F1F5,
+        backgroundColor: Colors.hexF8FAFC,
         borderColor: Colors.hexCFDDE6,
     },
     editBtn: {

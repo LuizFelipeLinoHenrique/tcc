@@ -84,7 +84,7 @@ const styles = StyleSheet.create({
         maxWidth: 900,
         maxHeight: "90%",
         backgroundColor: Colors.white,
-        borderRadius: 12,
+        borderRadius: 8,
         overflow: "hidden",
     },
     header: {
@@ -96,7 +96,7 @@ const styles = StyleSheet.create({
     title: {
         color: Colors.hex0B4F6C,
         fontSize: 18,
-        fontWeight: "600",
+        fontFamily: "WorksansSemiBold",
         flex: 1,
     },
     close: { padding: 8 },

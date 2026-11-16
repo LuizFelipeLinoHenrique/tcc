@@ -1,3 +1,4 @@
+import { router } from "expo-router";
 import { Colors } from "@/src/theme/colors";
 import { useState } from "react";
 import {
@@ -16,7 +17,7 @@ import useResponsive from "@/src/hooks/useResponsive";
 import { supabase } from "@/src/lib/supabase";
 
 export default function AddClients() {
-    const { maxCardWidth } = useResponsive();
+    const { maxCardWidth, isMobile } = useResponsive();
 
     const [nome, setNome] = useState("");
     const [email, setEmail] = useState("");
@@ -125,7 +126,7 @@ export default function AddClients() {
 
                     <View style={styles.formContainer}>
                         {/* NOME COMPLETO */}
-                        <View style={pagesStyles.field}>
+                        <View style={[pagesStyles.field, { width: isMobile ? "100%" : "48%" }]}>
                             <Text style={pagesStyles.label}>NOME COMPLETO</Text>
                             <View style={styles.inputWrapper}>
                                 <Ionicons
@@ -151,7 +152,7 @@ export default function AddClients() {
                         </View>
 
                         {/* E-MAIL */}
-                        <View style={pagesStyles.field}>
+                        <View style={[pagesStyles.field, { width: isMobile ? "100%" : "48%" }]}>
                             <Text style={pagesStyles.label}>E-MAIL</Text>
                             <View style={styles.inputWrapper}>
                                 <Ionicons
@@ -179,7 +180,7 @@ export default function AddClients() {
                         </View>
 
                         {/* TELEFONE */}
-                        <View style={pagesStyles.field}>
+                        <View style={[pagesStyles.field, { width: isMobile ? "100%" : "48%" }]}>
                             <Text style={pagesStyles.label}>TELEFONE / WHATSAPP</Text>
                             <View style={styles.inputWrapper}>
                                 <Ionicons
@@ -202,7 +203,7 @@ export default function AddClients() {
                         </View>
 
                         {/* ENDEREÇO */}
-                        <View style={pagesStyles.field}>
+                        <View style={[pagesStyles.field, { width: isMobile ? "100%" : "48%" }]}>
                             <Text style={pagesStyles.label}>ENDEREÇO</Text>
                             <View style={styles.inputWrapper}>
                                 <Ionicons
@@ -244,6 +245,8 @@ export default function AddClients() {
                         )}
 
                         {/* BOTÃO CADASTRAR */}
+                        <View style={{ width: "100%", flexDirection: isMobile ? "column-reverse" : "row", justifyContent: "flex-end", gap: 12, borderTopWidth: 1, borderTopColor: Colors.hexDCE7EE, paddingTop: 20 }}>
+                          <AnimatedButton title="Cancelar" stylesPressable={pagesStyles.secondaryButton} stylesText={pagesStyles.secondaryButtonText} disabled={loading} onPress={() => router.push("/(tabs)/(client)/clients")} />
                         <AnimatedButton
                             stylesPressable={[
                                 pagesStyles.primaryButton,
@@ -260,6 +263,7 @@ export default function AddClients() {
                                 )
                             }
                         />
+                        </View>
                     </View>
                 </View>
             </View>
@@ -271,7 +275,7 @@ const styles = StyleSheet.create({
     container: {
         width: "100%",
         alignItems: "center",
-        paddingHorizontal: 10,
+        paddingHorizontal: 0,
     },
     header: {
         flexDirection: "row",
@@ -300,6 +304,7 @@ const styles = StyleSheet.create({
         marginVertical: 20,
     },
     formContainer: {
+        flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between",
         gap: 18,
     },
     inputWrapper: {

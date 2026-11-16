@@ -1,3 +1,4 @@
+import { router } from "expo-router";
 import { Colors } from "@/src/theme/colors";
 import { useState } from "react";
 import {
@@ -15,7 +16,7 @@ import useResponsive from "@/src/hooks/useResponsive";
 import { supabase } from "@/src/lib/supabase";
 
 export default function AddSupplier() {
-    const { maxCardWidth } = useResponsive();
+    const { maxCardWidth, isMobile } = useResponsive();
 
     const [nome, setNome] = useState("");
     const [cnpj, setCnpj] = useState("");
@@ -126,7 +127,7 @@ export default function AddSupplier() {
 
                     <View style={styles.formContainer}>
                         {/* RAZÃO SOCIAL / NOME */}
-                        <View style={pagesStyles.field}>
+                        <View style={[pagesStyles.field, { width: isMobile ? "100%" : "48%" }]}>
                             <Text style={pagesStyles.label}>NOME / RAZÃO SOCIAL *</Text>
                             <View style={styles.inputWrapper}>
                                 <Ionicons
@@ -152,7 +153,7 @@ export default function AddSupplier() {
                         </View>
 
                         {/* CNPJ */}
-                        <View style={pagesStyles.field}>
+                        <View style={[pagesStyles.field, { width: isMobile ? "100%" : "48%" }]}>
                             <Text style={pagesStyles.label}>CNPJ</Text>
                             <View style={styles.inputWrapper}>
                                 <Ionicons
@@ -179,7 +180,7 @@ export default function AddSupplier() {
                         </View>
 
                         {/* TELEFONE / WHATSAPP */}
-                        <View style={pagesStyles.field}>
+                        <View style={[pagesStyles.field, { width: isMobile ? "100%" : "48%" }]}>
                             <Text style={pagesStyles.label}>TELEFONE / WHATSAPP</Text>
                             <View style={styles.inputWrapper}>
                                 <Ionicons
@@ -206,7 +207,7 @@ export default function AddSupplier() {
                         </View>
 
                         {/* E-MAIL */}
-                        <View style={pagesStyles.field}>
+                        <View style={[pagesStyles.field, { width: isMobile ? "100%" : "48%" }]}>
                             <Text style={pagesStyles.label}>E-MAIL COMERCIAL</Text>
                             <View style={styles.inputWrapper}>
                                 <Ionicons
@@ -234,7 +235,7 @@ export default function AddSupplier() {
                         </View>
 
                         {/* CONTATO / REPRESENTANTE */}
-                        <View style={pagesStyles.field}>
+                        <View style={[pagesStyles.field, { width: isMobile ? "100%" : "48%" }]}>
                             <Text style={pagesStyles.label}>PESSOA DE CONTATO / VENDEDOR</Text>
                             <View style={styles.inputWrapper}>
                                 <Ionicons
@@ -260,7 +261,7 @@ export default function AddSupplier() {
                         </View>
 
                         {/* ENDEREÇO */}
-                        <View style={pagesStyles.field}>
+                        <View style={[pagesStyles.field, { width: isMobile ? "100%" : "48%" }]}>
                             <Text style={pagesStyles.label}>ENDEREÇO</Text>
                             <View style={[styles.inputWrapper, styles.inputWrapperMultiline]}>
                                 <Ionicons
@@ -305,6 +306,8 @@ export default function AddSupplier() {
                         )}
 
                         {/* BOTÃO CADASTRAR */}
+                        <View style={{ width: "100%", flexDirection: isMobile ? "column-reverse" : "row", justifyContent: "flex-end", gap: 12, borderTopWidth: 1, borderTopColor: Colors.hexDCE7EE, paddingTop: 20 }}>
+                          <AnimatedButton title="Cancelar" stylesPressable={pagesStyles.secondaryButton} stylesText={pagesStyles.secondaryButtonText} disabled={loading} onPress={() => router.push("/(tabs)/(supplier)/suppliers")} />
                         <AnimatedButton
                             stylesPressable={[
                                 pagesStyles.primaryButton,
@@ -321,6 +324,7 @@ export default function AddSupplier() {
                                 )
                             }
                         />
+                        </View>
                     </View>
                 </View>
             </View>
@@ -332,7 +336,7 @@ const styles = StyleSheet.create({
     container: {
         width: "100%",
         alignItems: "center",
-        paddingHorizontal: 10,
+        paddingHorizontal: 0,
     },
     header: {
         flexDirection: "row",
@@ -361,6 +365,7 @@ const styles = StyleSheet.create({
         marginVertical: 20,
     },
     formContainer: {
+        flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between",
         gap: 18,
     },
     inputWrapper: {

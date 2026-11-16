@@ -38,7 +38,7 @@ export function AnimatedButton({
         setPressed(true);
 
         Animated.spring(scale, {
-            toValue: 0.88,
+            toValue: 0.98,
             useNativeDriver: false,
         }).start();
     };
@@ -61,6 +61,7 @@ export function AnimatedButton({
             ]}
         >
             <Pressable
+                accessibilityRole="button"
                 onPressIn={disabled ? undefined : pressionar}
                 onPressOut={disabled ? undefined : soltar}
                 onPress={disabled ? undefined : onPress}

@@ -65,10 +65,10 @@ export default function SignInPage() {
         Acesso ao Sistema
       </Text>
       <Text style={authStyles.title}>
-        Boas-vindas de volta
+        Entrar no PalletCore
       </Text>
       <Text style={authStyles.description}>
-        Entre com suas credenciais para acessar o painel.
+        Informe seu e-mail e senha para continuar.
       </Text>
 
       <View style={authStyles.form}>

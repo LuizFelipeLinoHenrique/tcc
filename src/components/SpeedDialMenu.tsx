@@ -208,9 +208,9 @@ const styles = StyleSheet.create({
         borderColor: Colors.hexDCE7EE,
         shadowColor: Colors.hex062534,
         shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.12,
+        shadowOpacity: 0,
         shadowRadius: 6,
-        elevation: 3,
+        elevation: 0,
     },
 
     label: {
@@ -232,9 +232,9 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         shadowColor: Colors.hex302016,
         shadowOffset: { width: 0, height: 3 },
-        shadowOpacity: 0.22,
+        shadowOpacity: 0,
         shadowRadius: 6,
-        elevation: 3,
+        elevation: 0,
     },
 
     destructiveActionButton: {
@@ -250,9 +250,9 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         shadowColor: Colors.hex052635,
         shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.28,
+        shadowOpacity: 0,
         shadowRadius: 10,
-        elevation: 5,
+        elevation: 0,
         borderWidth: 1.5,
         borderColor: Colors.overlayWhite20,
     },

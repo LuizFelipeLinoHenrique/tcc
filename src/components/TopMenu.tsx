@@ -61,6 +61,8 @@ function AnimatedTab({ tab, active }: {
                     styles.tab,
                     active && styles.activeTab,
                 ]}
+                accessibilityRole="tab"
+                accessibilityState={{ selected: active }}
                 onPress={() => router.push(tab.route)}
                 onPressIn={pressionar}
                 onPressOut={soltar}
@@ -125,18 +127,19 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "center",
+        minHeight: 44,
         paddingVertical: 10,
         paddingHorizontal: 12,
-        borderRadius: 10,
+        borderRadius: 6,
         gap: 6,
     },
     activeTab: {
         backgroundColor: Colors.hexE0F2FE,
         shadowColor: Colors.hex082F42,
         shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.04,
+        shadowOpacity: 0,
         shadowRadius: 5,
-        elevation: 2,
+        elevation: 0,
     },
     tabIcon: {
         marginRight: 2,

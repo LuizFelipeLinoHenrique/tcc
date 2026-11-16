@@ -313,9 +313,9 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         shadowColor: Colors.hex082F42,
         shadowOffset: { width: 0, height: 3 },
-        shadowOpacity: 0.05,
+        shadowOpacity: 0,
         shadowRadius: 10,
-        elevation: 2,
+        elevation: 0,
     },
 
     header: {
@@ -384,9 +384,9 @@ const styles = StyleSheet.create({
         borderColor: Colors.hex0B4F6C,
         shadowColor: Colors.hex0B4F6C,
         shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.04,
+        shadowOpacity: 0,
         shadowRadius: 4,
-        elevation: 2,
+        elevation: 0,
     },
 
     filtroBotaoPressed: {

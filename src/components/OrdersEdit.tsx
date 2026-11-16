@@ -4,6 +4,7 @@ import { supabase } from "@/src/lib/supabase";
 import { recordError } from "@/src/lib/tableActions";
 import { OrderItem, orderItems } from "@/src/lib/orderItems";
 import { parsePositiveInteger } from "@/src/lib/orderValidation";
+import { displayDate } from "@/src/lib/dates";
 import React, { useEffect, useState } from "react";
 import {
     ActivityIndicator,
@@ -29,6 +30,7 @@ type Order = {
     itens?: OrderItem[];
     id: number;
     data_pedido: string;
+    created_at?: string | null;
     id_cliente: number;
     qtde: number;
     id_produto: number;
@@ -172,7 +174,7 @@ export function EditOrderCard({
 
                     <View style={styles.dateBox}>
                         <Ionicons name="calendar-outline" size={13} color={Colors.hex475569} />
-                        <Text style={styles.dateText}>{pedido.data_pedido}</Text>
+                        <Text style={styles.dateText}>{displayDate(pedido.data_pedido?.trim() || pedido.created_at)}</Text>
                     </View>
                 </View>
             </View>

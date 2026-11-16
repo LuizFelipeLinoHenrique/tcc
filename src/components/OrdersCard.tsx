@@ -1,16 +1,20 @@
 import { Colors } from "@/src/theme/colors";
-import { OrderItem, orderItems, orderQuantity } from "@/src/lib/orderItems";
+import { OrderItem, orderItems } from "@/src/lib/orderItems";
+import { money } from "@/src/lib/cashFlow";
+import { displayDate } from "@/src/lib/dates";
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
 export type Pedido = {
     id: number;
-    data_pedido: string;
+    data_pedido?: string | null;
+    created_at?: string | null;
     id_cliente: number;
     qtde: number;
     id_produto: number;
     status: string;
+    total_cents?: number | null;
     financial_user_id?: string | null;
     financeiro?: { status: string } | null;
     itens?: OrderItem[];
@@ -38,7 +42,7 @@ function renderStatusBadge(status: string) {
             accessibilityLabel={state?.label ?? `Status: ${status || "Não informado"}`}
             style={[styles.statusBadge, state?.style]}
         >
-            <Ionicons name={state?.icon ?? "help-circle-outline"} size={20} color={state?.color ?? Colors.hex475569} />
+            <Text style={[styles.statusText, { color: state?.color ?? Colors.hex475569 }]}>{state?.label ?? (status || "Não informado")}</Text>
         </View>
     );
 }
@@ -59,7 +63,7 @@ export function OrderTableHeader() {
                 <Text style={styles.headerText}>PRODUTO</Text>
             </View>
             <View style={styles.colQty}>
-                <Text style={styles.headerText}>QUANTIDADE</Text>
+                <Text style={styles.headerText}>VALOR TOTAL</Text>
             </View>
             <View style={styles.colStatus}>
                 <Text style={styles.headerText}>STATUS</Text>
@@ -90,7 +94,7 @@ export function OrderTableRow({
             {/* Data */}
             <View style={styles.colDate}>
                 <View style={styles.dateContainer}>
-                    <Text style={styles.cellText}>{pedido.data_pedido}</Text>
+                    <Text style={styles.cellText}>{displayDate(pedido.data_pedido?.trim() || pedido.created_at)}</Text>
                 </View>
             </View>
 
@@ -110,7 +114,7 @@ export function OrderTableRow({
 
             {/* Quantidade */}
             <View style={styles.colQty}>
-                <Text style={styles.qtyBadgeText}>{orderQuantity(pedido)} un.</Text>
+                <Text style={styles.qtyBadgeText}>{pedido.total_cents != null ? money(pedido.total_cents) : "Não informado"}</Text>
             </View>
 
             {/* Status */}
@@ -183,13 +187,13 @@ const styles = StyleSheet.create({
     headerRow: {
         flexDirection: "row",
         alignItems: "center",
-        backgroundColor: Colors.hexE8F1F5,
+        backgroundColor: Colors.hexF8FAFC,
         paddingVertical: 12,
-        paddingHorizontal: 24,
-        columnGap: 24,
-        borderBottomWidth: 1.5,
+        paddingHorizontal: 16,
+        columnGap: 16,
+        borderBottomWidth: 1,
         borderColor: Colors.hexCFDDE6,
-        minWidth: 1148,
+        minWidth: 1010,
     },
     headerText: {
         fontSize: 11,
@@ -205,11 +209,11 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         paddingVertical: 11,
-        paddingHorizontal: 24,
-        columnGap: 24,
+        paddingHorizontal: 16,
+        columnGap: 16,
         borderBottomWidth: 1,
         borderColor: Colors.hexE2EBF0,
-        minWidth: 1148,
+        minWidth: 1010,
     },
     rowEven: {
         backgroundColor: Colors.white,
@@ -220,12 +224,12 @@ const styles = StyleSheet.create({
 
     // Colunas
     colId: {
-        width: 80,
+        width: 64,
         flexShrink: 0,
         justifyContent: "center",
     },
     colDate: {
-        width: 140,
+        width: 105,
         flexShrink: 0,
         justifyContent: "center",
     },
@@ -236,18 +240,19 @@ const styles = StyleSheet.create({
         justifyContent: "center",
     },
     colProduct: {
-        width: 220,
+        width: 180,
         flexShrink: 0,
         flexGrow: 1,
         justifyContent: "center",
     },
     colQty: {
         width: 120,
+        alignItems: "flex-end",
         flexShrink: 0,
         justifyContent: "center",
     },
     colStatus: {
-        width: 84,
+        width: 100,
         flexShrink: 0,
         justifyContent: "center",
     },
@@ -285,15 +290,18 @@ const styles = StyleSheet.create({
         gap: 6,
     },
     qtyBadgeText: {
+        fontVariant: ["tabular-nums"],
+        textAlign: "right",
         fontSize: 12,
         fontFamily: "WorksansMedium",
         color: Colors.hex1E293B,
     },
 
     // Status
+    statusText: { fontFamily: "WorksansMedium", fontSize: 12 },
     statusBadge: {
-        width: 36,
-        height: 36,
+        paddingHorizontal: 10,
+        minHeight: 28,
         alignItems: "center",
         justifyContent: "center",
         borderRadius: 8,
@@ -334,7 +342,7 @@ const styles = StyleSheet.create({
         transform: [{ scale: 0.97 }],
     },
     detailsBtn: {
-        backgroundColor: Colors.hexE8F1F5,
+        backgroundColor: Colors.hexF8FAFC,
         borderColor: Colors.hexCFDDE6,
     },
     editBtn: {

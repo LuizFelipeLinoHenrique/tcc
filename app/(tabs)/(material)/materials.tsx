@@ -239,13 +239,13 @@ export default function Materials() {
               <ScrollView
                   showsVerticalScrollIndicator={false}
                   horizontal
-                  showsHorizontalScrollIndicator={false}
+                  showsHorizontalScrollIndicator={true}
                   style={styles.tableScroll}
                   contentContainerStyle={styles.tableScrollContent}
               >
                   <View style={styles.tableContainer}>
                       <FlatList
-                          showsHorizontalScrollIndicator={false}
+                          showsHorizontalScrollIndicator={true}
                           data={produtos}
                           keyExtractor={(item) => item.id.toString()}
                           ListHeaderComponent={<MaterialTableHeader />}
@@ -371,9 +371,9 @@ const styles = StyleSheet.create({
         overflow: "hidden",
         shadowColor: Colors.hex082F42,
         shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.05,
+        shadowOpacity: 0,
         shadowRadius: 8,
-        elevation: 2,
+        elevation: 0,
     },
     container: {
         flex: 1,

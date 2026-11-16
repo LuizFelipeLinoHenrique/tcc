@@ -17,6 +17,9 @@ export type LineGraphProps = {
     /** Altura total do traçado, incluindo a região abaixo do saldo zero. */
     plotHeight?: number;
     showHeader?: boolean;
+    curved?: boolean;
+    minSpacing?: number;
+    color?: string;
 };
 
 export function LineGraph({
@@ -31,6 +34,9 @@ export function LineGraph({
     formatYLabel,
     plotHeight,
     showHeader = true,
+    curved = true,
+    minSpacing = 20,
+    color = Colors.hex0B4F6C,
 }: LineGraphProps) {
     if (!data || data.length === 0) {
         return (
@@ -49,7 +55,7 @@ export function LineGraph({
         );
     }
 
-    const safeSpacing = data.length > 1 ? Math.max(spacing, 20) : 50;
+    const safeSpacing = data.length > 1 ? Math.max(spacing, minSpacing) : 50;
     const safeInitialSpacing = data.length === 1 ? Math.max((width - 60) / 2, 20) : 14;
     const mostNegativeValue = Math.min(0, ...data.map(item => item.value ?? 0));
     const negativeSections = Math.ceil(-mostNegativeValue / ((maxValue || 10) / noOfSections));
@@ -60,7 +66,7 @@ export function LineGraph({
 
     // Custom data point para Web que evita passar 'onPressOut' para elementos SVG <circle> nativos do DOM
     const renderCustomPoint = () => (
-        <View style={styles.customPoint} />
+        <View style={[styles.customPoint, { backgroundColor: color }]} />
     );
 
     return (
@@ -79,7 +85,7 @@ export function LineGraph({
             <View style={styles.chartWrapper} testID="line-graph-plot">
                 <LineChart
                     isAnimated
-                    curved={data.length > 1}
+                    curved={curved && data.length > 1}
                     areaChart
                     rotateLabel={false}
                     width={width}
@@ -88,9 +94,9 @@ export function LineGraph({
                     data={data}
                     maxValue={maxValue || 10}
                     mostNegativeValue={mostNegativeValue}
-                    color={Colors.hex0B4F6C}
+                    color={color}
                     thickness={3}
-                    startFillColor={Colors.hex0B4F6C}
+                    startFillColor={color}
                     endFillColor={Colors.hexF8FAFC}
                     startOpacity={0.28}
                     endOpacity={0.02}
@@ -99,7 +105,7 @@ export function LineGraph({
                     animationDuration={1000}
                     onDataChangeAnimationDuration={400}
                     yAxisTextStyle={styles.axisText}
-                    dataPointsColor={Colors.hex0B4F6C}
+                    dataPointsColor={color}
                     dataPointsRadius={4}
                     dataPointsWidth={8}
                     dataPointsHeight={8}
@@ -185,13 +191,12 @@ const styles = StyleSheet.create({
         width: 8,
         height: 8,
         borderRadius: 4,
-        backgroundColor: Colors.hex0B4F6C,
         borderWidth: 1.5,
         borderColor: Colors.white,
         shadowColor: Colors.hex082F42,
         shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.04,
+        shadowOpacity: 0,
         shadowRadius: 2,
-        elevation: 1,
+        elevation: 0,
     },
 });

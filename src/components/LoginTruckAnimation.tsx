@@ -193,7 +193,7 @@ export function LoginTruckAnimation({ ready, onComplete }: { ready: boolean; onC
 }
 
 const styles = StyleSheet.create({
-  overlay: { position: "absolute", top: 0, right: 0, bottom: 0, left: 0, zIndex: 1000, elevation: 20, backgroundColor: Colors.hexF8FAFC, alignItems: "center", justifyContent: "center", overflow: "hidden" },
+  overlay: { position: "absolute", top: 0, right: 0, bottom: 0, left: 0, zIndex: 1000, elevation: 0, backgroundColor: Colors.hexF8FAFC, alignItems: "center", justifyContent: "center", overflow: "hidden" },
   content: { width: "100%", alignItems: "center", paddingVertical: 32 },
   brand: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 20 },
   brandDot: { width: 10, height: 10, borderRadius: 3, backgroundColor: Colors.hex0891B2, transform: [{ rotate: "-12deg" }] },

@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { CashEntry, addMonths, cashCategories, displayDate, cashToday, parseDate, parseMoney } from "@/src/lib/cashFlow";
 import { CashDraft, cashError, saveCashEntries } from "@/src/lib/cashFlowRepository";
 import { Colors } from "@/src/theme/colors";
+import { maskDate } from "@/src/lib/dates";
 
 export function CashChoices<T extends string>({ values, value, onChange, disabled = false }: { values: { value: T; label: string }[]; value: T; onChange: (value: T) => void; disabled?: boolean }) {
   return <View style={styles.choices}>{values.map(item => <Pressable key={item.value} accessibilityRole="button" accessibilityState={{ selected: value === item.value, disabled }} disabled={disabled} onPress={() => onChange(item.value)} style={[styles.choice, value === item.value && styles.selected]}><Text style={[styles.choiceText, value === item.value && styles.selectedText]}>{item.label}</Text></Pressable>)}</View>;
@@ -23,7 +24,7 @@ export function CashEntryForm({ entry, initialType, onSaved, onBusy }: { entry?:
   const saving = useRef(false);
 
   const linked = !!entry?.order_id;
-  const field = (label: string, value: string, change: (value: string) => void, placeholder = "", maxLength = 160, numeric = false, locked = false) => <View style={styles.field}><Text style={styles.label}>{label}</Text><TextInput accessibilityLabel={label} editable={!busy && !locked} value={value} onChangeText={change} placeholder={placeholder} placeholderTextColor={Colors.hex94A3B8} maxLength={maxLength} keyboardType={numeric ? "decimal-pad" : "default"} style={styles.input} /></View>;
+  const field = (label: string, value: string, change: (value: string) => void, placeholder = "", maxLength = 160, numeric = false, locked = false) => <View style={styles.field}><Text style={styles.label}>{label}</Text><TextInput accessibilityLabel={label} editable={!busy && !locked} value={value} onChangeText={change} placeholder={placeholder} placeholderTextColor={Colors.hex94A3B8} maxLength={maxLength} keyboardType={placeholder === "DD/MM/AAAA" ? "number-pad" : numeric ? "decimal-pad" : "default"} style={styles.input} /></View>;
 
   async function save() {
     if (saving.current) return;
@@ -52,10 +53,10 @@ export function CashEntryForm({ entry, initialType, onSaved, onBusy }: { entry?:
     <Text style={styles.label}>Categoria *</Text>
     <CashChoices values={cashCategories.map(value => ({ value, label: value }))} value={category} onChange={setCategory} disabled={busy} />
     {field("Categoria personalizada", category, setCategory, "Categoria", 80)}
-    {field("Vencimento *", dueDate, setDueDate, "DD/MM/AAAA", 10, false, linked)}
+    {field("Vencimento *", dueDate, value => setDueDate(maskDate(value)), "DD/MM/AAAA", 10, true, linked)}
     <Text style={styles.label}>Situação</Text>
     <CashChoices values={([{ value: "pending", label: "Pendente" }, { value: "paid", label: "Realizado" }, { value: "cancelled", label: "Cancelado" }] as const).filter(option => !linked || option.value !== "cancelled" || entry.status === "cancelled")} value={status} onChange={setStatus} disabled={busy || (linked && entry.status !== "pending")} />
-    {status === "paid" && field("Data do pagamento / recebimento *", paidDate, setPaidDate, "DD/MM/AAAA", 10)}
+    {status === "paid" && field("Data do pagamento / recebimento *", paidDate, value => setPaidDate(maskDate(value)), "DD/MM/AAAA", 10, true)}
     {!entry && <>{field("Quantidade de lançamentos mensais", repetitions, setRepetitions, "1", 2, true)}<Text style={styles.hint}>1 cria um lançamento único. Até 24 repetições com o mesmo valor; cada uma poderá ser editada separadamente.</Text></>}
     <Text style={styles.label}>Observações</Text><TextInput accessibilityLabel="Observações" editable={!busy} value={notes} onChangeText={setNotes} multiline maxLength={2000} style={[styles.input, { minHeight: 80, textAlignVertical: "top" }]} />
     {!!error && <Text accessibilityRole="alert" style={styles.error}>{error}</Text>}

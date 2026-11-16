@@ -1,5 +1,6 @@
 import SignOutConfirmation from "@/src/components/SignOutConfirmation";
 import { Colors } from "@/src/theme/colors";
+import { displayDate } from "@/src/lib/dates";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
@@ -37,14 +38,7 @@ export default function Configurations() {
                     setUserEmail(data.user.email ?? "Usuário PalletCore");
                     setUserId(data.user.id);
                     if (data.user.created_at) {
-                        const date = new Date(data.user.created_at);
-                        setCreatedAt(
-                            date.toLocaleDateString("pt-BR", {
-                                day: "2-digit",
-                                month: "2-digit",
-                                year: "numeric",
-                            })
-                        );
+                        setCreatedAt(displayDate(data.user.created_at));
                     }
                 }
             } catch (e) {
@@ -308,9 +302,9 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         shadowColor: Colors.hex0B4F6C,
         shadowOffset: { width: 0, height: 3 },
-        shadowOpacity: 0.04,
+        shadowOpacity: 0,
         shadowRadius: 6,
-        elevation: 3,
+        elevation: 0,
     },
     avatarText: {
         fontSize: 18,

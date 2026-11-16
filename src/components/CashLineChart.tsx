@@ -44,7 +44,10 @@ export function CashLineChart({ points, width }: { points: CashChartPoint[]; wid
   const { bounds, coordinates } = chart;
   const line = traceCashLine(coordinates, progress);
   if (coordinates.length === 0) return null;
-  const labelIndices = Array.from(new Set([0, Math.floor((points.length - 1) / 2), points.length - 1]));
+  const plotWidth = bounds.right - bounds.left;
+  const labelIndices = Array.from(new Set(plotWidth >= 200
+    ? [0, Math.floor((points.length - 1) / 2), points.length - 1]
+    : plotWidth >= 132 ? [0, points.length - 1] : [Math.floor((points.length - 1) / 2)]));
 
   return <Svg testID="cash-line-plot" width="100%" height={chart.height} viewBox={`0 0 ${chart.width} ${chart.height}`}>
     <Defs><ClipPath id={clipId}><Rect x={bounds.left} y={bounds.top} width={bounds.right - bounds.left} height={bounds.bottom - bounds.top} /></ClipPath></Defs>
@@ -58,6 +61,6 @@ export function CashLineChart({ points, width }: { points: CashChartPoint[]; wid
       <Circle cx={coordinates[0].x} cy={coordinates[0].y} r={3} fill={Colors.hex0B4F6C} />
       {line.tip && <Circle testID="cash-line-tip" cx={line.tip.x} cy={line.tip.y} r={3} fill={Colors.hex0B4F6C} />}
     </G>
-    {labelIndices.map((index, position) => <SvgText key={index} x={coordinates[index].x} y={166} textAnchor={position === 0 ? "start" : position === labelIndices.length - 1 ? "end" : "middle"} fontSize={10} fill={Colors.hex64748B}>{displayDate(points[index].date).slice(0, 5)}</SvgText>)}
+    {labelIndices.map((index, position) => <SvgText key={index} x={coordinates[index].x} y={166} textAnchor={labelIndices.length === 1 ? "middle" : position === 0 ? "start" : position === labelIndices.length - 1 ? "end" : "middle"} fontSize={10} fill={Colors.hex64748B}>{displayDate(points[index].date)}</SvgText>)}
   </Svg>;
 }

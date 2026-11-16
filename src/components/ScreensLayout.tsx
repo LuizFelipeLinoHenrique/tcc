@@ -1,3 +1,5 @@
+import { Theme } from "@/src/theme/tokens";
+import { useWindowDimensions } from "react-native";
 import { Colors } from "@/src/theme/colors";
 import { PropsWithChildren } from "react";
 import { KeyboardAvoidingView, Platform, ScrollView, StyleProp, StyleSheet, View, ViewStyle } from "react-native";
@@ -10,6 +12,7 @@ type PagesLayoutProps = PropsWithChildren<{
 }>;
 
 export function PagesLayout({ children, scroll, scrollContent, noScrollContent }: PagesLayoutProps) {
+    const compact = useWindowDimensions().width < 760;
     return (
         <SafeAreaView style={pagesStyles.safeArea}>
             <KeyboardAvoidingView
@@ -21,12 +24,12 @@ export function PagesLayout({ children, scroll, scrollContent, noScrollContent }
                     <ScrollView
                         showsVerticalScrollIndicator={false}
                         showsHorizontalScrollIndicator={false}
-                        contentContainerStyle={[pagesStyles.scrollContent, scrollContent]}
+                        contentContainerStyle={[pagesStyles.scrollContent, compact && { padding: 16 }, scrollContent]}
                     >
                         {children}
                     </ScrollView>
                 ) : (
-                    <View style={[pagesStyles.container, noScrollContent]}>
+                    <View style={[pagesStyles.container, compact && { padding: 16 }, noScrollContent]}>
                         {children}
                     </View>
                 )}
@@ -47,31 +50,31 @@ export const pagesStyles = StyleSheet.create({
         flexGrow: 1,
         alignItems: "stretch",
         justifyContent: "flex-start",
-        padding: 20,
+        padding: Theme.space.xl,
     },
     container: {
         flex: 1,
         alignItems: "stretch",
         justifyContent: "flex-start",
-        padding: 20,
+        padding: Theme.space.xl,
     },
     card: {
         width: "100%",
         backgroundColor: Colors.white,
         borderWidth: 1,
         borderColor: Colors.hexDCE7EE,
-        borderRadius: 8,
+        borderRadius: Theme.radius.panel,
         padding: 24,
         shadowColor: Colors.hex082F42,
         shadowOffset: { width: 0, height: 6 },
-        shadowOpacity: 0.04,
+        shadowOpacity: 0,
         shadowRadius: 16,
-        elevation: 2,
+        elevation: 0,
     },
     brand: {
         color: Colors.hex0891B2,
         fontSize: 12,
-        fontFamily: "WorksansSemiBold",
+        fontFamily: Theme.font.semibold,
         letterSpacing: 1.4,
         textTransform: "uppercase"
     },
@@ -94,7 +97,7 @@ export const pagesStyles = StyleSheet.create({
         color: Colors.hex475569,
         fontSize: 14,
         lineHeight: 20,
-        fontFamily: "WorksansRegular"
+        fontFamily: Theme.font.regular
     },
     form: {
         marginTop: 20,
@@ -106,32 +109,32 @@ export const pagesStyles = StyleSheet.create({
     label: {
         color: Colors.hex1E293B,
         fontSize: 12,
-        fontFamily: "WorksansSemiBold",
+        fontFamily: Theme.font.semibold,
         letterSpacing: 0.2,
     },
     input: {
         minHeight: 48,
         borderWidth: 1,
         borderColor: Colors.hexCFDDE6,
-        borderRadius: 8,
-        backgroundColor: Colors.hexF8FAFC,
+        borderRadius: Theme.radius.panel,
+        backgroundColor: Colors.white,
         paddingHorizontal: 15,
         color: Colors.hex0F172A,
         fontSize: 15,
-        fontFamily: "WorksansRegular",
+        fontFamily: Theme.font.regular,
     },
     primaryButton: {
         minHeight: 48,
         paddingHorizontal: 16,
         alignItems: "center",
         justifyContent: "center",
-        borderRadius: 8,
+        borderRadius: Theme.radius.panel,
         backgroundColor: Colors.hex0B4F6C,
         shadowColor: Colors.hex0B4F6C,
         shadowOffset: { width: 0, height: 3 },
-        shadowOpacity: 0.04,
+        shadowOpacity: 0,
         shadowRadius: 6,
-        elevation: 2,
+        elevation: 0,
     },
     primaryButtonPressed: {
         backgroundColor: Colors.hex083A50,
@@ -140,19 +143,19 @@ export const pagesStyles = StyleSheet.create({
     primaryButtonText: {
         color: Colors.hexFFFDF9,
         fontSize: 15,
-        fontFamily: "WorksansSemiBold",
+        fontFamily: Theme.font.semibold,
         letterSpacing: 0.3,
     },
     link: {
         color: Colors.hex0E7490,
         fontSize: 13,
-        fontFamily: "WorksansSemiBold"
+        fontFamily: Theme.font.semibold
     },
     text: {
         color: Colors.hex1E293B,
         fontSize: 15,
         lineHeight: 21,
-        fontFamily: "WorksansRegular"
+        fontFamily: Theme.font.regular
     },
     textBold: {
         color: Colors.hex0F172A,
@@ -171,12 +174,12 @@ export const pagesStyles = StyleSheet.create({
     footerText: {
         color: Colors.hex475569,
         fontSize: 13,
-        fontFamily: "WorksansRegular"
+        fontFamily: Theme.font.regular
     },
     error: {
         borderWidth: 1,
         borderColor: Colors.hexF0CBC2,
-        borderRadius: 8,
+        borderRadius: Theme.radius.panel,
         backgroundColor: Colors.hexFDF2EF,
         paddingHorizontal: 14,
         paddingVertical: 11
@@ -189,7 +192,7 @@ export const pagesStyles = StyleSheet.create({
     warning: {
         borderWidth: 1,
         borderColor: Colors.hexEADDC6,
-        borderRadius: 8,
+        borderRadius: Theme.radius.panel,
         backgroundColor: Colors.hexFDF8F0,
         paddingHorizontal: 14,
         paddingVertical: 11
@@ -204,7 +207,7 @@ export const pagesStyles = StyleSheet.create({
         paddingHorizontal: 16,
         alignItems: "center",
         justifyContent: "center",
-        borderRadius: 8,
+        borderRadius: Theme.radius.panel,
         borderWidth: 1.5,
         borderColor: Colors.hexCBD8E2,
         backgroundColor: Colors.white,
@@ -212,7 +215,7 @@ export const pagesStyles = StyleSheet.create({
     secondaryButtonText: {
         color: Colors.hex334155,
         fontSize: 14,
-        fontFamily: "WorksansSemiBold"
+        fontFamily: Theme.font.semibold
     },
     animatedView: {
         flex: 1

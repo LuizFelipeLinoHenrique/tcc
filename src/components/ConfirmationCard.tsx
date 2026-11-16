@@ -105,9 +105,9 @@ const styles = StyleSheet.create({
         backgroundColor: Colors.hexA74E3C,
         shadowColor: Colors.hexA74E3C,
         shadowOffset: { width: 0, height: 3 },
-        shadowOpacity: 0.22,
+        shadowOpacity: 0,
         shadowRadius: 6,
-        elevation: 2,
+        elevation: 0,
     },
     confirmButtonPressed: {
         backgroundColor: Colors.hex8E3D2D,
