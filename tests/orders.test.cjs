@@ -90,6 +90,31 @@ const addScreen = () => {
   return page;
 };
 
+test("focusing an order field opens its autocomplete and selecting a result links the ID", async () => {
+  const page = addScreen();
+  assert.equal(page.nodes("OrderRecordDropdown").length, 0);
+  for (const [label, table, id, nome] of [["Cliente", "clientes", 12, "Cliente cadastrado"], ["Produto", "produtos", 34, "Produto cadastrado"]]) {
+    const field = () => page.nodes("TextInput").find(node => node.props.accessibilityLabel === label);
+    const dropdown = () => page.nodes("OrderRecordDropdown").find(node => node.props.table === table);
+    field().props.onFocus();
+    page.render();
+    assert.equal(dropdown().props.search, "");
+    field().props.onChangeText("cadastrado");
+    page.render();
+    assert.equal(dropdown().props.search, "cadastrado");
+    dropdown().props.onSelect(String(id));
+    const request = page.requests.at(-1);
+    assert.equal(request.table, table);
+    assert.ok(request.calls.some(([method, column, value]) => method === "eq" && column === "id" && value === id));
+    request.resolve({ data: { id, nome }, error: null });
+    await new Promise(setImmediate);
+    page.render();
+    assert.equal(dropdown(), undefined);
+    assert.equal(field().props.value, nome);
+    assert.ok(page.nodes("Text").some(node => Array.isArray(node.props.children) && node.props.children.includes(nome)));
+  }
+});
+
 test("order dates display calendar days, creation timestamps and missing values", () => {
   for (const [dates, expected] of [
     [{ data_pedido: "2026-11-15" }, "15/11/2026"],
@@ -413,7 +438,7 @@ test("failed insertion releases loading, preserves fields and permits retry", as
   page.requests[2].resolve({ error: { code: "42501" } });
   await submit;
   page.render();
-  assert.equal(page.nodes("TextInput")[0].props.value, "2");
+  assert.equal(page.nodes("TextInput")[0].props.value, "Nome");
   assert.equal(page.nodes("TextInput")[0].props.editable, true);
   assert.match(JSON.stringify(page.nodes("Text").map(node => node.props.children)), /permissão/);
   assert.equal(page.nodes("AnimatedButton").find(node => node.props.title === "Adicionar Pedido").props.disabled, false);

@@ -1,17 +1,17 @@
 import { Theme } from "@/src/theme/tokens";
-import { useWindowDimensions } from "react-native";
 import { Colors } from "@/src/theme/colors";
 import { PropsWithChildren } from "react";
-import { KeyboardAvoidingView, Platform, ScrollView, StyleProp, StyleSheet, View, ViewStyle } from "react-native";
+import { KeyboardAvoidingView, Platform, ScrollView, ScrollViewProps, StyleProp, StyleSheet, useWindowDimensions, View, ViewStyle } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 type PagesLayoutProps = PropsWithChildren<{
     scroll: boolean;
     scrollContent?: StyleProp<ViewStyle>;
     noScrollContent?: StyleProp<ViewStyle>;
+    keyboardShouldPersistTaps?: ScrollViewProps["keyboardShouldPersistTaps"];
 }>;
 
-export function PagesLayout({ children, scroll, scrollContent, noScrollContent }: PagesLayoutProps) {
+export function PagesLayout({ children, scroll, scrollContent, noScrollContent, keyboardShouldPersistTaps }: PagesLayoutProps) {
     const compact = useWindowDimensions().width < 760;
     return (
         <SafeAreaView style={pagesStyles.safeArea}>
@@ -22,6 +22,7 @@ export function PagesLayout({ children, scroll, scrollContent, noScrollContent }
 
                 {scroll ? (
                     <ScrollView
+                        keyboardShouldPersistTaps={keyboardShouldPersistTaps}
                         showsVerticalScrollIndicator={false}
                         showsHorizontalScrollIndicator={false}
                         contentContainerStyle={[pagesStyles.scrollContent, compact && { padding: 16 }, scrollContent]}

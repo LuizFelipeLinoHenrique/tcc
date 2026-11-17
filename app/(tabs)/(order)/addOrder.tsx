@@ -16,17 +16,23 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 
 import { AnimatedButton } from "@/src/components/AnimatedButton";
+import { OrderRecordDropdown } from "@/src/components/OrderRecordDropdown";
 import { PagesLayout, pagesStyles } from "@/src/components/ScreensLayout";
 import useResponsive from "@/src/hooks/useResponsive";
 import { supabase } from "@/src/lib/supabase";
 
 type ValidationState = "idle" | "loading" | "success" | "error";
+type Catalog = "clientes" | "produtos";
 
 export default function OrdersManager() {
     const { maxCardWidth, isMobile } = useResponsive();
 
     const [idCliente, setIdCliente] = useState("");
     const [idProduto, setIdProduto] = useState("");
+    const [clienteBusca, setClienteBusca] = useState("");
+    const [produtoBusca, setProdutoBusca] = useState("");
+    const [catalogoAtivo, setCatalogoAtivo] = useState<Catalog | null>(null);
+    const blurTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
     const [qtde, setQtde] = useState("");
     const [vencimento, setVencimento] = useState("");
     const requestKey = useRef<string | null>(null);
@@ -52,7 +58,21 @@ export default function OrdersManager() {
     useEffect(() => () => {
         clienteRequest.current += 1;
         produtoRequest.current += 1;
+        clearTimeout(blurTimer.current);
     }, []);
+
+    function abrirCatalogo(catalogo: Catalog) {
+        clearTimeout(blurTimer.current);
+        setCatalogoAtivo(catalogo);
+    }
+
+    function fecharAoPerderFoco(catalogo: Catalog) {
+        clearTimeout(blurTimer.current);
+        // Permite que o toque na opção seja concluído após o blur do campo na web.
+        blurTimer.current = setTimeout(() => {
+            setCatalogoAtivo(atual => atual === catalogo ? null : atual);
+        }, 200);
+    }
 
     function limparMensagemSucesso() {
         if (mensagemSucesso) {
@@ -67,6 +87,12 @@ export default function OrdersManager() {
         setNomeCliente(null);
         setClienteErro(null);
         limparMensagemSucesso();
+
+        if (!id && clienteBusca.trim()) {
+            setClienteStatus("error");
+            setClienteErro("Selecione um cliente da lista.");
+            return false;
+        }
 
         if (!id) {
             setClienteStatus("idle");
@@ -118,6 +144,12 @@ export default function OrdersManager() {
         setNomeProduto(null);
         setProdutoErro(null);
         limparMensagemSucesso();
+
+        if (!id && produtoBusca.trim()) {
+            setProdutoStatus("error");
+            setProdutoErro("Selecione um produto da lista.");
+            return false;
+        }
 
         if (!id) {
             setProdutoStatus("idle");
@@ -198,7 +230,7 @@ export default function OrdersManager() {
                 setSubmitError("Informe o vencimento do recebimento no formato DD/MM/AAAA.");
                 return;
             }
-            const temRascunho = !!(idProduto.trim() || qtde.trim());
+            const temRascunho = !!(produtoBusca.trim() || qtde.trim());
             const [clienteValido, produtoValido] = await Promise.all([
                 verificarCliente(), temRascunho ? verificarProduto() : Promise.resolve(true),
             ]);
@@ -237,6 +269,8 @@ export default function OrdersManager() {
                 requestKey.current = null;
                 setIdCliente("");
                 setIdProduto("");
+                setClienteBusca("");
+                setProdutoBusca("");
                 setQtde("");
                 setNomeCliente("");
                 setNomeProduto("");
@@ -256,8 +290,8 @@ export default function OrdersManager() {
 
     function alterarCliente(valor: string) {
         clienteRequest.current += 1;
-        const somenteNumeros = valor.replace(/\D/g, "");
-        setIdCliente(somenteNumeros);
+        setIdCliente(/^\d+$/.test(valor.trim()) ? valor.trim() : "");
+        setClienteBusca(valor);
         setNomeCliente("");
         setClienteErro(null);
         setClienteStatus("idle");
@@ -266,8 +300,8 @@ export default function OrdersManager() {
 
     function alterarProduto(valor: string) {
         produtoRequest.current += 1;
-        const somenteNumeros = valor.replace(/\D/g, "");
-        setIdProduto(somenteNumeros);
+        setIdProduto(/^\d+$/.test(valor.trim()) ? valor.trim() : "");
+        setProdutoBusca(valor);
         setNomeProduto("");
         setProdutoErro(null);
         setProdutoStatus("idle");
@@ -297,6 +331,7 @@ export default function OrdersManager() {
             setItens(prev => [...prev, { id_produto: Number(idProduto), nome: produtoValidado, quantidade: qtde }]);
             produtoRequest.current += 1;
             setIdProduto("");
+            setProdutoBusca("");
             setQtde("");
             setNomeProduto(null);
             setProdutoStatus("idle");
@@ -311,14 +346,14 @@ export default function OrdersManager() {
         idCliente.trim() !== "" &&
         clienteStatus === "success" &&
         (itens.length > 0 || (produtoStatus === "success" && parsePositiveInteger(qtde) !== null)) &&
-        (!(idProduto || qtde) || (produtoStatus === "success" && parsePositiveInteger(qtde) !== null)) &&
+        (!(produtoBusca.trim() || qtde) || (produtoStatus === "success" && parsePositiveInteger(qtde) !== null)) &&
         itens.every(item => parsePositiveInteger(item.quantidade) !== null) &&
         !quantidadeErro &&
         !!parseDate(vencimento) &&
         !loading;
 
     return (
-        <PagesLayout scroll={true} scrollContent={{ paddingVertical: 20 }}>
+        <PagesLayout scroll={true} scrollContent={{ paddingVertical: 20 }} keyboardShouldPersistTaps="handled">
             <View style={styles.container}>
                 <View style={[pagesStyles.card, { maxWidth: maxCardWidth }]}>
                     {/* CABEÇALHO */}
@@ -342,7 +377,7 @@ export default function OrdersManager() {
                     <View style={styles.formContainer}>
                         {/* CLIENTE */}
                         <View style={pagesStyles.field}>
-                            <Text style={pagesStyles.label}>ID DO CLIENTE</Text>
+                            <Text style={pagesStyles.label}>CLIENTE</Text>
                             <View
                                 style={[
                                     styles.inputWrapper,
@@ -363,12 +398,20 @@ export default function OrdersManager() {
                                     style={styles.inputIcon}
                                 />
                                 <TextInput
-                                    value={idCliente}
-                                    onChangeText={alterarCliente}
-                                    onBlur={() => verificarCliente()}
-                                    placeholder="Ex: 1"
+                                    accessibilityLabel="Cliente"
+                                    accessibilityState={{ expanded: catalogoAtivo === "clientes" && !loading }}
+                                    value={nomeCliente || clienteBusca}
+                                    onChangeText={texto => {
+                                        alterarCliente(texto);
+                                        abrirCatalogo("clientes");
+                                    }}
+                                    onFocus={() => abrirCatalogo("clientes")}
+                                    onBlur={() => {
+                                        fecharAoPerderFoco("clientes");
+                                        if (!nomeCliente) return verificarCliente();
+                                    }}
+                                    placeholder="Buscar cliente por nome ou ID"
                                     placeholderTextColor={Colors.hex94A3B8}
-                                    keyboardType="number-pad"
                                     returnKeyType="next"
                                     editable={!loading}
                                     style={styles.input}
@@ -377,6 +420,20 @@ export default function OrdersManager() {
                                     <ActivityIndicator size="small" color={Colors.hex0B4F6C} />
                                 )}
                             </View>
+
+                            {catalogoAtivo === "clientes" && !loading && (
+                                <OrderRecordDropdown
+                                    key={nomeCliente ? "" : clienteBusca}
+                                    table="clientes"
+                                    search={nomeCliente ? "" : clienteBusca}
+                                    value={idCliente}
+                                    onSelect={id => {
+                                        setCatalogoAtivo(null);
+                                        alterarCliente(id);
+                                        void verificarCliente(id);
+                                    }}
+                                />
+                            )}
 
                             {clienteStatus === "success" && nomeCliente && (
                                 <View style={styles.verifiedBox}>
@@ -395,7 +452,7 @@ export default function OrdersManager() {
 
                         {/* MATERIAL */}
                         <View style={pagesStyles.field}>
-                            <Text style={pagesStyles.label}>ID DO MATERIAL</Text>
+                            <Text style={pagesStyles.label}>PRODUTO</Text>
                             <View
                                 style={[
                                     styles.inputWrapper,
@@ -416,12 +473,20 @@ export default function OrdersManager() {
                                     style={styles.inputIcon}
                                 />
                                 <TextInput
-                                    value={idProduto}
-                                    onChangeText={alterarProduto}
-                                    onBlur={() => verificarProduto()}
-                                    placeholder="Ex: 10"
+                                    accessibilityLabel="Produto"
+                                    accessibilityState={{ expanded: catalogoAtivo === "produtos" && !loading }}
+                                    value={nomeProduto || produtoBusca}
+                                    onChangeText={texto => {
+                                        alterarProduto(texto);
+                                        abrirCatalogo("produtos");
+                                    }}
+                                    onFocus={() => abrirCatalogo("produtos")}
+                                    onBlur={() => {
+                                        fecharAoPerderFoco("produtos");
+                                        if (!nomeProduto) return verificarProduto();
+                                    }}
+                                    placeholder="Buscar produto por nome ou ID"
                                     placeholderTextColor={Colors.hex94A3B8}
-                                    keyboardType="number-pad"
                                     returnKeyType="next"
                                     editable={!loading}
                                     style={styles.input}
@@ -430,6 +495,20 @@ export default function OrdersManager() {
                                     <ActivityIndicator size="small" color={Colors.hex0B4F6C} />
                                 )}
                             </View>
+
+                            {catalogoAtivo === "produtos" && !loading && (
+                                <OrderRecordDropdown
+                                    key={nomeProduto ? "" : produtoBusca}
+                                    table="produtos"
+                                    search={nomeProduto ? "" : produtoBusca}
+                                    value={idProduto}
+                                    onSelect={id => {
+                                        setCatalogoAtivo(null);
+                                        alterarProduto(id);
+                                        void verificarProduto(id);
+                                    }}
+                                />
+                            )}
 
                             {produtoStatus === "success" && nomeProduto && (
                                 <View style={styles.verifiedBox}>
