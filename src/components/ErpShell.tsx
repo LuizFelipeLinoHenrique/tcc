@@ -35,7 +35,7 @@ export function ErpShell({ children, onSignOut }: PropsWithChildren<{ onSignOut:
         <View style={styles.brand}><View style={styles.brandIcon}><Ionicons name="cube" size={23} color={Colors.white} /></View><View><Text style={styles.brandName}>PalletCore</Text><Text style={styles.brandCaption}>GESTÃO EMPRESARIAL</Text></View></View>
         <Text style={styles.section}>ÁREA DE TRABALHO</Text>
         <View style={styles.nav}>{navigation}</View>
-        <View style={styles.sidebarFooter}><Text style={styles.footerTitle}>Gestão integrada</Text><Text style={styles.footerText}>Pedidos, cadastros e financeiro.</Text></View>
+        <View style={styles.sidebarFooter} />
       </View>}
       <View style={styles.main}>
         <View style={[styles.header, !desktop && styles.mobileHeader]}>
@@ -64,8 +64,6 @@ const styles = StyleSheet.create({
   selectedText: { color: Colors.white, fontFamily: "WorksansSemiBold" },
   hover: { opacity: 0.8 },
   sidebarFooter: { marginTop: "auto", borderTopWidth: 1, borderTopColor: Colors.hex334155, paddingTop: 20, paddingHorizontal: 10, paddingBottom: 8 },
-  footerTitle: { color: Colors.hexCBD8E2, fontSize: 12, fontFamily: "WorksansSemiBold" },
-  footerText: { color: Colors.hex94A3B8, fontSize: 11, marginTop: 5, fontFamily: "WorksansRegular" },
   main: { flex: 1, minWidth: 0 },
   header: { minHeight: 68, backgroundColor: Colors.white, borderBottomWidth: 1, borderBottomColor: Colors.hexDCE7EE, flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 28, paddingVertical: 12 },
   mobileHeader: { paddingHorizontal: 18, minHeight: 70 },

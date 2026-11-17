@@ -79,7 +79,6 @@ export function MaterialTableRow({
                         <Text style={styles.materialName} numberOfLines={1}>
                             {produto.nome}
                         </Text>
-                        <Text style={styles.materialSubtitle}>Item de catálogo</Text>
                     </View>
                 </View>
             </View>
@@ -238,11 +237,6 @@ const styles = StyleSheet.create({
         fontSize: 13,
         fontFamily: "WorksansSemiBold",
         color: Colors.hex0F172A,
-    },
-    materialSubtitle: {
-        fontSize: 10,
-        fontFamily: "WorksansRegular",
-        color: Colors.hex64748B,
     },
     priceText: {
         fontSize: 12,

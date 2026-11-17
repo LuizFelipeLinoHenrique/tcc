@@ -346,7 +346,7 @@ export default function Orders() {
             }}
         >
             <View style={[styles.container, isMobile && { flex: 0 }]}>
-                <View style={[styles.pageHeader, isMobile && { flexDirection: "column", alignItems: "stretch" }]}>
+                <View style={[pagesStyles.pageHeader, isMobile && { flexDirection: "column", alignItems: "stretch" }]}>
                     <View><Text accessibilityRole="header" style={pagesStyles.title}>Pedidos</Text><Text style={pagesStyles.description}>Consulte e acompanhe os pedidos da operação.</Text></View>
                     <AnimatedButton title="Novo pedido" stylesPressable={pagesStyles.primaryButton} stylesText={pagesStyles.primaryButtonText} onPress={() => router.push("/(tabs)/(order)/addOrder")} />
                 </View>
@@ -504,7 +504,6 @@ export default function Orders() {
 }
 
 const styles = StyleSheet.create({
-    pageHeader: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 12, marginBottom: 20 },
     container: {
         flex: 1,
         width: "100%",

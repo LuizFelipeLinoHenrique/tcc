@@ -78,6 +78,13 @@ export const pagesStyles = StyleSheet.create({
         letterSpacing: 1.4,
         textTransform: "uppercase"
     },
+    pageHeader: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+        gap: 12,
+        marginBottom: 20,
+    },
     title: {
         marginVertical: 6,
         color: Colors.hex0F172A,

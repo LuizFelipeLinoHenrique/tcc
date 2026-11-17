@@ -234,17 +234,16 @@ export default function HomeScreen() {
                     <View testID="dashboard-partners" style={styles.partnersPanel}>
                         <View style={styles.panelHeading}>
                             <View style={styles.panelIcon}><Ionicons name="business-outline" size={20} color={Colors.hex0B4F6C} /></View>
-                            <View style={styles.flexCopy}><Text accessibilityRole="header" style={styles.panelTitle}>Cadastros da operação</Text><Text style={styles.panelDescription}>Clientes, produtos e fornecedores cadastrados</Text></View>
+                            <View style={styles.flexCopy}><Text accessibilityRole="header" style={styles.panelTitle}>Cadastros da operação</Text></View>
                         </View>
                         <View style={[styles.partnerGrid, compact && styles.partnerGridCompact]}>
                             {([
-                                { label: "Clientes", caption: "na sua base de relacionamento", value: totalClientes, icon: "people-outline" },
-                                { label: "Produtos", caption: "cadastrados no catálogo", value: totalMateriais, icon: "layers-outline" },
-                                { label: "Fornecedores", caption: "na sua rede de parceiros", value: totalFornecedores, icon: "business-outline" },
+                                { label: "Clientes", value: totalClientes, icon: "people-outline" },
+                                { label: "Produtos", value: totalMateriais, icon: "layers-outline" },
+                                { label: "Fornecedores", value: totalFornecedores, icon: "business-outline" },
                             ] as const).map((item, index) => <View key={item.label} style={[styles.partnerItem, index > 0 && (compact ? styles.partnerTopBorder : styles.partnerLeftBorder)]}>
                                 <View style={styles.partnerLabelRow}><Ionicons name={item.icon} size={16} color={Colors.hex64748B} /><Text style={styles.partnerLabel}>{item.label}</Text></View>
                                 <Text style={styles.partnerValue}>{item.value.toLocaleString("pt-BR")}</Text>
-                                <Text style={styles.caption}>{item.caption}</Text>
                             </View>)}
                         </View>
                     </View>
@@ -259,7 +258,7 @@ export default function HomeScreen() {
                             ] as const).map(item => <View key={item.label} testID="dashboard-financial-card" style={[styles.metricCard, { width: metricWidth }, item.primary && styles.balanceCard]}>
                                 <View style={styles.metricHeading}><Text style={styles.metricLabel}>{item.label}</Text><View style={[styles.metricIcon, { backgroundColor: item.background }]}><Ionicons name={item.icon} size={18} color={item.color} /></View></View>
                                 <Text style={[styles.moneyValue, { color: item.color }]} numberOfLines={1} adjustsFontSizeToFit>{money(item.value)}</Text>
-                                <Text style={styles.caption}>{item.note}</Text>
+                                {!!item.note && <Text style={styles.caption}>{item.note}</Text>}
                             </View>)}
                         </View>
                     </View>
@@ -268,12 +267,12 @@ export default function HomeScreen() {
                         <View><Text accessibilityRole="header" style={styles.sectionTitle}>Situação dos pedidos</Text><Text style={styles.description}>Visão consolidada de todos os pedidos registrados.</Text></View>
                         <View style={styles.grid}>
                             {([
-                                { label: "Pendentes", value: pedidosPendentes, note: "Em processamento", icon: "time-outline", color: Colors.hexB45309, background: Colors.hexFEF3C7 },
+                                { label: "Pendentes", value: pedidosPendentes, note: "", icon: "time-outline", color: Colors.hexB45309, background: Colors.hexFEF3C7 },
                                 { label: "Entregues", value: pedidosEntregues, note: taxaEntrega + "% dos pedidos registrados", icon: "checkmark-circle-outline", color: Colors.hex15803D, background: Colors.hexDCFCE7 },
-                                { label: "Cancelados", value: pedidosCancelados, note: "Cancelados na operação", icon: "close-circle-outline", color: Colors.hexB91C1C, background: Colors.hexFEE2E2 },
+                                { label: "Cancelados", value: pedidosCancelados, note: "", icon: "close-circle-outline", color: Colors.hexB91C1C, background: Colors.hexFEE2E2 },
                             ] as const).map(item => <View key={item.label} style={[styles.orderCard, { width: metricWidth }]}>
                                 <View style={[styles.metricIcon, { backgroundColor: item.background }]}><Ionicons name={item.icon} size={20} color={item.color} /></View>
-                                <View style={styles.flexCopy}><Text style={styles.metricLabel}>{item.label}</Text><Text style={styles.caption}>{item.note}</Text></View>
+                                <View style={styles.flexCopy}><Text style={styles.metricLabel}>{item.label}</Text>{!!item.note && <Text style={styles.caption}>{item.note}</Text>}</View>
                                 <Text style={[styles.orderValue, { color: item.color }]}>{item.value.toLocaleString("pt-BR")}</Text>
                             </View>)}
                         </View>
@@ -310,8 +309,8 @@ export default function HomeScreen() {
                         <View style={styles.section}>
                             <View><Text accessibilityRole="header" style={styles.groupTitle}>Clientes e produtos em destaque</Text><Text style={styles.description}>Ranking geral por unidades em pedidos não cancelados.</Text></View>
                             <View style={styles.grid}>
-                                <View testID="dashboard-ranking" style={[styles.chartPanel, { width: pairWidth }]}><Text style={styles.panelTitle}>Clientes com maior volume</Text><Text style={styles.panelDescription}>Os quatro clientes com mais unidades em pedidos</Text><DashboardRanking data={topClientesData} emptyLabel="Nenhum cliente com pedidos ativos." /></View>
-                                <View testID="dashboard-ranking" style={[styles.chartPanel, { width: pairWidth }]}><Text style={styles.panelTitle}>Produtos mais solicitados</Text><Text style={styles.panelDescription}>Os quatro produtos com maior demanda</Text><DashboardRanking data={topMateriaisData} emptyLabel="Nenhum produto com demanda registrada." /></View>
+                                <View testID="dashboard-ranking" style={[styles.chartPanel, { width: pairWidth }]}><Text style={styles.panelTitle}>Clientes com maior volume</Text><DashboardRanking data={topClientesData} emptyLabel="Nenhum cliente com pedidos ativos." /></View>
+                                <View testID="dashboard-ranking" style={[styles.chartPanel, { width: pairWidth }]}><Text style={styles.panelTitle}>Produtos mais solicitados</Text><DashboardRanking data={topMateriaisData} emptyLabel="Nenhum produto com demanda registrada." /></View>
                             </View>
                         </View>
                     </View>

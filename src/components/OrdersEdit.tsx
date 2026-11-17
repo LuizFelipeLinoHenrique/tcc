@@ -266,15 +266,15 @@ export function EditOrderCard({
                     </View>
                 </View>
                 {itens.map((item, index) => (
-                    <View key={index} style={styles.fields}>
-                        <View style={[styles.field, isMobile && styles.fieldMobile]}>
+                    <View key={index} style={styles.productRow}>
+                        <View style={styles.productField}>
                             <Text style={pagesStyles.label}>ID DO PRODUTO {index + 1}</Text>
                             <TextInput accessibilityLabel={`Produto ${index + 1}`} value={item.id_produto} editable={!saving && !additionsBlocked && !item.registered} keyboardType="number-pad" style={[styles.inputWrapper, styles.input]}
                                 onChangeText={value => setItens(prev => prev.map((entry, i) => i === index ? { ...entry, id_produto: value } : entry))} />
                         </View>
-                        <View style={[styles.field, isMobile && styles.fieldMobile]}>
+                        <View style={styles.productField}>
                             <Text style={pagesStyles.label}>QUANTIDADE</Text>
-                            <TextInput accessibilityLabel={`Quantidade do produto ${index + 1}`} value={item.qtde} editable={!saving && !additionsBlocked && !item.registered} keyboardType="number-pad" style={[styles.inputWrapper, styles.input]}
+                            <TextInput accessibilityLabel={`Quantidade do produto ${index + 1}`} value={item.qtde} editable={!saving && !additionsBlocked} keyboardType="number-pad" style={[styles.inputWrapper, styles.input]}
                                 onChangeText={value => setItens(prev => prev.map((entry, i) => i === index ? { ...entry, qtde: value } : entry))} />
                         </View>
                         <Pressable accessibilityRole="button" accessibilityLabel={`Remover produto ${index + 1}`} disabled={saving || additionsBlocked || itens.length === 1} style={[styles.removeButton, (saving || additionsBlocked || itens.length === 1) && styles.removeButtonDisabled]} onPress={() => setItens(prev => prev.filter((_, i) => i !== index))}>
@@ -314,9 +314,23 @@ export function EditOrderCard({
 }
 
 const styles = StyleSheet.create({
+    productRow: {
+        width: "100%",
+        flexDirection: "row",
+        alignItems: "flex-end",
+        gap: 12,
+        marginTop: 18,
+        marginBottom: 14,
+    },
+    productField: {
+        flex: 1,
+        minWidth: 0,
+        gap: 6,
+    },
     removeButton: {
         width: 44,
-        height: 44,
+        height: 46,
+        flexShrink: 0,
         alignItems: "center",
         justifyContent: "center",
         alignSelf: "flex-end",

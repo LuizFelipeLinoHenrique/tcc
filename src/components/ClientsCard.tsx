@@ -85,7 +85,6 @@ export function ClientTableRow({
                         <Text style={styles.clientName} numberOfLines={1}>
                             {cliente.nome}
                         </Text>
-                        <Text style={styles.clientSubtitle}>Cliente cadastrado</Text>
                     </View>
                 </View>
             </View>
@@ -265,11 +264,6 @@ const styles = StyleSheet.create({
         fontSize: 13,
         fontFamily: "WorksansSemiBold",
         color: Colors.hex0F172A,
-    },
-    clientSubtitle: {
-        fontSize: 10,
-        fontFamily: "WorksansRegular",
-        color: Colors.hex64748B,
     },
     iconTextRow: {
         flexDirection: "row",

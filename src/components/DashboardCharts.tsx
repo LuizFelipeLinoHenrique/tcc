@@ -57,7 +57,7 @@ export function DashboardOrderMix({ data }: { data: Group[] }) {
                         strokeDasharray={`${length} ${circumference - length}`} strokeDashoffset={-start} transform="rotate(-90 68 68)" />;
                 })}
             </Svg>
-            <View style={styles.donutCenter}><Text style={styles.donutValue}>{total ? "100%" : "—"}</Text><Text style={styles.muted}>distribuição</Text></View>
+            <View style={styles.donutCenter}><Text style={styles.donutValue}>{total.toLocaleString("pt-BR")}</Text><Text style={styles.muted}>pedidos</Text></View>
         </View>
         <View style={styles.legend}>{data.map(item => <View key={item.label} style={styles.legendRow}>
             <View style={[styles.dot, { backgroundColor: item.color }]} /><Text style={styles.legendLabel}>{item.label}</Text>

@@ -168,14 +168,16 @@ test("editing preserves all items and saves quantities and status in one operati
   assert.equal(saved, true);
 });
 
-test("integrated order editing permits new products and preserves recorded items", async () => {
+test("integrated order editing permits new products and recorded quantity changes", async () => {
   const page = screen("src/components/OrdersEdit.tsx", { idPedido: 42 });
   page.runEffects();
   page.requests[0].resolve({ data: { id: 42, id_cliente: 5, id_produto: 10, qtde: 2, status: "P", financial_user_id: "owner", financeiro: { status: "pending" }, itens: [{ id_produto: 10, qtde: 2 }] } });
   await new Promise(resolve => setImmediate(resolve));
   page.render();
   assert.equal(page.nodes("TextInput")[0].props.editable, false);
-  assert.equal(page.nodes("TextInput").find(node => node.props.accessibilityLabel === "Quantidade do produto 1").props.editable, false);
+  assert.equal(page.nodes("TextInput").find(node => node.props.accessibilityLabel === "Quantidade do produto 1").props.editable, true);
+  page.nodes("TextInput").find(node => node.props.accessibilityLabel === "Quantidade do produto 1").props.onChangeText("4");
+  page.render();
   assert.equal(page.nodes("AnimatedButton").find(node => node.props.title === "Adicionar outro produto").props.disabled, false);
   assert.equal(page.nodes("TextInput")[1].props.editable, true);
   page.nodes("AnimatedButton").find(node => node.props.title === "Adicionar outro produto").props.onPress();
@@ -189,7 +191,7 @@ test("integrated order editing permits new products and preserves recorded items
   assert.equal(page.nodes("Pressable").find(node => node.props.accessibilityLabel === "Remover produto 1").props.disabled, false);
   assert.equal(page.nodes("Pressable").find(node => node.props.accessibilityLabel === "Remover produto 2").props.disabled, false);
   const saving = page.nodes("AnimatedButton").find(node => node.props.title === "Salvar Alterações").props.onPress();
-  assert.deepEqual(page.requests.at(-1).calls[0][2].p_itens, [{ id_produto: 10, qtde: 2 }, { id_produto: 20, qtde: 3 }]);
+  assert.deepEqual(page.requests.at(-1).calls[0][2].p_itens, [{ id_produto: 10, qtde: 4 }, { id_produto: 20, qtde: 3 }]);
   page.requests.at(-1).resolve({ error: { message: "Falha ao salvar" } });
   await saving;
   page.render();

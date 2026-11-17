@@ -121,7 +121,7 @@ export default function CashFlowScreen() {
     </View>
     {loading && <View style={styles.row}><ActivityIndicator color={Colors.hex0B4F6C} /><Text style={styles.muted}>Atualizando movimentações…</Text></View>}
     {loaded && <>
-      <View style={styles.metrics}>{metric("Saldo realizado no mês", summary.balance, "wallet-outline", summary.balance < 0 ? Colors.hexB91C1C : Colors.hex0B4F6C, "Entradas menos saídas realizadas no mês")}{metric("Entradas realizadas", summary.income, "arrow-down-outline", Colors.hex15803D, "No mês selecionado")}{metric("Saídas realizadas", summary.expense, "arrow-up-outline", Colors.hexB91C1C, "No mês selecionado")}{metric("Saldo previsto no mês", summary.expected, "cash-outline", Colors.hex0F172A, "Saldo do mês + a receber − a pagar")}</View>
+      <View style={styles.metrics}>{metric("Saldo realizado no mês", summary.balance, "wallet-outline", summary.balance < 0 ? Colors.hexB91C1C : Colors.hex0B4F6C, "Entradas menos saídas realizadas no mês")}{metric("Entradas realizadas", summary.income, "arrow-down-outline", Colors.hex15803D)}{metric("Saídas realizadas", summary.expense, "arrow-up-outline", Colors.hexB91C1C)}{metric("Saldo previsto no mês", summary.expected, "cash-outline", Colors.hex0F172A, "Saldo do mês + a receber − a pagar")}</View>
       <View style={styles.metrics}>
         {metric("Saldo anterior", summary.opening, "time-outline", Colors.hex0F172A, "Realizado antes do mês selecionado")}
         {metric("Saldo acumulado", summary.closing, "wallet-outline", summary.closing < 0 ? Colors.hexB91C1C : Colors.hex0B4F6C, "Saldo anterior + resultado realizado do mês")}

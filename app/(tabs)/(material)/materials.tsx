@@ -1,3 +1,5 @@
+import { router } from "expo-router";
+import { AnimatedButton } from "@/src/components/AnimatedButton";
 import { createPagination, mergeById } from "@/src/lib/pagination";
 import { RecordModal } from "@/src/components/RecordModal";
 import { useRecordDeletion } from "@/src/hooks/useRecordDeletion";
@@ -13,7 +15,7 @@ import {
     View,
 } from "react-native";
 
-import { PagesLayout } from "@/src/components/ScreensLayout";
+import { PagesLayout, pagesStyles } from "@/src/components/ScreensLayout";
 import useResponsive from "@/src/hooks/useResponsive";
 import { supabase } from "@/src/lib/supabase";
 
@@ -224,6 +226,18 @@ export default function Materials() {
           }}
       >
           <View style={styles.container}>
+              <View style={[pagesStyles.pageHeader, isMobile && { flexDirection: "column", alignItems: "stretch" }]}>
+                  <View>
+                      <Text accessibilityRole="header" style={pagesStyles.title}>Produtos</Text>
+                      <Text style={pagesStyles.description}>Consulte e gerencie os registros de produtos.</Text>
+                  </View>
+                  <AnimatedButton
+                      title="Novo produto"
+                      stylesPressable={pagesStyles.primaryButton}
+                      stylesText={pagesStyles.primaryButtonText}
+                      onPress={() => router.push("/(tabs)/(material)/addMaterial")}
+                  />
+              </View>
               <View style={styles.header}>
                   <MaterialsFilters
                       pesquisa={pesquisa}

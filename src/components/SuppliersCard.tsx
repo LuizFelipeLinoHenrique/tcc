@@ -93,9 +93,9 @@ export function SupplierTableRow({
                         <Text style={styles.supplierName} numberOfLines={1}>
                             {fornecedor.nome}
                         </Text>
-                        <Text style={styles.supplierSubtitle}>
-                            {fornecedor.contato ? `Contato: ${fornecedor.contato}` : "Fornecedor parceiro"}
-                        </Text>
+                        {!!fornecedor.contato && <Text style={styles.supplierSubtitle}>
+                            Contato: {fornecedor.contato}
+                        </Text>}
                     </View>
                 </View>
             </View>

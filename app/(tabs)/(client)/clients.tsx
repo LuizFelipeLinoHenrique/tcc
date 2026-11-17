@@ -1,3 +1,5 @@
+import { router } from "expo-router";
+import { AnimatedButton } from "@/src/components/AnimatedButton";
 import { createPagination, mergeById } from "@/src/lib/pagination";
 import { RecordModal } from "@/src/components/RecordModal";
 import { useRecordDeletion } from "@/src/hooks/useRecordDeletion";
@@ -23,7 +25,7 @@ import {
   ClientsFilters,
   TipoPesquisaCliente,
 } from "@/src/components/ClientsFilters";
-import { PagesLayout } from "@/src/components/ScreensLayout";
+import { PagesLayout, pagesStyles } from "@/src/components/ScreensLayout";
 import useResponsive from "@/src/hooks/useResponsive";
 
 const PAGE_SIZE = 50;
@@ -214,6 +216,18 @@ export default function Clients() {
       }}
     >
       <View style={styles.container}>
+        <View style={[pagesStyles.pageHeader, isMobile && { flexDirection: "column", alignItems: "stretch" }]}>
+            <View>
+                <Text accessibilityRole="header" style={pagesStyles.title}>Clientes</Text>
+                <Text style={pagesStyles.description}>Consulte e gerencie os registros de clientes.</Text>
+            </View>
+            <AnimatedButton
+                title="Novo cliente"
+                stylesPressable={pagesStyles.primaryButton}
+                stylesText={pagesStyles.primaryButtonText}
+                onPress={() => router.push("/(tabs)/(client)/addClients")}
+            />
+        </View>
         <View style={styles.header}>
           <ClientsFilters
             pesquisa={pesquisa}
