@@ -11,12 +11,13 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 
 import { AnimatedButton } from "@/src/components/AnimatedButton";
-import { PagesLayout, pagesStyles } from "@/src/components/ScreensLayout";
+import { RegistrationLayout, registrationStyles } from "@/src/components/RegistrationLayout";
+import { pagesStyles } from "@/src/components/ScreensLayout";
 import useResponsive from "@/src/hooks/useResponsive";
 import { supabase } from "@/src/lib/supabase";
 
 export default function AddSupplier() {
-    const { maxCardWidth, isMobile } = useResponsive();
+    const { isMobile } = useResponsive();
 
     const [nome, setNome] = useState("");
     const [cnpj, setCnpj] = useState("");
@@ -104,266 +105,214 @@ export default function AddSupplier() {
     const formPreenchido = nome.trim().length > 0 && !loading;
 
     return (
-        <PagesLayout scroll={true} scrollContent={{ paddingVertical: 20 }}>
-            <View style={styles.container}>
-                <View style={[pagesStyles.card, { maxWidth: maxCardWidth }]}>
-                    {/* CABEÇALHO */}
-                    <View style={styles.header}>
-                        <View style={styles.headerIcon}>
-                            <Ionicons name="business" size={24} color={Colors.hex0B4F6C} />
-                        </View>
-                        <View style={styles.headerTextContainer}>
-                            <Text style={pagesStyles.brand}>CADASTRO DE FORNECEDORES</Text>
-                            <Text style={[pagesStyles.title, styles.titleText]}>
-                                Novo Fornecedor
-                            </Text>
-                            <Text style={pagesStyles.description}>
-                                Cadastre um novo fornecedor de produtos, insumos ou serviços
-                            </Text>
-                        </View>
-                    </View>
-
-                    <View style={styles.divider} />
-
-                    <View style={styles.formContainer}>
-                        {/* RAZÃO SOCIAL / NOME */}
-                        <View style={[pagesStyles.field, { width: isMobile ? "100%" : "48%" }]}>
-                            <Text style={pagesStyles.label}>NOME / RAZÃO SOCIAL *</Text>
-                            <View style={styles.inputWrapper}>
-                                <Ionicons
-                                    name="business-outline"
-                                    size={18}
-                                    color={Colors.hex64748B}
-                                    style={styles.inputIcon}
-                                />
-                                <TextInput
-                                    value={nome}
-                                    onChangeText={(val) => {
-                                        setNome(val);
-                                        setErro(null);
-                                        setMensagemSucesso(null);
-                                    }}
-                                    placeholder="Ex: Madeireira Central Ltda."
-                                    placeholderTextColor={Colors.hex94A3B8}
-                                    returnKeyType="next"
-                                    editable={!loading}
-                                    style={styles.input}
-                                />
-                            </View>
-                        </View>
-
-                        {/* CNPJ */}
-                        <View style={[pagesStyles.field, { width: isMobile ? "100%" : "48%" }]}>
-                            <Text style={pagesStyles.label}>CNPJ</Text>
-                            <View style={styles.inputWrapper}>
-                                <Ionicons
-                                    name="card-outline"
-                                    size={18}
-                                    color={Colors.hex64748B}
-                                    style={styles.inputIcon}
-                                />
-                                <TextInput
-                                    value={cnpj}
-                                    onChangeText={(val) => {
-                                        setCnpj(formatarCnpj(val));
-                                        setErro(null);
-                                        setMensagemSucesso(null);
-                                    }}
-                                    placeholder="Ex: 00.000.000/0001-00"
-                                    placeholderTextColor={Colors.hex94A3B8}
-                                    keyboardType="numeric"
-                                    returnKeyType="next"
-                                    editable={!loading}
-                                    style={styles.input}
-                                />
-                            </View>
-                        </View>
-
-                        {/* TELEFONE / WHATSAPP */}
-                        <View style={[pagesStyles.field, { width: isMobile ? "100%" : "48%" }]}>
-                            <Text style={pagesStyles.label}>TELEFONE / WHATSAPP</Text>
-                            <View style={styles.inputWrapper}>
-                                <Ionicons
-                                    name="call-outline"
-                                    size={18}
-                                    color={Colors.hex64748B}
-                                    style={styles.inputIcon}
-                                />
-                                <TextInput
-                                    value={telefone}
-                                    onChangeText={(val) => {
-                                        setTelefone(formatarTelefone(val));
-                                        setErro(null);
-                                        setMensagemSucesso(null);
-                                    }}
-                                    placeholder="Ex: (11) 98765-4321"
-                                    placeholderTextColor={Colors.hex94A3B8}
-                                    keyboardType="phone-pad"
-                                    returnKeyType="next"
-                                    editable={!loading}
-                                    style={styles.input}
-                                />
-                            </View>
-                        </View>
-
-                        {/* E-MAIL */}
-                        <View style={[pagesStyles.field, { width: isMobile ? "100%" : "48%" }]}>
-                            <Text style={pagesStyles.label}>E-MAIL COMERCIAL</Text>
-                            <View style={styles.inputWrapper}>
-                                <Ionicons
-                                    name="mail-outline"
-                                    size={18}
-                                    color={Colors.hex64748B}
-                                    style={styles.inputIcon}
-                                />
-                                <TextInput
-                                    value={email}
-                                    onChangeText={(val) => {
-                                        setEmail(val);
-                                        setErro(null);
-                                        setMensagemSucesso(null);
-                                    }}
-                                    placeholder="Ex: contato@fornecedor.com.br"
-                                    placeholderTextColor={Colors.hex94A3B8}
-                                    keyboardType="email-address"
-                                    autoCapitalize="none"
-                                    returnKeyType="next"
-                                    editable={!loading}
-                                    style={styles.input}
-                                />
-                            </View>
-                        </View>
-
-                        {/* CONTATO / REPRESENTANTE */}
-                        <View style={[pagesStyles.field, { width: isMobile ? "100%" : "48%" }]}>
-                            <Text style={pagesStyles.label}>PESSOA DE CONTATO / VENDEDOR</Text>
-                            <View style={styles.inputWrapper}>
-                                <Ionicons
-                                    name="person-outline"
-                                    size={18}
-                                    color={Colors.hex64748B}
-                                    style={styles.inputIcon}
-                                />
-                                <TextInput
-                                    value={contato}
-                                    onChangeText={(val) => {
-                                        setContato(val);
-                                        setErro(null);
-                                        setMensagemSucesso(null);
-                                    }}
-                                    placeholder="Ex: Roberto Alves (Vendas)"
-                                    placeholderTextColor={Colors.hex94A3B8}
-                                    returnKeyType="next"
-                                    editable={!loading}
-                                    style={styles.input}
-                                />
-                            </View>
-                        </View>
-
-                        {/* ENDEREÇO */}
-                        <View style={[pagesStyles.field, { width: isMobile ? "100%" : "48%" }]}>
-                            <Text style={pagesStyles.label}>ENDEREÇO</Text>
-                            <View style={[styles.inputWrapper, styles.inputWrapperMultiline]}>
-                                <Ionicons
-                                    name="location-outline"
-                                    size={18}
-                                    color={Colors.hex64748B}
-                                    style={[styles.inputIcon, styles.inputIconMultiline]}
-                                />
-                                <TextInput
-                                    value={endereco}
-                                    onChangeText={(val) => {
-                                        setEndereco(val);
-                                        setErro(null);
-                                        setMensagemSucesso(null);
-                                    }}
-                                    placeholder="Ex: Av. das Indústrias, 500 - Galpão 3 - São Paulo, SP"
-                                    placeholderTextColor={Colors.hex94A3B8}
-                                    multiline
-                                    numberOfLines={3}
-                                    textAlignVertical="top"
-                                    returnKeyType="done"
-                                    editable={!loading}
-                                    style={[styles.input, styles.textArea]}
-                                />
-                            </View>
-                        </View>
-
-                        {/* MENSAGEM DE ERRO */}
-                        {erro && (
-                            <View style={styles.errorBox}>
-                                <Ionicons name="alert-circle" size={18} color={Colors.hexB91C1C} />
-                                <Text style={styles.errorBoxText}>{erro}</Text>
-                            </View>
-                        )}
-
-                        {/* MENSAGEM DE SUCESSO */}
-                        {mensagemSucesso && (
-                            <View style={styles.successBox}>
-                                <Ionicons name="checkmark-circle" size={20} color={Colors.hex166534} />
-                                <Text style={styles.successBoxText}>{mensagemSucesso}</Text>
-                            </View>
-                        )}
-
-                        {/* BOTÃO CADASTRAR */}
-                        <View style={{ width: "100%", flexDirection: isMobile ? "column-reverse" : "row", justifyContent: "flex-end", gap: 12, borderTopWidth: 1, borderTopColor: Colors.hexDCE7EE, paddingTop: 20 }}>
-                          <AnimatedButton title="Cancelar" stylesPressable={pagesStyles.secondaryButton} stylesText={pagesStyles.secondaryButtonText} disabled={loading} onPress={() => router.push("/(tabs)/(supplier)/suppliers")} />
-                        <AnimatedButton
-                            stylesPressable={[
-                                pagesStyles.primaryButton,
-                                !formPreenchido && styles.buttonDisabled,
-                            ]}
-                            stylesText={pagesStyles.primaryButtonText}
-                            onPress={handleCadastrar}
-                            disabled={!formPreenchido}
-                            title={
-                                loading ? (
-                                    <ActivityIndicator size="small" color={Colors.hexFFFDF9} />
-                                ) : (
-                                    "Cadastrar Fornecedor"
-                                )
-                            }
+        <RegistrationLayout title="Novo fornecedor">
+            <View style={styles.formContainer}>
+                {/* RAZÃO SOCIAL / NOME */}
+                <View style={[pagesStyles.field, { width: isMobile ? "100%" : "48%" }]}>
+                    <Text style={pagesStyles.label}>Nome / razão social *</Text>
+                    <View style={styles.inputWrapper}>
+                        <Ionicons
+                            name="business-outline"
+                            size={18}
+                            color={Colors.hex64748B}
+                            style={styles.inputIcon}
                         />
-                        </View>
+                        <TextInput
+                            value={nome}
+                            onChangeText={(val) => {
+                                setNome(val);
+                                setErro(null);
+                                setMensagemSucesso(null);
+                            }}
+                            placeholder="Ex: Madeireira Central Ltda."
+                            placeholderTextColor={Colors.hex94A3B8}
+                            returnKeyType="next"
+                            editable={!loading}
+                            style={styles.input}
+                        />
                     </View>
                 </View>
+
+                {/* CNPJ */}
+                <View style={[pagesStyles.field, { width: isMobile ? "100%" : "48%" }]}>
+                    <Text style={pagesStyles.label}>CNPJ</Text>
+                    <View style={styles.inputWrapper}>
+                        <Ionicons
+                            name="card-outline"
+                            size={18}
+                            color={Colors.hex64748B}
+                            style={styles.inputIcon}
+                        />
+                        <TextInput
+                            value={cnpj}
+                            onChangeText={(val) => {
+                                setCnpj(formatarCnpj(val));
+                                setErro(null);
+                                setMensagemSucesso(null);
+                            }}
+                            placeholder="Ex: 00.000.000/0001-00"
+                            placeholderTextColor={Colors.hex94A3B8}
+                            keyboardType="numeric"
+                            returnKeyType="next"
+                            editable={!loading}
+                            style={styles.input}
+                        />
+                    </View>
+                </View>
+
+                {/* TELEFONE / WHATSAPP */}
+                <Text accessibilityRole="header" style={registrationStyles.sectionTitle}>Contato</Text>
+                <View style={[pagesStyles.field, { width: isMobile ? "100%" : "48%" }]}>
+                    <Text style={pagesStyles.label}>Telefone / WhatsApp</Text>
+                    <View style={styles.inputWrapper}>
+                        <Ionicons
+                            name="call-outline"
+                            size={18}
+                            color={Colors.hex64748B}
+                            style={styles.inputIcon}
+                        />
+                        <TextInput
+                            value={telefone}
+                            onChangeText={(val) => {
+                                setTelefone(formatarTelefone(val));
+                                setErro(null);
+                                setMensagemSucesso(null);
+                            }}
+                            placeholder="Ex: (11) 98765-4321"
+                            placeholderTextColor={Colors.hex94A3B8}
+                            keyboardType="phone-pad"
+                            returnKeyType="next"
+                            editable={!loading}
+                            style={styles.input}
+                        />
+                    </View>
+                </View>
+
+                {/* E-MAIL */}
+                <View style={[pagesStyles.field, { width: isMobile ? "100%" : "48%" }]}>
+                    <Text style={pagesStyles.label}>E-mail comercial</Text>
+                    <View style={styles.inputWrapper}>
+                        <Ionicons
+                            name="mail-outline"
+                            size={18}
+                            color={Colors.hex64748B}
+                            style={styles.inputIcon}
+                        />
+                        <TextInput
+                            value={email}
+                            onChangeText={(val) => {
+                                setEmail(val);
+                                setErro(null);
+                                setMensagemSucesso(null);
+                            }}
+                            placeholder="Ex: contato@fornecedor.com.br"
+                            placeholderTextColor={Colors.hex94A3B8}
+                            keyboardType="email-address"
+                            autoCapitalize="none"
+                            returnKeyType="next"
+                            editable={!loading}
+                            style={styles.input}
+                        />
+                    </View>
+                </View>
+
+                {/* CONTATO / REPRESENTANTE */}
+                <View style={[pagesStyles.field, { width: "100%" }]}>
+                    <Text style={pagesStyles.label}>Pessoa de contato / vendedor</Text>
+                    <View style={styles.inputWrapper}>
+                        <Ionicons
+                            name="person-outline"
+                            size={18}
+                            color={Colors.hex64748B}
+                            style={styles.inputIcon}
+                        />
+                        <TextInput
+                            value={contato}
+                            onChangeText={(val) => {
+                                setContato(val);
+                                setErro(null);
+                                setMensagemSucesso(null);
+                            }}
+                            placeholder="Ex: Roberto Alves (Vendas)"
+                            placeholderTextColor={Colors.hex94A3B8}
+                            returnKeyType="next"
+                            editable={!loading}
+                            style={styles.input}
+                        />
+                    </View>
+                </View>
+
+                {/* ENDEREÇO */}
+                <View style={[pagesStyles.field, { width: "100%" }]}>
+                    <Text style={pagesStyles.label}>Endereço</Text>
+                    <View style={[styles.inputWrapper, styles.inputWrapperMultiline]}>
+                        <Ionicons
+                            name="location-outline"
+                            size={18}
+                            color={Colors.hex64748B}
+                            style={[styles.inputIcon, styles.inputIconMultiline]}
+                        />
+                        <TextInput
+                            value={endereco}
+                            onChangeText={(val) => {
+                                setEndereco(val);
+                                setErro(null);
+                                setMensagemSucesso(null);
+                            }}
+                            placeholder="Ex: Av. das Indústrias, 500 - Galpão 3 - São Paulo, SP"
+                            placeholderTextColor={Colors.hex94A3B8}
+                            multiline
+                            numberOfLines={3}
+                            textAlignVertical="top"
+                            returnKeyType="done"
+                            editable={!loading}
+                            style={[styles.input, styles.textArea]}
+                        />
+                    </View>
+                </View>
+
+                {/* MENSAGEM DE ERRO */}
+                {erro && (
+                    <View style={styles.errorBox}>
+                        <Ionicons name="alert-circle" size={18} color={Colors.hexB91C1C} />
+                        <Text style={styles.errorBoxText}>{erro}</Text>
+                    </View>
+                )}
+
+                {/* MENSAGEM DE SUCESSO */}
+                {mensagemSucesso && (
+                    <View style={styles.successBox}>
+                        <Ionicons name="checkmark-circle" size={20} color={Colors.hex166534} />
+                        <Text style={styles.successBoxText}>{mensagemSucesso}</Text>
+                    </View>
+                )}
+
+                {/* BOTÃO CADASTRAR */}
             </View>
-        </PagesLayout>
+            <View style={[registrationStyles.actions, isMobile && registrationStyles.compactActions]}>
+                <AnimatedButton title="Cancelar" stylesPressable={pagesStyles.secondaryButton} stylesText={pagesStyles.secondaryButtonText} disabled={loading} onPress={() => router.push("/(tabs)/(supplier)/suppliers")} />
+                <AnimatedButton
+                    stylesPressable={[
+                        pagesStyles.primaryButton,
+                        !formPreenchido && styles.buttonDisabled,
+                    ]}
+                    stylesText={pagesStyles.primaryButtonText}
+                    onPress={handleCadastrar}
+                    disabled={!formPreenchido}
+                    title={
+                        loading ? (
+                            <ActivityIndicator size="small" color={Colors.hexFFFDF9} />
+                        ) : (
+                            "Cadastrar Fornecedor"
+                        )
+                    }
+                />
+            </View>
+        </RegistrationLayout>
     );
 }
 
 const styles = StyleSheet.create({
-    container: {
-        width: "100%",
-        alignItems: "center",
-        paddingHorizontal: 6,
-    },
-    header: {
-        flexDirection: "row",
-        alignItems: "flex-start",
-        gap: 14,
-    },
-    headerIcon: {
-        width: 48,
-        height: 48,
-        borderRadius: 8,
-        backgroundColor: Colors.hexE8F1F5,
-        alignItems: "center",
-        justifyContent: "center",
-        marginTop: 2,
-    },
-    headerTextContainer: {
-        flex: 1,
-    },
-    titleText: {
-        marginVertical: 2,
-        marginBottom: 2,
-    },
-    divider: {
-        height: 1,
-        backgroundColor: Colors.hexDDE8EF,
-        marginVertical: 20,
-    },
     formContainer: {
         flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between",
         gap: 18,

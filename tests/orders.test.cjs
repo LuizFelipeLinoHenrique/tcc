@@ -67,6 +67,7 @@ function screen(file, props = {}) {
     if (name.endsWith("/useResponsive")) return { __esModule: true, default: () => ({ isMobile: false }) };
     if (name.endsWith("/useRecordDeletion")) return { useRecordDeletion: () => ({}) };
     if (name.endsWith("/ScreensLayout")) return { PagesLayout: "PagesLayout", pagesStyles: {} };
+    if (name.endsWith("/RegistrationLayout")) return { RegistrationLayout: "RegistrationLayout", registrationStyles: {} };
     const key = name.split("/").at(-1);
     return { [key]: key, Ionicons: "Ionicons" };
   };

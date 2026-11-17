@@ -17,7 +17,8 @@ import { Ionicons } from "@expo/vector-icons";
 
 import { AnimatedButton } from "@/src/components/AnimatedButton";
 import { OrderRecordDropdown } from "@/src/components/OrderRecordDropdown";
-import { PagesLayout, pagesStyles } from "@/src/components/ScreensLayout";
+import { RegistrationLayout, registrationStyles } from "@/src/components/RegistrationLayout";
+import { pagesStyles } from "@/src/components/ScreensLayout";
 import useResponsive from "@/src/hooks/useResponsive";
 import { supabase } from "@/src/lib/supabase";
 
@@ -25,7 +26,7 @@ type ValidationState = "idle" | "loading" | "success" | "error";
 type Catalog = "clientes" | "produtos";
 
 export default function OrdersManager() {
-    const { maxCardWidth, isMobile } = useResponsive();
+    const { isMobile } = useResponsive();
 
     const [idCliente, setIdCliente] = useState("");
     const [idProduto, setIdProduto] = useState("");
@@ -353,315 +354,296 @@ export default function OrdersManager() {
         !loading;
 
     return (
-        <PagesLayout scroll={true} scrollContent={{ paddingVertical: 20 }} keyboardShouldPersistTaps="handled">
-            <View style={styles.container}>
-                <View style={[pagesStyles.card, { maxWidth: maxCardWidth }]}>
-                    {/* CABEÇALHO */}
-                    <View style={styles.header}>
-                        <View style={styles.headerIcon}>
-                            <Ionicons name="add-circle" size={26} color={Colors.hex0B4F6C} />
-                        </View>
-                        <View style={styles.headerTextContainer}>
-                            <Text style={pagesStyles.brand}>NOVO REGISTRO</Text>
-                            <Text style={[pagesStyles.title, styles.titleText]}>
-                                Adicionar Pedido
-                            </Text>
-                            <Text style={pagesStyles.description}>
-                                Vincule o cliente, produto e quantidade para criar o pedido
-                            </Text>
-                        </View>
+        <RegistrationLayout title="Novo pedido" keepKeyboardTaps>
+            <View style={styles.formContainer}>
+                {/* CLIENTE */}
+                <Text accessibilityRole="header" style={registrationStyles.sectionTitle}>Comprador</Text>
+                <View style={pagesStyles.field}>
+                    <Text style={pagesStyles.label}>Cliente</Text>
+                    <View
+                        style={[
+                            styles.inputWrapper,
+                            clienteStatus === "error" && styles.inputWrapperError,
+                            clienteStatus === "success" && styles.inputWrapperSuccess,
+                        ]}
+                    >
+                        <Ionicons
+                            name="person-outline"
+                            size={18}
+                            color={
+                                clienteStatus === "success"
+                                    ? Colors.hex166534
+                                    : clienteStatus === "error"
+                                    ? Colors.hexB91C1C
+                                    : Colors.hex64748B
+                            }
+                            style={styles.inputIcon}
+                        />
+                        <TextInput
+                            accessibilityLabel="Cliente"
+                            accessibilityState={{ expanded: catalogoAtivo === "clientes" && !loading }}
+                            value={nomeCliente || clienteBusca}
+                            onChangeText={texto => {
+                                alterarCliente(texto);
+                                abrirCatalogo("clientes");
+                            }}
+                            onFocus={() => abrirCatalogo("clientes")}
+                            onBlur={() => {
+                                fecharAoPerderFoco("clientes");
+                                if (!nomeCliente) return verificarCliente();
+                            }}
+                            placeholder="Buscar cliente por nome ou ID"
+                            placeholderTextColor={Colors.hex94A3B8}
+                            returnKeyType="next"
+                            editable={!loading}
+                            style={styles.input}
+                        />
+                        {clienteStatus === "loading" && (
+                            <ActivityIndicator size="small" color={Colors.hex0B4F6C} />
+                        )}
                     </View>
 
-                    <View style={styles.divider} />
-
-                    <View style={styles.formContainer}>
-                        {/* CLIENTE */}
-                        <View style={pagesStyles.field}>
-                            <Text style={pagesStyles.label}>CLIENTE</Text>
-                            <View
-                                style={[
-                                    styles.inputWrapper,
-                                    clienteStatus === "error" && styles.inputWrapperError,
-                                    clienteStatus === "success" && styles.inputWrapperSuccess,
-                                ]}
-                            >
-                                <Ionicons
-                                    name="person-outline"
-                                    size={18}
-                                    color={
-                                        clienteStatus === "success"
-                                            ? Colors.hex166534
-                                            : clienteStatus === "error"
-                                            ? Colors.hexB91C1C
-                                            : Colors.hex64748B
-                                    }
-                                    style={styles.inputIcon}
-                                />
-                                <TextInput
-                                    accessibilityLabel="Cliente"
-                                    accessibilityState={{ expanded: catalogoAtivo === "clientes" && !loading }}
-                                    value={nomeCliente || clienteBusca}
-                                    onChangeText={texto => {
-                                        alterarCliente(texto);
-                                        abrirCatalogo("clientes");
-                                    }}
-                                    onFocus={() => abrirCatalogo("clientes")}
-                                    onBlur={() => {
-                                        fecharAoPerderFoco("clientes");
-                                        if (!nomeCliente) return verificarCliente();
-                                    }}
-                                    placeholder="Buscar cliente por nome ou ID"
-                                    placeholderTextColor={Colors.hex94A3B8}
-                                    returnKeyType="next"
-                                    editable={!loading}
-                                    style={styles.input}
-                                />
-                                {clienteStatus === "loading" && (
-                                    <ActivityIndicator size="small" color={Colors.hex0B4F6C} />
-                                )}
-                            </View>
-
-                            {catalogoAtivo === "clientes" && !loading && (
-                                <OrderRecordDropdown
-                                    key={nomeCliente ? "" : clienteBusca}
-                                    table="clientes"
-                                    search={nomeCliente ? "" : clienteBusca}
-                                    value={idCliente}
-                                    onSelect={id => {
-                                        setCatalogoAtivo(null);
-                                        alterarCliente(id);
-                                        void verificarCliente(id);
-                                    }}
-                                />
-                            )}
-
-                            {clienteStatus === "success" && nomeCliente && (
-                                <View style={styles.verifiedBox}>
-                                    <Ionicons name="checkmark-circle" size={16} color={Colors.hex166534} />
-                                    <Text style={styles.verifiedText}>Cliente: {nomeCliente}</Text>
-                                </View>
-                            )}
-
-                            {clienteStatus === "error" && clienteErro && (
-                                <View style={styles.errorBox}>
-                                    <Ionicons name="alert-circle" size={16} color={Colors.hexB91C1C} />
-                                    <Text style={styles.errorBoxText}>{clienteErro}</Text>
-                                </View>
-                            )}
-                        </View>
-
-                        {/* MATERIAL */}
-                        <View style={pagesStyles.field}>
-                            <Text style={pagesStyles.label}>PRODUTO</Text>
-                            <View
-                                style={[
-                                    styles.inputWrapper,
-                                    produtoStatus === "error" && styles.inputWrapperError,
-                                    produtoStatus === "success" && styles.inputWrapperSuccess,
-                                ]}
-                            >
-                                <Ionicons
-                                    name="cube-outline"
-                                    size={18}
-                                    color={
-                                        produtoStatus === "success"
-                                            ? Colors.hex166534
-                                            : produtoStatus === "error"
-                                            ? Colors.hexB91C1C
-                                            : Colors.hex64748B
-                                    }
-                                    style={styles.inputIcon}
-                                />
-                                <TextInput
-                                    accessibilityLabel="Produto"
-                                    accessibilityState={{ expanded: catalogoAtivo === "produtos" && !loading }}
-                                    value={nomeProduto || produtoBusca}
-                                    onChangeText={texto => {
-                                        alterarProduto(texto);
-                                        abrirCatalogo("produtos");
-                                    }}
-                                    onFocus={() => abrirCatalogo("produtos")}
-                                    onBlur={() => {
-                                        fecharAoPerderFoco("produtos");
-                                        if (!nomeProduto) return verificarProduto();
-                                    }}
-                                    placeholder="Buscar produto por nome ou ID"
-                                    placeholderTextColor={Colors.hex94A3B8}
-                                    returnKeyType="next"
-                                    editable={!loading}
-                                    style={styles.input}
-                                />
-                                {produtoStatus === "loading" && (
-                                    <ActivityIndicator size="small" color={Colors.hex0B4F6C} />
-                                )}
-                            </View>
-
-                            {catalogoAtivo === "produtos" && !loading && (
-                                <OrderRecordDropdown
-                                    key={nomeProduto ? "" : produtoBusca}
-                                    table="produtos"
-                                    search={nomeProduto ? "" : produtoBusca}
-                                    value={idProduto}
-                                    onSelect={id => {
-                                        setCatalogoAtivo(null);
-                                        alterarProduto(id);
-                                        void verificarProduto(id);
-                                    }}
-                                />
-                            )}
-
-                            {produtoStatus === "success" && nomeProduto && (
-                                <View style={styles.verifiedBox}>
-                                    <Ionicons name="checkmark-circle" size={16} color={Colors.hex166534} />
-                                    <Text style={styles.verifiedText}>Produto: {nomeProduto}</Text>
-                                </View>
-                            )}
-
-                            {produtoStatus === "error" && produtoErro && (
-                                <View style={styles.errorBox}>
-                                    <Ionicons name="alert-circle" size={16} color={Colors.hexB91C1C} />
-                                    <Text style={styles.errorBoxText}>{produtoErro}</Text>
-                                </View>
-                            )}
-                        </View>
-
-                        {/* QUANTIDADE */}
-                        <View style={pagesStyles.field}>
-                            <Text style={pagesStyles.label}>QUANTIDADE</Text>
-                            <View
-                                style={[
-                                    styles.inputWrapper,
-                                    quantidadeErro ? styles.inputWrapperError : null,
-                                ]}
-                            >
-                                <Ionicons
-                                    name="layers-outline"
-                                    size={18}
-                                    color={quantidadeErro ? Colors.hexB91C1C : Colors.hex64748B}
-                                    style={styles.inputIcon}
-                                />
-                                <TextInput
-                                    value={qtde}
-                                    onChangeText={alterarQuantidade}
-                                    onBlur={validarQuantidade}
-                                    placeholder="Ex: 10"
-                                    placeholderTextColor={Colors.hex94A3B8}
-                                    keyboardType="number-pad"
-                                    returnKeyType="done"
-                                    editable={!loading}
-                                    style={styles.input}
-                                />
-                            </View>
-
-                            {quantidadeErro && (
-                                <View style={styles.errorBox}>
-                                    <Ionicons name="alert-circle" size={16} color={Colors.hexB91C1C} />
-                                    <Text style={styles.errorBoxText}>{quantidadeErro}</Text>
-                                </View>
-                            )}
-                        </View>
-
-                        <AnimatedButton
-                            title="Adicionar produto ao pedido"
-                            onPress={adicionarProduto}
-                            disabled={loading || !idProduto || parsePositiveInteger(qtde) === null}
-                            stylesPressable={pagesStyles.primaryButton}
-                            stylesText={pagesStyles.primaryButtonText}
+                    {catalogoAtivo === "clientes" && !loading && (
+                        <OrderRecordDropdown
+                            key={nomeCliente ? "" : clienteBusca}
+                            table="clientes"
+                            search={nomeCliente ? "" : clienteBusca}
+                            value={idCliente}
+                            onSelect={id => {
+                                setCatalogoAtivo(null);
+                                alterarCliente(id);
+                                void verificarCliente(id);
+                            }}
                         />
-                        {itens.length > 0 && (
-                            <View style={styles.formContainer}>
-                                <Text style={pagesStyles.label}>PRODUTOS DO PEDIDO ({itens.length})</Text>
-                                {itens.map((item, index) => (
-                                    <View key={item.id_produto} style={styles.itemRow}>
-                                        <Text style={styles.itemName}>{item.nome} (#{item.id_produto})</Text>
-                                        <View style={styles.itemQuantity}>
-                                            <Text style={pagesStyles.label}>QUANTIDADE</Text>
-                                            <TextInput
-                                                accessibilityLabel={`Quantidade do produto ${item.id_produto}`}
-                                                value={item.quantidade}
-                                                keyboardType="number-pad"
-                                                editable={!loading}
-                                                style={[styles.inputWrapper, styles.input]}
-                                                onChangeText={value => {
-                                                    setItens(prev => prev.map((entry, i) => i === index ? { ...entry, quantidade: value } : entry));
-                                                    setSubmitError(null);
-                                                    limparMensagemSucesso();
-                                                }}
-                                            />
-                                            {parsePositiveInteger(item.quantidade) === null && <Text accessibilityRole="alert" style={styles.errorBoxText}>Informe uma quantidade inteira maior que zero.</Text>}
-                                        </View>
-                                        <Pressable accessibilityRole="button" accessibilityLabel={`Remover produto ${item.id_produto}`} disabled={loading}
-                                            onPress={() => { setItens(prev => prev.filter((_, i) => i !== index)); setSubmitError(null); }}>
-                                            <Ionicons name="trash-outline" size={22} color={Colors.hexB91C1C} />
-                                        </Pressable>
-                                    </View>
-                                ))}
-                            </View>
-                        )}
-                        <View style={pagesStyles.field}>
-                            <Text style={pagesStyles.label}>VENCIMENTO DO RECEBIMENTO *</Text>
-                            <TextInput accessibilityLabel="Vencimento do recebimento" value={vencimento}
-                                onChangeText={value => setVencimento(maskDate(value))} editable={!loading} placeholder="DD/MM/AAAA"
-                                keyboardType="number-pad" maxLength={10} style={[styles.inputWrapper, styles.input]} />
+                    )}
+
+                    {clienteStatus === "success" && nomeCliente && (
+                        <View style={styles.verifiedBox}>
+                            <Ionicons name="checkmark-circle" size={16} color={Colors.hex166534} />
+                            <Text style={styles.verifiedText}>Cliente: {nomeCliente}</Text>
                         </View>
+                    )}
 
-                        {/* STATUS INICIAL INFORMATIVO */}
-                        <View style={styles.statusContainer}>
-                            <View style={styles.statusIcon}>
-                                <Ionicons name="time-outline" size={20} color={Colors.hex92400E} />
-                            </View>
-
-                            <View style={styles.statusTextContainer}>
-                                <Text style={styles.statusTitle}>STATUS PADRÃO</Text>
-                                <Text style={styles.statusDescription}>
-                                    O pedido será registrado com status inicial como Pendente.
-                                </Text>
-                            </View>
-
-                            <View style={styles.statusBadge}>
-                                <Text style={styles.statusBadgeText}>Pendente</Text>
-                            </View>
+                    {clienteStatus === "error" && clienteErro && (
+                        <View style={styles.errorBox}>
+                            <Ionicons name="alert-circle" size={16} color={Colors.hexB91C1C} />
+                            <Text style={styles.errorBoxText}>{clienteErro}</Text>
                         </View>
+                    )}
+                </View>
 
-                        {!!submitError && (
-                            <View style={styles.errorBox}>
-                                <Text accessibilityRole="alert" style={styles.errorBoxText}>
-                                    {submitError} Você pode tentar novamente pelo botão abaixo.
-                                </Text>
-                            </View>
-                        )}
-                        {/* MENSAGEM DE SUCESSO */}
-                        {mensagemSucesso !== null && (
-                            <View style={styles.successMessage}>
-                                <Ionicons name="checkmark-circle" size={22} color={Colors.hex166534} />
-                                <Text style={styles.successMessageText}>{mensagemSucesso}</Text>
-                            </View>
-                        )}
-
-                        {/* BOTÃO CADASTRAR */}
-                        <View style={{ width: "100%", flexDirection: isMobile ? "column-reverse" : "row", justifyContent: "flex-end", gap: 12, borderTopWidth: 1, borderTopColor: Colors.hexDCE7EE, paddingTop: 20 }}>
-                          <AnimatedButton title="Cancelar" stylesPressable={pagesStyles.secondaryButton} stylesText={pagesStyles.secondaryButtonText} disabled={loading} onPress={() => router.push("/(tabs)/(order)/orders")} />
-                        <AnimatedButton
-                            stylesPressable={[
-                                pagesStyles.primaryButton,
-                                !formularioValido && styles.buttonDisabled,
-                            ]}
-                            stylesText={pagesStyles.primaryButtonText}
-                            onPress={addOrders}
-                            disabled={!formularioValido}
-                            title={
-                                loading ? (
-                                    <ActivityIndicator size="small" color={Colors.hexFFFDF9} />
-                                ) : (
-                                    "Adicionar Pedido"
-                                )
+                {/* MATERIAL */}
+                <Text accessibilityRole="header" style={registrationStyles.sectionTitle}>Itens do pedido</Text>
+                <View style={pagesStyles.field}>
+                    <Text style={pagesStyles.label}>Produto</Text>
+                    <View
+                        style={[
+                            styles.inputWrapper,
+                            produtoStatus === "error" && styles.inputWrapperError,
+                            produtoStatus === "success" && styles.inputWrapperSuccess,
+                        ]}
+                    >
+                        <Ionicons
+                            name="cube-outline"
+                            size={18}
+                            color={
+                                produtoStatus === "success"
+                                    ? Colors.hex166534
+                                    : produtoStatus === "error"
+                                    ? Colors.hexB91C1C
+                                    : Colors.hex64748B
                             }
+                            style={styles.inputIcon}
                         />
+                        <TextInput
+                            accessibilityLabel="Produto"
+                            accessibilityState={{ expanded: catalogoAtivo === "produtos" && !loading }}
+                            value={nomeProduto || produtoBusca}
+                            onChangeText={texto => {
+                                alterarProduto(texto);
+                                abrirCatalogo("produtos");
+                            }}
+                            onFocus={() => abrirCatalogo("produtos")}
+                            onBlur={() => {
+                                fecharAoPerderFoco("produtos");
+                                if (!nomeProduto) return verificarProduto();
+                            }}
+                            placeholder="Buscar produto por nome ou ID"
+                            placeholderTextColor={Colors.hex94A3B8}
+                            returnKeyType="next"
+                            editable={!loading}
+                            style={styles.input}
+                        />
+                        {produtoStatus === "loading" && (
+                            <ActivityIndicator size="small" color={Colors.hex0B4F6C} />
+                        )}
+                    </View>
+
+                    {catalogoAtivo === "produtos" && !loading && (
+                        <OrderRecordDropdown
+                            key={nomeProduto ? "" : produtoBusca}
+                            table="produtos"
+                            search={nomeProduto ? "" : produtoBusca}
+                            value={idProduto}
+                            onSelect={id => {
+                                setCatalogoAtivo(null);
+                                alterarProduto(id);
+                                void verificarProduto(id);
+                            }}
+                        />
+                    )}
+
+                    {produtoStatus === "success" && nomeProduto && (
+                        <View style={styles.verifiedBox}>
+                            <Ionicons name="checkmark-circle" size={16} color={Colors.hex166534} />
+                            <Text style={styles.verifiedText}>Produto: {nomeProduto}</Text>
                         </View>
+                    )}
+
+                    {produtoStatus === "error" && produtoErro && (
+                        <View style={styles.errorBox}>
+                            <Ionicons name="alert-circle" size={16} color={Colors.hexB91C1C} />
+                            <Text style={styles.errorBoxText}>{produtoErro}</Text>
+                        </View>
+                    )}
+                </View>
+
+                {/* QUANTIDADE */}
+                <View style={pagesStyles.field}>
+                    <Text style={pagesStyles.label}>Quantidade</Text>
+                    <View
+                        style={[
+                            styles.inputWrapper,
+                            quantidadeErro ? styles.inputWrapperError : null,
+                        ]}
+                    >
+                        <Ionicons
+                            name="layers-outline"
+                            size={18}
+                            color={quantidadeErro ? Colors.hexB91C1C : Colors.hex64748B}
+                            style={styles.inputIcon}
+                        />
+                        <TextInput
+                            value={qtde}
+                            onChangeText={alterarQuantidade}
+                            onBlur={validarQuantidade}
+                            placeholder="Ex: 10"
+                            placeholderTextColor={Colors.hex94A3B8}
+                            keyboardType="number-pad"
+                            returnKeyType="done"
+                            editable={!loading}
+                            style={styles.input}
+                        />
+                    </View>
+
+                    {quantidadeErro && (
+                        <View style={styles.errorBox}>
+                            <Ionicons name="alert-circle" size={16} color={Colors.hexB91C1C} />
+                            <Text style={styles.errorBoxText}>{quantidadeErro}</Text>
+                        </View>
+                    )}
+                </View>
+
+                <AnimatedButton
+                    title="Adicionar produto ao pedido"
+                    onPress={adicionarProduto}
+                    disabled={loading || !idProduto || parsePositiveInteger(qtde) === null}
+                    stylesPressable={pagesStyles.primaryButton}
+                    stylesText={pagesStyles.primaryButtonText}
+                />
+                {itens.length > 0 && (
+                    <View style={styles.formContainer}>
+                        <Text style={pagesStyles.label}>PRODUTOS DO PEDIDO ({itens.length})</Text>
+                        {itens.map((item, index) => (
+                            <View key={item.id_produto} style={styles.itemRow}>
+                                <Text style={styles.itemName}>{item.nome} (#{item.id_produto})</Text>
+                                <View style={styles.itemQuantity}>
+                                    <Text style={pagesStyles.label}>Quantidade</Text>
+                                    <TextInput
+                                        accessibilityLabel={`Quantidade do produto ${item.id_produto}`}
+                                        value={item.quantidade}
+                                        keyboardType="number-pad"
+                                        editable={!loading}
+                                        style={[styles.inputWrapper, styles.input]}
+                                        onChangeText={value => {
+                                            setItens(prev => prev.map((entry, i) => i === index ? { ...entry, quantidade: value } : entry));
+                                            setSubmitError(null);
+                                            limparMensagemSucesso();
+                                        }}
+                                    />
+                                    {parsePositiveInteger(item.quantidade) === null && <Text accessibilityRole="alert" style={styles.errorBoxText}>Informe uma quantidade inteira maior que zero.</Text>}
+                                </View>
+                                <Pressable accessibilityRole="button" accessibilityLabel={`Remover produto ${item.id_produto}`} disabled={loading}
+                                    onPress={() => { setItens(prev => prev.filter((_, i) => i !== index)); setSubmitError(null); }}>
+                                    <Ionicons name="trash-outline" size={22} color={Colors.hexB91C1C} />
+                                </Pressable>
+                            </View>
+                        ))}
+                    </View>
+                )}
+                <Text accessibilityRole="header" style={registrationStyles.sectionTitle}>Recebimento</Text>
+                <View style={pagesStyles.field}>
+                    <Text style={pagesStyles.label}>Vencimento do recebimento *</Text>
+                    <TextInput accessibilityLabel="Vencimento do recebimento" value={vencimento}
+                        onChangeText={value => setVencimento(maskDate(value))} editable={!loading} placeholder="DD/MM/AAAA"
+                        keyboardType="number-pad" maxLength={10} style={[styles.inputWrapper, styles.input]} />
+                </View>
+
+                {/* STATUS INICIAL INFORMATIVO */}
+                <View style={styles.statusContainer}>
+                    <View style={styles.statusIcon}>
+                        <Ionicons name="time-outline" size={20} color={Colors.hex92400E} />
+                    </View>
+
+                    <View style={styles.statusTextContainer}>
+                        <Text style={styles.statusTitle}>STATUS PADRÃO</Text>
+                        <Text style={styles.statusDescription}>
+                            O pedido será registrado com status inicial como Pendente.
+                        </Text>
+                    </View>
+
+                    <View style={styles.statusBadge}>
+                        <Text style={styles.statusBadgeText}>Pendente</Text>
                     </View>
                 </View>
+
+                {!!submitError && (
+                    <View style={styles.errorBox}>
+                        <Text accessibilityRole="alert" style={styles.errorBoxText}>
+                            {submitError} Você pode tentar novamente pelo botão abaixo.
+                        </Text>
+                    </View>
+                )}
+                {/* MENSAGEM DE SUCESSO */}
+                {mensagemSucesso !== null && (
+                    <View style={styles.successMessage}>
+                        <Ionicons name="checkmark-circle" size={22} color={Colors.hex166534} />
+                        <Text style={styles.successMessageText}>{mensagemSucesso}</Text>
+                    </View>
+                )}
+
+                {/* BOTÃO CADASTRAR */}
             </View>
-        </PagesLayout>
+            <View style={[registrationStyles.actions, isMobile && registrationStyles.compactActions]}>
+                <AnimatedButton title="Cancelar" stylesPressable={pagesStyles.secondaryButton} stylesText={pagesStyles.secondaryButtonText} disabled={loading} onPress={() => router.push("/(tabs)/(order)/orders")} />
+                <AnimatedButton
+                    stylesPressable={[
+                        pagesStyles.primaryButton,
+                        !formularioValido && styles.buttonDisabled,
+                    ]}
+                    stylesText={pagesStyles.primaryButtonText}
+                    onPress={addOrders}
+                    disabled={!formularioValido}
+                    title={
+                        loading ? (
+                            <ActivityIndicator size="small" color={Colors.hexFFFDF9} />
+                        ) : (
+                            "Adicionar Pedido"
+                        )
+                    }
+                />
+            </View>
+        </RegistrationLayout>
     );
 }
 
@@ -669,37 +651,6 @@ const styles = StyleSheet.create({
     itemRow: { flexDirection: "row", flexWrap: "wrap", alignItems: "center", gap: 12, padding: 12, borderWidth: 1, borderColor: Colors.hexCFDDE6, borderRadius: 8 },
     itemName: { flex: 1, minWidth: 100, fontFamily: "WorksansMedium", color: Colors.hex0F172A },
     itemQuantity: { width: 110 },
-    container: {
-        width: "100%",
-        alignItems: "center",
-        paddingHorizontal: 6,
-    },
-    header: {
-        flexDirection: "row",
-        alignItems: "flex-start",
-        gap: 14,
-    },
-    headerIcon: {
-        width: 48,
-        height: 48,
-        borderRadius: 8,
-        backgroundColor: Colors.hexE8F1F5,
-        alignItems: "center",
-        justifyContent: "center",
-        marginTop: 2,
-    },
-    headerTextContainer: {
-        flex: 1,
-    },
-    titleText: {
-        marginVertical: 2,
-        marginBottom: 2,
-    },
-    divider: {
-        height: 1,
-        backgroundColor: Colors.hexDDE8EF,
-        marginVertical: 20,
-    },
     formContainer: {
         gap: 18,
     },
