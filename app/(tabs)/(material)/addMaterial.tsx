@@ -15,12 +15,14 @@ import { RegistrationLayout, registrationStyles } from "@/src/components/Registr
 import { pagesStyles } from "@/src/components/ScreensLayout";
 import useResponsive from "@/src/hooks/useResponsive";
 import { supabase } from "@/src/lib/supabase";
+import { parseReadyStock, readyStockError, readyStockLabel } from "@/src/lib/productStock";
 
 export default function AddMaterial() {
     const { isMobile } = useResponsive();
 
     const [nome, setNome] = useState("");
     const [preco, setPreco] = useState("");
+    const [quantidade, setQuantidade] = useState("0");
     const [descricao, setDescricao] = useState("");
 
     const [erro, setErro] = useState<string | null>(null);
@@ -55,6 +57,12 @@ export default function AddMaterial() {
             return;
         }
 
+        const quantidadeProntaEntrega = parseReadyStock(quantidade);
+        if (quantidadeProntaEntrega === null) {
+            setErro(readyStockError);
+            return;
+        }
+
         setLoading(true);
 
         // Tentativa 1: Coluna "descrição" e "preco"
@@ -64,6 +72,7 @@ export default function AddMaterial() {
                 nome: nome.trim(),
                 "descrição": descricao.trim(),
                 preco: precoNumerico,
+                quantidade_pronta_entrega: quantidadeProntaEntrega,
             })
             .select()
             .single();
@@ -76,6 +85,7 @@ export default function AddMaterial() {
                     nome: nome.trim(),
                     descricao: descricao.trim(),
                     preco: precoNumerico,
+                    quantidade_pronta_entrega: quantidadeProntaEntrega,
                 })
                 .select()
                 .single();
@@ -92,6 +102,7 @@ export default function AddMaterial() {
                     nome: nome.trim(),
                     descricao: descricao.trim(),
                     "preço": precoNumerico,
+                    quantidade_pronta_entrega: quantidadeProntaEntrega,
                 })
                 .select()
                 .single();
@@ -112,6 +123,7 @@ export default function AddMaterial() {
             setMensagemSucesso(`Produto "${data.nome}" cadastrado com sucesso! (ID: #${data.id})`);
             setNome("");
             setPreco("");
+            setQuantidade("0");
             setDescricao("");
         }
     }
@@ -172,6 +184,22 @@ export default function AddMaterial() {
                             style={styles.input}
                         />
                     </View>
+                </View>
+
+                <View style={[pagesStyles.field, { width: isMobile ? "100%" : "48%" }]}>
+                    <Text style={pagesStyles.label}>{readyStockLabel}</Text>
+                    <TextInput
+                        accessibilityLabel={readyStockLabel}
+                        value={quantidade}
+                        onChangeText={(value) => {
+                            setQuantidade(value);
+                            setErro(null);
+                            setMensagemSucesso(null);
+                        }}
+                        keyboardType="number-pad"
+                        editable={!loading}
+                        style={pagesStyles.input}
+                    />
                 </View>
 
                 {/* DESCRIÇÃO */}

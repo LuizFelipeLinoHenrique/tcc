@@ -10,26 +10,10 @@ import { Ionicons } from "@expo/vector-icons";
 import React, { useCallback, useState } from "react";
 import { useFocusEffect } from "expo-router";
 import { dashboardCash } from "@/src/lib/dashboardCash";
+import { dashboardOrders } from "@/src/lib/dashboardOrders";
 import { cashToday, money } from "@/src/lib/cashFlow";
 import { cashError, loadCashEntries } from "@/src/lib/cashFlowRepository";
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
-import { lineDataItem } from "react-native-gifted-charts";
-
-function buildTimelineData(pedidos: any[], monthsCount: number): lineDataItem[] {
-    const today = cashToday();
-    const [year, month] = today.split("-").map(Number);
-    return Array.from({ length: monthsCount }, (_, index) => {
-        const date = new Date(year, month - monthsCount + index, 1, 12);
-        const key = date.getFullYear() + "-" + String(date.getMonth() + 1).padStart(2, "0");
-        return {
-            label: date.toLocaleDateString("pt-BR", { month: "2-digit", year: "2-digit" }),
-            value: pedidos.filter(pedido => {
-                const day = String(pedido.data_pedido ?? pedido.created_at ?? "").slice(0, 10);
-                return day.startsWith(key) && day <= today;
-            }).length,
-        };
-    });
-}
 
 export default function HomeScreen() {
     const { width } = useResponsive();
@@ -44,7 +28,7 @@ export default function HomeScreen() {
     const today = cashToday();
     const monthLabel = new Date(today + "T12:00:00").toLocaleDateString("pt-BR", { month: "long", year: "numeric" });
 
-    const [ordersNum, setOrdersNum] = useState<lineDataItem[]>([]);
+    const [ordersNum, setOrdersNum] = useState<ReturnType<typeof dashboardOrders>>([]);
     const [financials, setFinancials] = useState(() => dashboardCash([], 3));
     const [loadError, setLoadError] = useState("");
     const [refreshKey, setRefreshKey] = useState(0);
@@ -189,8 +173,7 @@ export default function HomeScreen() {
                 setTopClientesData(topClientes);
 
                 // Mantém o histórico no período atual, inclusive meses sem pedidos.
-                const timelinePoints = buildTimelineData(listaPedidos, active);
-                setOrdersNum(timelinePoints);
+                setOrdersNum(dashboardOrders(listaPedidos, active));
 
                 setLastUpdated(new Date());
 
@@ -302,7 +285,7 @@ export default function HomeScreen() {
                         <View style={styles.section}>
                             <Text accessibilityRole="header" style={styles.groupTitle}>Atividade dos pedidos</Text>
                             <View style={styles.grid}>
-                                <View testID="dashboard-orders-chart" style={[styles.chartPanel, { width: pairWidth }]}><Text style={styles.panelTitle}>Evolução dos pedidos</Text><Text style={styles.panelDescription}>Pedidos registrados por mês</Text><DashboardTrend data={ordersNum.map(point => ({ label: String(point.label ?? ""), value: point.value ?? 0 }))} /></View>
+                                <View testID="dashboard-orders-chart" style={[styles.chartPanel, { width: pairWidth }]}><Text style={styles.panelTitle}>Evolução dos pedidos</Text><Text style={styles.panelDescription}>Pedidos registrados por mês</Text><DashboardTrend data={ordersNum} /></View>
                                 <View style={[styles.chartPanel, { width: pairWidth }]}><Text style={styles.panelTitle}>Distribuição por status</Text><Text style={styles.panelDescription}>Todos os pedidos · posição atual</Text><DashboardOrderMix data={statusPieData} /></View>
                             </View>
                         </View>

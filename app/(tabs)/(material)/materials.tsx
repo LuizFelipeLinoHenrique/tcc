@@ -336,6 +336,10 @@ export default function Materials() {
                               fullWidth: true,
                           },
                           {
+                              label: "Quantidade para pronta entrega",
+                              value: materialSelecionado.quantidade_pronta_entrega ?? 0,
+                          },
+                          {
                               label: "Descrição",
                               value:
                                   getMaterialDescricao(materialSelecionado) ||

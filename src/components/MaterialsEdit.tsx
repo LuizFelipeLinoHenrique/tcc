@@ -1,6 +1,7 @@
 import { Colors } from "@/src/theme/colors";
 import { materialValues, recordError, updateRecord } from "@/src/lib/tableActions";
 import { supabase } from "@/src/lib/supabase";
+import { parseReadyStock, readyStockError, readyStockLabel } from "@/src/lib/productStock";
 import { useEffect, useState } from "react";
 import {
     ActivityIndicator,
@@ -30,6 +31,7 @@ export function EditMaterialCard({
     const [produto, setMaterial] = useState<Produto | null>(null);
     const [nome, setNome] = useState("");
     const [preco, setPreco] = useState("");
+    const [quantidade, setQuantidade] = useState("0");
     const [descricao, setDescricao] = useState("");
 
     const [loading, setLoading] = useState(true);
@@ -61,6 +63,7 @@ export function EditMaterialCard({
         setMaterial(mat);
         setNome(mat.nome ?? "");
         setPreco(String(getMaterialPreco(mat)));
+        setQuantidade(String(mat.quantidade_pronta_entrega ?? 0));
         setDescricao(getMaterialDescricao(mat));
 
         setLoading(false);
@@ -82,11 +85,21 @@ export function EditMaterialCard({
             return;
         }
 
+        const quantidadeProntaEntrega = parseReadyStock(quantidade);
+        if (quantidadeProntaEntrega === null) {
+            setError(readyStockError);
+            return;
+        }
+
+        const values = {
+            ...materialValues(produto, nome.trim(), descricao.trim(), precoNumero),
+            quantidade_pronta_entrega: quantidadeProntaEntrega,
+        };
         setSaving(true);
         setError("");
 
         try {
-            await updateRecord("produtos", produto.id, materialValues(produto, nome.trim(), descricao.trim(), precoNumero));
+            await updateRecord("produtos", produto.id, values);
         } catch (cause) {
             setError(recordError(cause));
             return;
@@ -94,10 +107,7 @@ export function EditMaterialCard({
             setSaving(false);
         }
 
-        setMaterial({
-            ...produto,
-            ...materialValues(produto, nome.trim(), descricao.trim(), precoNumero),
-        });
+        setMaterial({ ...produto, ...values });
 
         setSaving(false);
         Alert.alert("Sucesso", "Produto atualizado com sucesso.");
@@ -182,6 +192,18 @@ export function EditMaterialCard({
                             placeholder="Ex: 49.90"
                             placeholderTextColor={Colors.hex64748B}
                             keyboardType="decimal-pad"
+                            style={pagesStyles.input}
+                        />
+                    </View>
+
+                    <View style={[styles.field, isMobile && styles.fieldMobile]}>
+                        <Text style={pagesStyles.textBold}>{readyStockLabel}</Text>
+                        <TextInput
+                            accessibilityLabel={readyStockLabel}
+                            value={quantidade}
+                            onChangeText={setQuantidade}
+                            keyboardType="number-pad"
+                            editable={!saving}
                             style={pagesStyles.input}
                         />
                     </View>

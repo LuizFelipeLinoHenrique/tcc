@@ -9,6 +9,7 @@ import {
     ViewStyle,
 } from "react-native";
 import useResponsive from "../hooks/useResponsive";
+import { readyStockLabel } from "../lib/productStock";
 import { pagesStyles } from "./ScreensLayout";
 
 export type MaterialDetail = {
@@ -76,6 +77,7 @@ export function MaterialDetailsCard({
     const id = getDetail("ID do Produto");
     const nome = getDetail("Nome");
     const preco = getDetail("Preço");
+    const quantidade = getDetail(readyStockLabel);
     const descricao = getDetail("Descrição");
 
     return (
@@ -131,7 +133,8 @@ export function MaterialDetailsCard({
                     </View>
 
                     <View style={styles.details}>
-                        {renderDetail(preco, true, true)}
+                        {renderDetail(preco, false, true)}
+                        {renderDetail(quantidade)}
                     </View>
                 </View>
             )}

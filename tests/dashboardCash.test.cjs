@@ -15,8 +15,26 @@ function load(name) {
   return mod.exports;
 }
 const { dashboardCash } = load("dashboardCash");
+const { dashboardOrders } = load("dashboardOrders");
 const { cashMonthData } = load("cashFlow");
 const today = "2026-11-15";
+
+test("order history groups registration dates by month in São Paulo", () => {
+  const orders = [
+    { data_pedido: "2026-10-01T02:59:59Z" },
+    { data_pedido: "2026-11-01T02:59:59Z" },
+    { data_pedido: "2026-11-01T03:00:00Z" },
+    { data_pedido: "2026-11-01", created_at: "2026-10-01T12:00:00Z" },
+    { data_pedido: "02/11/2026" },
+    { data_pedido: " ", created_at: "2026-11-16T02:00:00Z" },
+    { created_at: "2026-11-16T03:00:00Z" },
+    { data_pedido: "2026-11-00" },
+  ];
+  const points = dashboardOrders(orders, 6, today);
+  assert.deepEqual(points.map(point => point.value), [0, 0, 0, 1, 1, 4]);
+  assert.deepEqual(dashboardOrders(orders, 3, today), points.slice(-3));
+  assert.equal(dashboardOrders(orders, 12, today).length, 12);
+});
 const entry = (overrides = {}) => ({ id: "1", user_id: "owner", order_id: null, type: "income", amount_cents: 10000, description: "Venda", category: "Vendas", account: "Caixa", due_date: today, paid_date: null, status: "pending", notes: "", created_at: "", ...overrides });
 
 test("dashboard reconciles with cash flow including manual entries, expenses, prior balances and pending amounts", () => {
@@ -108,6 +126,7 @@ function dashboardScreen() {
     if (name === "@expo/vector-icons") return { Ionicons: "Icon" };
     if (name.endsWith("/cashFlow")) return load("cashFlow");
     if (name.endsWith("/dashboardCash")) return load("dashboardCash");
+    if (name.endsWith("/dashboardOrders")) return load("dashboardOrders");
     if (name.endsWith("/cashFlowRepository")) return { cashError: error => error.message, loadCashEntries: async () => { requests.push("cash_flow_entries"); if (failure) throw failure; return records; } };
     if (name.endsWith("/supabase")) return { supabase };
     if (name.endsWith("/useResponsive")) return () => ({ width: 1200, isMobile: false, graphWidth: 1000, maxCardWidth: 1100 });

@@ -10,6 +10,7 @@ export type Produto = {
     descrição?: string;
     preco?: number;
     preço?: number;
+    quantidade_pronta_entrega?: number;
 };
 
 export type MaterialCardProps = {
@@ -43,6 +44,9 @@ export function MaterialTableHeader() {
             </View>
             <View style={styles.colPrice}>
                 <Text style={styles.headerText}>PREÇO UNITÁRIO</Text>
+            </View>
+            <View style={styles.colStock}>
+                <Text style={styles.headerText}>PRONTA ENTREGA</Text>
             </View>
             <View style={styles.colDesc}>
                 <Text style={styles.headerText}>DESCRIÇÃO</Text>
@@ -88,7 +92,9 @@ export function MaterialTableRow({
                 <Text style={styles.priceText}>{formatMoney(preco)}</Text>
             </View>
 
-            {/* Descrição */}
+            <View style={styles.colStock}>
+                <Text style={styles.descText}>{produto.quantidade_pronta_entrega ?? 0}</Text>
+            </View>
             <View style={styles.colDesc}>
                 <Text style={styles.descText} numberOfLines={2}>
                     {descricao ? descricao : "Sem descrição informada"}
@@ -206,8 +212,13 @@ const styles = StyleSheet.create({
         flexShrink: 0,
         justifyContent: "center",
     },
+    colStock: {
+        width: 135,
+        flexShrink: 0,
+        justifyContent: "center",
+    },
     colDesc: {
-        width: 340,
+        width: 181,
         flexShrink: 0,
         flexGrow: 1,
         justifyContent: "center",
