@@ -11,6 +11,7 @@ export type Produto = {
     preco?: number;
     preço?: number;
     quantidade_pronta_entrega?: number;
+    quantidade_a_produzir?: number;
 };
 
 export type MaterialCardProps = {
@@ -47,6 +48,9 @@ export function MaterialTableHeader() {
             </View>
             <View style={styles.colStock}>
                 <Text style={styles.headerText}>PRONTA ENTREGA</Text>
+            </View>
+            <View style={styles.colStock}>
+                <Text style={styles.headerText}>QUANTIDADE A PRODUZIR</Text>
             </View>
             <View style={styles.colDesc}>
                 <Text style={styles.headerText}>DESCRIÇÃO</Text>
@@ -94,6 +98,9 @@ export function MaterialTableRow({
 
             <View style={styles.colStock}>
                 <Text style={styles.descText}>{produto.quantidade_pronta_entrega ?? 0}</Text>
+            </View>
+            <View style={styles.colStock}>
+                <Text style={styles.descText}>{produto.quantidade_a_produzir ?? 0}</Text>
             </View>
             <View style={styles.colDesc}>
                 <Text style={styles.descText} numberOfLines={2}>
@@ -166,7 +173,7 @@ const styles = StyleSheet.create({
         columnGap: 24,
         borderBottomWidth: 1,
         borderColor: Colors.hexCFDDE6,
-        minWidth: 1076,
+        minWidth: 1235,
     },
     headerText: {
         fontSize: 11,
@@ -186,7 +193,7 @@ const styles = StyleSheet.create({
         columnGap: 24,
         borderBottomWidth: 1,
         borderColor: Colors.hexE2EBF0,
-        minWidth: 1076,
+        minWidth: 1235,
     },
     rowEven: {
         backgroundColor: Colors.white,

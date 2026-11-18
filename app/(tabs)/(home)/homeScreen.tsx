@@ -49,6 +49,7 @@ export default function HomeScreen() {
     const [statusPieData, setStatusPieData] = useState<PieGraphItem[]>([]);
     const [topMateriaisData, setTopMateriaisData] = useState<BarGraphItem[]>([]);
     const [topClientesData, setTopClientesData] = useState<BarGraphItem[]>([]);
+    const [productionRanking, setProductionRanking] = useState<{ label: string; value: number }[] | null>([]);
 
     const [active, setActive] = useState<number>(3);
 
@@ -61,12 +62,17 @@ export default function HomeScreen() {
             if (showLoading) setLoadingData(true);
 
             try {
-                const [cashEntries, ordersResult, productsResult, clientsResult, suppliersResult] = await Promise.all([
+                const [cashEntries, ordersResult, productsResult, clientsResult, suppliersResult, productionResult] = await Promise.all([
                     loadCashEntries(),
                     supabase.from("pedidos").select("*, itens:pedido_itens(id_produto, qtde, unit_price_cents)").is("deleted_at", null),
                     supabase.from("produtos").select("*"),
                     supabase.from("clientes").select("id, nome"),
                     supabase.from("fornecedores").select("*", { count: "exact", head: true }),
+                    supabase.from("produtos").select("id, nome, quantidade_a_produzir")
+                        .gt("quantidade_a_produzir", 0)
+                        .order("quantidade_a_produzir", { ascending: false })
+                        .order("id")
+                        .limit(3),
                 ]);
                 if (disposed) return;
                 for (const result of [ordersResult, productsResult, clientsResult, suppliersResult]) {
@@ -80,6 +86,10 @@ export default function HomeScreen() {
                 setTotalClientes(listaClientes.length);
                 setTotalFornecedores(suppliersResult.count ?? 0);
                 setTotalMateriais(listaProdutos.length);
+                setProductionRanking(productionResult.error ? null : (productionResult.data ?? []).map(produto => ({
+                    label: produto.nome || `Produto #${produto.id}`,
+                    value: Number(produto.quantidade_a_produzir),
+                })));
 
                 // Processamento dos pedidos
                 const total = listaPedidos.length;
@@ -259,6 +269,15 @@ export default function HomeScreen() {
                                 <Text style={[styles.orderValue, { color: item.color }]}>{item.value.toLocaleString("pt-BR")}</Text>
                             </View>)}
                         </View>
+                    </View>
+
+                    <View testID="dashboard-production-ranking" style={styles.chartPanel}>
+                        <Text accessibilityRole="header" style={styles.panelTitle}>Produtos com maior pendência de produção</Text>
+                        {productionRanking === null ? (
+                            <Text accessibilityRole="alert" style={styles.panelDescription}>Não foi possível carregar as pendências de produção.</Text>
+                        ) : (
+                            <DashboardRanking data={productionRanking} emptyLabel="Nenhum produto com produção pendente." />
+                        )}
                     </View>
 
                     <View style={styles.history}>

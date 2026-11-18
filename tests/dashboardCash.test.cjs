@@ -103,6 +103,7 @@ function dashboardScreen() {
   const timers = new Map();
   const requests = [];
   let records = [];
+  let products = [];
   let failure = null;
   const react = {
     useState(initial) {
@@ -115,7 +116,18 @@ function dashboardScreen() {
   const jsx = (type, props) => ({ type, props });
   const supabase = { from(table) {
     requests.push(table);
-    const query = { select: () => query, is: () => query, then: resolve => Promise.resolve({ data: [], count: 0, error: null }).then(resolve) };
+    let data = table === "produtos" ? [...products] : [];
+    const query = {
+      select: () => query,
+      is: () => query,
+      gt: (field, value) => { data = data.filter(row => row[field] > value); return query; },
+      order: (field, options) => {
+        if (options?.ascending === false) data.sort((a, b) => b[field] - a[field] || a.id - b.id);
+        return query;
+      },
+      limit: count => { data = data.slice(0, count); return query; },
+      then: resolve => Promise.resolve({ data, count: 0, error: null }).then(resolve),
+    };
     return query;
   } };
   const mocks = name => {
@@ -146,12 +158,34 @@ function dashboardScreen() {
     focus: () => effects.at(-1)(),
     refresh: () => timers.values().next().value(),
     data: value => { records = value; },
+    products: value => { products = value; },
     fail: error => { failure = error; },
     timers, requests,
   };
 }
 
 const flush = () => new Promise(resolve => setImmediate(resolve));
+test("dashboard shows the three largest positive production balances", async () => {
+  const screen = dashboardScreen();
+  screen.products([28, 0, 13, 41, 5].map((quantidade_a_produzir, index) => ({
+    id: index + 1, nome: `Produto ${index + 1}`, quantidade_a_produzir,
+  })));
+  screen.render();
+  const blur = screen.focus();
+  await flush();
+  function findPanel(node) {
+    if (Array.isArray(node)) return node.map(findPanel).find(Boolean);
+    if (node?.props?.testID === "dashboard-production-ranking") return node;
+    if (node?.props) return findPanel(node.props.children);
+  }
+  const panel = findPanel(screen.render());
+  assert.deepEqual(panel?.props.children[1].props.data, [
+    { label: "Produto 4", value: 41 },
+    { label: "Produto 1", value: 28 },
+    { label: "Produto 3", value: 13 },
+  ]);
+  blur();
+});
 test("screen reads cash movements without orders, refreshes while focused, and stops polling on blur", async () => {
   const screen = dashboardScreen();
   const paid = entry({ status: "paid", paid_date: load("cashFlow").cashToday(), amount_cents: 12345 });

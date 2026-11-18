@@ -10,7 +10,7 @@ set local role authenticated;
 do $$
 declare
   client_id bigint; product_a bigint; product_b bigint; single_id bigint; multi_id bigint;
-  retry_id bigint; failed_id bigint; legacy public.pedidos;
+  retry_id bigint; failed_id bigint; production_id bigint; legacy public.pedidos;
   request_key uuid := gen_random_uuid(); cart jsonb; cash public.cash_flow_entries;
   old_orders bigint; old_cash bigint; denied boolean;
 begin
@@ -37,20 +37,23 @@ begin
   assert (select quantidade_pronta_entrega = 15 from public.produtos where id = product_a);
   assert (select quantidade_pronta_entrega = 16 from public.produtos where id = product_b);
 
-  select count(*) into old_orders from public.pedidos;
-  select count(*) into old_cash from public.cash_flow_entries;
-  denied := false;
-  begin
-    perform public.save_order_items(client_id,
-      jsonb_build_array(jsonb_build_object('id_produto',product_a,'qtde',1),
-                        jsonb_build_object('id_produto',product_b,'qtde',17)),
-      p_due_date := current_date, p_request_id := gen_random_uuid());
-  exception when raise_exception then denied := sqlerrm like 'Estoque insuficiente%'; end;
-  assert denied, 'Estoque insuficiente deve recusar o pedido inteiro';
+  production_id := public.save_order_items(client_id,
+    jsonb_build_array(jsonb_build_object('id_produto',product_a,'qtde',1),
+                      jsonb_build_object('id_produto',product_b,'qtde',17)),
+    p_due_date := current_date, p_request_id := gen_random_uuid());
+  assert (select quantidade_pronta_entrega = 14 and quantidade_a_produzir = 0
+    from public.produtos where id = product_a);
+  assert (select quantidade_pronta_entrega = 0 and quantidade_a_produzir = 1
+    from public.produtos where id = product_b);
+  perform public.save_order_items(client_id,
+    jsonb_build_array(jsonb_build_object('id_produto',product_a,'qtde',1),
+                      jsonb_build_object('id_produto',product_b,'qtde',19)), 'P', production_id);
+  assert (select quantidade_pronta_entrega = 0 and quantidade_a_produzir = 3
+    from public.produtos where id = product_b);
+  update public.pedidos set status = 'C' where id = production_id;
   assert (select quantidade_pronta_entrega = 15 from public.produtos where id = product_a);
-  assert (select quantidade_pronta_entrega = 16 from public.produtos where id = product_b);
-  assert (select count(*) = old_orders from public.pedidos);
-  assert (select count(*) = old_cash from public.cash_flow_entries);
+  assert (select quantidade_pronta_entrega = 16 and quantidade_a_produzir = 0
+    from public.produtos where id = product_b);
 
   denied := false;
   begin

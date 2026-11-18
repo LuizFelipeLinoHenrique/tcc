@@ -51,7 +51,13 @@ async function main() {
           const clients=[{id:1,nome:'Distribuidora São Paulo e Região'},{id:2,nome:'Indústria de Embalagens Horizonte'},{id:3,nome:'Comercial Oliveira'},{id:4,nome:'Armazém Central'}];
           const products=[{id:1,nome:'Pallet de madeira reforçado'},{id:2,nome:'Caixa industrial retornável'},{id:3,nome:'Pallet padrão PBR'},{id:4,nome:'Estrutura de transporte'}];
           const now=new Date();const orders=Array.from({length:36},(_,i)=>({id:i+1,id_cliente:i%4+1,status:i%7===0?'C':i%3===0?'P':'E',data_pedido:new Date(now.getFullYear(),now.getMonth()-i%12,1).toISOString().slice(0,10),itens:[{id_produto:i%4+1,qtde:22+i*3,unit_price_cents:10000}]}));
-          export const supabase={from(table){const query={select(){return query},is(){return query},then(resolve){return Promise.resolve({data:empty?[]:table==='pedidos'?orders:table==='produtos'?products:clients,count:empty?0:18,error:null}).then(resolve)}};return query}};`;
+          export const supabase={from(table){
+            let data=empty?[]:table==='pedidos'?orders:table==='produtos'?products.map((product,i)=>({...product,quantidade_a_produzir:[28,0,13,41][i]})):clients;
+            const query={select(){return query},is(){return query},gt(field,value){data=data.filter(row=>row[field]>value);return query},
+              order(field,options){if(options?.ascending===false)data.sort((a,b)=>b[field]-a[field]||a.id-b.id);return query},
+              limit(count){data=data.slice(0,count);return query},then(resolve){return Promise.resolve({data,count:empty?0:18,error:null}).then(resolve)}};
+            return query;
+          }};`;
         return { contents, loader: "tsx", resolveDir: root };
       });
     } }],

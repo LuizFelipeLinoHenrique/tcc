@@ -2,6 +2,7 @@ import { router } from "expo-router";
 import { AnimatedButton } from "@/src/components/AnimatedButton";
 import { createPagination, mergeById } from "@/src/lib/pagination";
 import { RecordModal } from "@/src/components/RecordModal";
+import { ProductStockAdjustment } from "@/src/components/ProductStockAdjustment";
 import { useRecordDeletion } from "@/src/hooks/useRecordDeletion";
 import { Colors } from "@/src/theme/colors";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -57,6 +58,7 @@ export default function Materials() {
 
     const [detalhesAberto, setDetalhesAberto] = useState(false);
     const [editarAberto, setEditarAberto] = useState(false);
+    const [estoqueAberto, setEstoqueAberto] = useState(false);
 
     const [reloadMateriais, setReloadMateriais] = useState(0);
 
@@ -231,12 +233,20 @@ export default function Materials() {
                       <Text accessibilityRole="header" style={pagesStyles.title}>Produtos</Text>
                       <Text style={pagesStyles.description}>Consulte e gerencie os registros de produtos.</Text>
                   </View>
-                  <AnimatedButton
-                      title="Novo produto"
-                      stylesPressable={pagesStyles.primaryButton}
-                      stylesText={pagesStyles.primaryButtonText}
-                      onPress={() => router.push("/(tabs)/(material)/addMaterial")}
-                  />
+                  <View style={styles.headerActions}>
+                      <AnimatedButton
+                          title="Lançar estoque"
+                          stylesPressable={pagesStyles.secondaryButton}
+                          stylesText={pagesStyles.secondaryButtonText}
+                          onPress={() => setEstoqueAberto(true)}
+                      />
+                      <AnimatedButton
+                          title="Novo produto"
+                          stylesPressable={pagesStyles.primaryButton}
+                          stylesText={pagesStyles.primaryButtonText}
+                          onPress={() => router.push("/(tabs)/(material)/addMaterial")}
+                      />
+                  </View>
               </View>
               <View style={styles.header}>
                   <MaterialsFilters
@@ -340,6 +350,10 @@ export default function Materials() {
                               value: materialSelecionado.quantidade_pronta_entrega ?? 0,
                           },
                           {
+                              label: "Quantidade a produzir",
+                              value: materialSelecionado.quantidade_a_produzir ?? 0,
+                          },
+                          {
                               label: "Descrição",
                               value:
                                   getMaterialDescricao(materialSelecionado) ||
@@ -364,12 +378,23 @@ export default function Materials() {
                   />
               )}
           </RecordModal>
+          {estoqueAberto && (
+              <ProductStockAdjustment
+                  onClose={() => setEstoqueAberto(false)}
+                  onSaved={handlePesquisa}
+              />
+          )}
           {deletionDialog}
       </PagesLayout>
   );
 }
 
 const styles = StyleSheet.create({
+    headerActions: {
+        flexDirection: "row",
+        flexWrap: "wrap",
+        gap: 8,
+    },
     tableScroll: {
         flex: 1,
         width: "100%",
