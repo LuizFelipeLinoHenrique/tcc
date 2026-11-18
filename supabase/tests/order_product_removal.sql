@@ -8,9 +8,9 @@ do $$
 declare customer bigint; a bigint; b bigint; c bigint; order_key bigint; receipt uuid; cart jsonb; denied boolean;
 begin
   insert into public.clientes(nome) values ('TESTE REMOÇÃO - cliente') returning id into customer;
-  insert into public.produtos(nome,preco) values ('TESTE REMOÇÃO - A',12) returning id into a;
-  insert into public.produtos(nome,preco) values ('TESTE REMOÇÃO - B',25) returning id into b;
-  insert into public.produtos(nome,preco) values ('TESTE REMOÇÃO - C',7) returning id into c;
+  insert into public.produtos(nome,preco,quantidade_pronta_entrega) values ('TESTE REMOÇÃO - A',12,20) returning id into a;
+  insert into public.produtos(nome,preco,quantidade_pronta_entrega) values ('TESTE REMOÇÃO - B',25,20) returning id into b;
+  insert into public.produtos(nome,preco,quantidade_pronta_entrega) values ('TESTE REMOÇÃO - C',7,20) returning id into c;
   cart := jsonb_build_array(jsonb_build_object('id_produto',a,'qtde',2),jsonb_build_object('id_produto',b,'qtde',3));
   order_key := public.save_order_items(customer,cart,p_due_date := date '2026-12-10',p_request_id := gen_random_uuid());
   select id into strict receipt from public.cash_flow_entries where order_id = order_key;

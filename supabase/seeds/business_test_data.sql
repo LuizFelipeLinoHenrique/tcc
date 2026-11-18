@@ -53,8 +53,8 @@ begin
   ) as sample(name, email, address, contact)
   where not exists (select from public.fornecedores f where f.email = sample.email);
 
-  insert into public.produtos (nome, descricao, preco)
-  select sample.* from (values
+  insert into public.produtos (nome, descricao, preco, quantidade_pronta_entrega)
+  select sample.*, 1000 from (values
     ('[TESTE] Pallet de pinus 120 × 100 cm', 'Pallet de quatro entradas para movimentação em centros de distribuição.', 58),
     ('[TESTE] Pallet reforçado 120 × 100 cm', 'Pallet com travessas reforçadas para cargas industriais.', 92),
     ('[TESTE] Caixa de madeira 80 × 60 cm', 'Caixa fechada para proteger peças durante o transporte.', 145),

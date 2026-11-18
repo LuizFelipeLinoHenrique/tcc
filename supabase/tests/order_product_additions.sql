@@ -11,10 +11,10 @@ declare
   cart jsonb; denied boolean; receipt uuid;
 begin
   insert into public.clientes(nome) values ('TESTE ACRÉSCIMO - cliente') returning id into customer;
-  insert into public.produtos(nome,preco) values ('TESTE ACRÉSCIMO - A',12) returning id into a;
-  insert into public.produtos(nome,preco) values ('TESTE ACRÉSCIMO - B',25) returning id into b;
-  insert into public.produtos(nome,preco) values ('TESTE ACRÉSCIMO - C',7) returning id into c;
-  insert into public.produtos(nome,preco) values ('TESTE ACRÉSCIMO - grátis',0) returning id into z;
+  insert into public.produtos(nome,preco,quantidade_pronta_entrega) values ('TESTE ACRÉSCIMO - A',12,20) returning id into a;
+  insert into public.produtos(nome,preco,quantidade_pronta_entrega) values ('TESTE ACRÉSCIMO - B',25,20) returning id into b;
+  insert into public.produtos(nome,preco,quantidade_pronta_entrega) values ('TESTE ACRÉSCIMO - C',7,20) returning id into c;
+  insert into public.produtos(nome,preco,quantidade_pronta_entrega) values ('TESTE ACRÉSCIMO - grátis',0,20) returning id into z;
   cart := jsonb_build_array(jsonb_build_object('id_produto',a,'qtde',2));
   order_key := public.save_order_items(customer,cart,p_due_date := date '2026-12-10',p_request_id := gen_random_uuid());
   select id into strict receipt from public.cash_flow_entries where order_id = order_key;
@@ -35,9 +35,9 @@ begin
 
   denied := false;
   begin
-    perform public.save_order_items(customer,jsonb_build_array(jsonb_build_object('id_produto',a,'qtde',1)),'E',order_key);
+    perform public.save_order_items(customer,jsonb_build_array(jsonb_build_object('id_produto',a,'qtde',1)),'C',order_key);
   exception when raise_exception then denied := true; end;
-  assert denied, 'Não pode remover nem alterar itens registrados';
+  assert denied, 'Não pode editar itens e cancelar o pedido na mesma operação';
 
   denied := false;
   begin

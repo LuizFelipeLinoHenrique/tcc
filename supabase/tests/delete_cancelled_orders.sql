@@ -11,7 +11,7 @@ declare client_id bigint; product_id bigint; unpaid_id bigint; paid_id bigint;
   legacy_id bigint; actual numeric; expected numeric;
 begin
   insert into public.clientes(nome) values ('TESTE ROLLBACK - integridade') returning id into client_id;
-  insert into public.produtos(nome,preco) values ('TESTE ROLLBACK - integridade',150) returning id into product_id;
+  insert into public.produtos(nome,preco,quantidade_pronta_entrega) values ('TESTE ROLLBACK - integridade',150,20) returning id into product_id;
   cart := jsonb_build_array(jsonb_build_object('id_produto',product_id,'qtde',1));
   insert into public.cash_flow_entries(description,type,amount_cents,category,account,due_date,status,paid_date)
   values('TESTE ROLLBACK - manual','income',1000,'Vendas','Caixa principal',current_date,'paid',(now() at time zone 'America/Sao_Paulo')::date)

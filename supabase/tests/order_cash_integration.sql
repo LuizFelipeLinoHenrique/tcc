@@ -18,8 +18,8 @@ begin
     raise exception 'São necessários dois usuários existentes para validar RLS';
   end if;
   insert into public.clientes(nome) values ('TESTE TRANSACIONAL - cliente') returning id into client_id;
-  insert into public.produtos(nome,preco) values ('TESTE TRANSACIONAL - A',12) returning id into product_a;
-  insert into public.produtos(nome,preco) values ('TESTE TRANSACIONAL - B',25) returning id into product_b;
+  insert into public.produtos(nome,preco,quantidade_pronta_entrega) values ('TESTE TRANSACIONAL - A',12,20) returning id into product_a;
+  insert into public.produtos(nome,preco,quantidade_pronta_entrega) values ('TESTE TRANSACIONAL - B',25,20) returning id into product_b;
   single_id := public.save_order_items(client_id,jsonb_build_array(jsonb_build_object('id_produto',product_a,'qtde',3)),
     p_due_date := date '2026-11-20', p_request_id := gen_random_uuid());
   select * into strict cash from public.cash_flow_entries where order_id = single_id;
@@ -34,6 +34,23 @@ begin
   retry_id := public.save_order_items(client_id,cart,p_due_date := date '2026-12-10',p_request_id := request_key);
   assert retry_id = multi_id;
   assert (select count(*) = 1 from public.cash_flow_entries where order_id = multi_id);
+  assert (select quantidade_pronta_entrega = 15 from public.produtos where id = product_a);
+  assert (select quantidade_pronta_entrega = 16 from public.produtos where id = product_b);
+
+  select count(*) into old_orders from public.pedidos;
+  select count(*) into old_cash from public.cash_flow_entries;
+  denied := false;
+  begin
+    perform public.save_order_items(client_id,
+      jsonb_build_array(jsonb_build_object('id_produto',product_a,'qtde',1),
+                        jsonb_build_object('id_produto',product_b,'qtde',17)),
+      p_due_date := current_date, p_request_id := gen_random_uuid());
+  exception when raise_exception then denied := sqlerrm like 'Estoque insuficiente%'; end;
+  assert denied, 'Estoque insuficiente deve recusar o pedido inteiro';
+  assert (select quantidade_pronta_entrega = 15 from public.produtos where id = product_a);
+  assert (select quantidade_pronta_entrega = 16 from public.produtos where id = product_b);
+  assert (select count(*) = old_orders from public.pedidos);
+  assert (select count(*) = old_cash from public.cash_flow_entries);
 
   denied := false;
   begin
@@ -56,6 +73,8 @@ begin
   -- Repetir uma requisição antiga não reabre o pedido cancelado.
   assert public.save_order_items(client_id,cart,p_due_date := date '2026-12-10',p_request_id := request_key) = multi_id;
   assert (select status = 'C' from public.pedidos where id = multi_id);
+  assert (select quantidade_pronta_entrega = 20 from public.produtos where id = product_a);
+  assert (select quantidade_pronta_entrega = 20 from public.produtos where id = product_b);
 
   denied := false;
   begin
