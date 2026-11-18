@@ -29,10 +29,7 @@ import {
 } from "@/src/components/MaterialsCard";
 import { MaterialDetailsCard } from "@/src/components/MaterialsDetails";
 import { EditMaterialCard } from "@/src/components/MaterialsEdit";
-import {
-    MaterialsFilters,
-    TipoPesquisaMaterial,
-} from "@/src/components/MaterialsFilters";
+import { MaterialsFilters } from "@/src/components/MaterialsFilters";
 
 const PAGE_SIZE = 50;
 
@@ -45,8 +42,6 @@ export default function Materials() {
 
     const [produtos, setMateriais] = useState<Produto[]>([]);
     const [pesquisa, setPesquisa] = useState("");
-    const [tipoPesquisa, setTipoPesquisa] =
-        useState<TipoPesquisaMaterial>("NOME");
 
     const pagination = useRef(createPagination()).current;
     const [hasMore, setHasMore] = useState(true);
@@ -70,59 +65,27 @@ export default function Materials() {
             setLoading(true);
 
             try {
-                const cursor = request.cursor;
+                const texto = pesquisa.trim();
+                let query = supabase
+                    .from("produtos")
+                    .select("*")
+                    .order("id", { ascending: true })
+                    .limit(PAGE_SIZE);
 
-                const buildQuery = (colDesc: "descricao" | "descrição") => {
-                    let q = supabase
-                        .from("produtos")
-                        .select("*")
-                        .order("id", { ascending: true })
-                        .limit(PAGE_SIZE);
-
-                    if (cursor !== null) {
-                        q = q.gt("id", cursor);
-                    }
-
-                    const texto = pesquisa.trim();
-
-                    if (texto) {
-                        if (tipoPesquisa === "ID") {
-                            const id = Number(texto);
-                            if (!Number.isNaN(id)) {
-                                q = q.eq("id", id);
-                            } else {
-                                return null;
-                            }
-                        } else if (tipoPesquisa === "NOME") {
-                            q = q.ilike("nome", `%${texto}%`);
-                        } else if (tipoPesquisa === "DESCRICAO") {
-                            q = q.ilike(colDesc, `%${texto}%`);
-                        }
-                    }
-
-                    return q;
-                };
-
-                const initialQuery = buildQuery("descricao");
-                if (initialQuery === null) {
-                    pagination.accept(request, [], PAGE_SIZE);
-                    setMateriais((prev) => (reset ? [] : prev));
-                    setHasMore(false);
-                    setLoading(false);
-                    return;
+                if (request.cursor !== null) {
+                    query = query.gt("id", request.cursor);
                 }
 
-                let { data, error } = await initialQuery;
-
-                // Se houver erro de coluna no filtro de descrição, tentar com "descrição"
-                if (error && tipoPesquisa === "DESCRICAO") {
-                    const fallbackQuery = buildQuery("descrição");
-                    if (fallbackQuery) {
-                        const fallbackResult = await fallbackQuery;
-                        data = fallbackResult.data;
-                        error = fallbackResult.error;
-                    }
+                if (texto) {
+                    const id = Number(texto);
+                    const nome = `%${texto}%`;
+                    // Only integer text can be interpolated into the raw OR filter.
+                    query = /^-?\d+$/.test(texto) && Number.isSafeInteger(id)
+                        ? query.or(`id.eq.${id},nome.ilike.${nome}`)
+                        : query.ilike("nome", nome);
                 }
+
+                const { data, error } = await query;
 
                 if (!pagination.isCurrent(request)) return;
 
@@ -157,7 +120,7 @@ export default function Materials() {
                 }
             }
         },
-        [pagination, pesquisa, tipoPesquisa],
+        [pagination, pesquisa],
     );
 
     useEffect(() => {
@@ -182,7 +145,6 @@ export default function Materials() {
 
     const limparPesquisa = () => {
         setPesquisa("");
-        setTipoPesquisa("NOME");
         setHasMore(true);
         setReloadMateriais((prev) => prev + 1);
     };
@@ -252,8 +214,6 @@ export default function Materials() {
                   <MaterialsFilters
                       pesquisa={pesquisa}
                       setPesquisa={setPesquisa}
-                      tipoPesquisa={tipoPesquisa}
-                      setTipoPesquisa={setTipoPesquisa}
                       onSearch={handlePesquisa}
                       onClear={limparPesquisa}
                       isMobile={isMobile}

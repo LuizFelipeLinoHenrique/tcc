@@ -13,8 +13,12 @@ export type SearchFiltersProps<T extends string> = {
   isMobile: boolean;
 };
 
-type Props<T extends string> = SearchFiltersProps<T> & {
-  options: readonly (readonly [T, string])[];
+type Props<T extends string> = Omit<SearchFiltersProps<T>, "tipoPesquisa" | "setTipoPesquisa"> & (
+  | (Pick<SearchFiltersProps<T>, "tipoPesquisa" | "setTipoPesquisa"> & {
+      options: readonly (readonly [T, string])[];
+    })
+  | { options?: undefined }
+) & {
   placeholder: string;
   fieldLabel?: string;
   keyboardType?: TextInputProps["keyboardType"];
@@ -23,13 +27,14 @@ type Props<T extends string> = SearchFiltersProps<T> & {
   testID?: string;
 };
 
-export function SearchFilters<T extends string>({ options, placeholder, fieldLabel = "Pesquisa", keyboardType = "default", ...p }: Props<T>) {
+export function SearchFilters<T extends string>(p: Props<T>) {
+  const { placeholder, fieldLabel = "Pesquisa", keyboardType = "default" } = p;
   return <FilterPanel onClear={p.onClear} isMobile={p.isMobile} additionalFilters={p.additionalFilters} additionalFiltersLabel={p.additionalFiltersLabel} testID={p.testID}>
     <View style={[filterStyles.searchRow, p.isMobile && filterStyles.column]}>
-      <View style={filterStyles.searchType}>
+      {p.options && <View style={filterStyles.searchType}>
         <Text style={pagesStyles.label}>Pesquisar por</Text>
-        <FilterChoices items={options} value={p.tipoPesquisa} onChange={p.setTipoPesquisa} />
-      </View>
+        <FilterChoices items={p.options} value={p.tipoPesquisa} onChange={p.setTipoPesquisa} />
+      </View>}
       <View style={filterStyles.searchField}>
         <Text style={pagesStyles.label}>{fieldLabel}</Text>
         <View style={filterStyles.inputRow}>
