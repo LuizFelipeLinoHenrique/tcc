@@ -300,10 +300,7 @@ const styles = StyleSheet.create({
         backgroundColor: Colors.hex0B4F6C,
         alignItems: "center",
         justifyContent: "center",
-        shadowColor: Colors.hex0B4F6C,
-        shadowOffset: { width: 0, height: 3 },
-        shadowOpacity: 0,
-        shadowRadius: 6,
+        boxShadow: "none",
         elevation: 0,
     },
     avatarText: {

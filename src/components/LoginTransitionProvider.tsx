@@ -48,8 +48,7 @@ export function LoginTransitionProvider({ children }: PropsWithChildren) {
     <LoginTransitionContext.Provider value={value}>
       <View style={styles.container}>
         <View
-          style={styles.container}
-          pointerEvents={active ? "none" : "auto"}
+          style={[styles.container, { pointerEvents: active ? "none" : "auto" }]}
           accessibilityElementsHidden={active}
           importantForAccessibility={active ? "no-hide-descendants" : "auto"}
         >

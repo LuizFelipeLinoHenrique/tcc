@@ -525,10 +525,7 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: Colors.hexDCE7EE,
         overflow: "hidden",
-        shadowColor: Colors.hex082F42,
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0,
-        shadowRadius: 8,
+        boxShadow: "none",
         elevation: 0,
     },
 });

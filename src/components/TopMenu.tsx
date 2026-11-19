@@ -2,7 +2,7 @@ import { Colors } from "@/src/theme/colors";
 import { Ionicons } from "@expo/vector-icons";
 import { Href, router, usePathname } from "expo-router";
 import { useRef } from "react";
-import { Animated, Pressable, StyleSheet, Text, View } from "react-native";
+import { Animated, Platform, Pressable, StyleSheet, Text, View } from "react-native";
 
 type Tab = {
     label: string;
@@ -35,7 +35,7 @@ function AnimatedTab({ tab, active }: {
         Animated.timing(scale, {
             toValue: 0.96,
             duration: 50,
-            useNativeDriver: true,
+            useNativeDriver: Platform.OS !== "web",
         }).start();
     };
 
@@ -43,7 +43,7 @@ function AnimatedTab({ tab, active }: {
         Animated.timing(scale, {
             toValue: 1,
             duration: 100,
-            useNativeDriver: true,
+            useNativeDriver: Platform.OS !== "web",
         }).start();
     };
 
@@ -135,10 +135,7 @@ const styles = StyleSheet.create({
     },
     activeTab: {
         backgroundColor: Colors.hexE0F2FE,
-        shadowColor: Colors.hex082F42,
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0,
-        shadowRadius: 5,
+        boxShadow: "none",
         elevation: 0,
     },
     tabIcon: {

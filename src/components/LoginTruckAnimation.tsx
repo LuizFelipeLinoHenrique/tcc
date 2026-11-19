@@ -154,7 +154,8 @@ export function LoginTruckAnimation({ ready, onComplete }: { ready: boolean; onC
         <View style={styles.brand}><View style={styles.brandDot} /><Text style={styles.brandText}>PALLETCORE</Text></View>
         <View style={{ width: sceneWidth, height: 280 * scale }} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
           <Scenery />
-          <Animated.View pointerEvents="none" style={[StyleSheet.absoluteFill, {
+          <Animated.View style={[StyleSheet.absoluteFill, {
+            pointerEvents: "none",
             opacity: drive.interpolate({ inputRange: [0, 0.2, 0.4, 1], outputRange: [0, 0, 0.8, 0] }),
             transform: [{ translateX: drive.interpolate({ inputRange: [0, 1], outputRange: [0, 60 * scale] }) }],
           }]}>

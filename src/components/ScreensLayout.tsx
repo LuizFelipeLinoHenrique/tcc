@@ -66,10 +66,7 @@ export const pagesStyles = StyleSheet.create({
         borderColor: Colors.hexDCE7EE,
         borderRadius: Theme.radius.panel,
         padding: 24,
-        shadowColor: Colors.hex082F42,
-        shadowOffset: { width: 0, height: 6 },
-        shadowOpacity: 0,
-        shadowRadius: 16,
+        boxShadow: "none",
         elevation: 0,
     },
     brand: {
@@ -138,10 +135,7 @@ export const pagesStyles = StyleSheet.create({
         justifyContent: "center",
         borderRadius: Theme.radius.panel,
         backgroundColor: Colors.hex0B4F6C,
-        shadowColor: Colors.hex0B4F6C,
-        shadowOffset: { width: 0, height: 3 },
-        shadowOpacity: 0,
-        shadowRadius: 6,
+        boxShadow: "none",
         elevation: 0,
     },
     primaryButtonPressed: {

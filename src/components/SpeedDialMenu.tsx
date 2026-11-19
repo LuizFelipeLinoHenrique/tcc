@@ -62,7 +62,7 @@ export default function SpeedDial({ actions }: SpeedDialProps) {
                 />
             )}
 
-            <View style={styles.container} pointerEvents="box-none">
+            <View style={styles.container}>
                 {/* Ações */}
                 {actions.map((action, index) => {
                     const isDestructive = action.label.toLowerCase().includes("sair");
@@ -85,10 +85,10 @@ export default function SpeedDial({ actions }: SpeedDialProps) {
                     return (
                         <Animated.View
                             key={action.label}
-                            pointerEvents={open ? "auto" : "none"}
                             style={[
                                 styles.actionContainer,
                                 {
+                                    pointerEvents: open ? "auto" : "none",
                                     opacity,
                                     transform: [
                                         { translateY },
@@ -179,6 +179,7 @@ const styles = StyleSheet.create({
     },
 
     container: {
+        pointerEvents: "box-none",
         position: "absolute",
         left: 20,
         bottom: 24,
@@ -206,10 +207,7 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         borderWidth: 1,
         borderColor: Colors.hexDCE7EE,
-        shadowColor: Colors.hex062534,
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0,
-        shadowRadius: 6,
+        boxShadow: "none",
         elevation: 0,
     },
 
@@ -230,10 +228,7 @@ const styles = StyleSheet.create({
         backgroundColor: Colors.hex145D7E,
         alignItems: "center",
         justifyContent: "center",
-        shadowColor: Colors.hex302016,
-        shadowOffset: { width: 0, height: 3 },
-        shadowOpacity: 0,
-        shadowRadius: 6,
+        boxShadow: "none",
         elevation: 0,
     },
 
@@ -248,10 +243,7 @@ const styles = StyleSheet.create({
         backgroundColor: Colors.hex0B4F6C,
         alignItems: "center",
         justifyContent: "center",
-        shadowColor: Colors.hex052635,
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0,
-        shadowRadius: 10,
+        boxShadow: "none",
         elevation: 0,
         borderWidth: 1.5,
         borderColor: Colors.overlayWhite20,

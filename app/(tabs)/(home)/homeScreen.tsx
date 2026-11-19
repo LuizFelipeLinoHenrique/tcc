@@ -375,7 +375,7 @@ const styles = StyleSheet.create({
     historyHeaderCompact: { flexDirection: "column", alignItems: "stretch", gap: 16 },
     periodControl: { flexDirection: "row", padding: 6, borderWidth: 1, borderColor: Colors.hexDCE7EE, borderRadius: 11, backgroundColor: Colors.hexEEF2F6, gap: 4 },
     periodButton: { flex: 1, minWidth: 76, minHeight: 40, justifyContent: "center", alignItems: "center", paddingHorizontal: 12, borderRadius: 8 },
-    periodButtonActive: { backgroundColor: Colors.white, shadowColor: Colors.hex082F42, shadowOpacity: 0, shadowRadius: 4, shadowOffset: { width: 0, height: 1 }, elevation: 0 },
+    periodButtonActive: { backgroundColor: Colors.white, boxShadow: "none", elevation: 0 },
     periodText: { fontSize: 11, fontFamily: "WorksansMedium", color: Colors.hex64748B },
     periodTextActive: { fontFamily: "WorksansSemiBold", color: Colors.hex0B4F6C },
     chartPanel: { backgroundColor: Colors.white, borderWidth: 1, borderColor: Colors.hexDCE7EE, borderRadius: 8, padding: 20, minWidth: 0, overflow: "hidden" },

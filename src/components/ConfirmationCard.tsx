@@ -103,10 +103,7 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         borderRadius: 8,
         backgroundColor: Colors.hexA74E3C,
-        shadowColor: Colors.hexA74E3C,
-        shadowOffset: { width: 0, height: 3 },
-        shadowOpacity: 0,
-        shadowRadius: 6,
+        boxShadow: "none",
         elevation: 0,
     },
     confirmButtonPressed: {
