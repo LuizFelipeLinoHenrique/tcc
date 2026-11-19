@@ -14,6 +14,18 @@ Acesse **Fluxo de caixa** no menu principal. Os lançamentos são persistidos no
 - O fluxo usa um único caixa, com novos lançamentos em **Caixa principal**. Registros antigos entram nos totais, preservando os dados de origem.
 - Filtre mês, tipo, situação, categoria e texto. A listagem tem páginas de 25 itens. CSV exporta todos os resultados filtrados e fica indisponível enquanto a atualização falhar; no celular, abre o compartilhamento do conteúdo CSV.
 
+## Relatório mensal em PDF e XLSX
+
+Selecione o mês pelas setas e use **Exportar relatório mensal**. Escolha **Baixar PDF** ou **Baixar XLSX**. No navegador, o arquivo é baixado; no Android/iOS, abre as opções do sistema para salvar ou compartilhar. As métricas consideram o mês inteiro, independentemente dos filtros e da paginação da lista. Meses sem movimentações também podem ser exportados.
+
+O arquivo contém apenas métricas: resumo financeiro (incluindo saldo anterior, realizado e previsto, do mês e acumulado), quantidades por situação, totais por categoria e evolução diária. Não inclui textos explicativos, descrições, observações ou listagem individual dos lançamentos. O XLSX organiza as quatro seções em abas, com valores numéricos em reais, cabeçalhos fixos e filtros. O PDF apresenta as métricas desde a primeira página e repete os cabeçalhos nas páginas das tabelas.
+
+As regras de competência são as mesmas dos indicadores: realizados entram pela data do pagamento; pendentes e cancelados, pelo vencimento. Cancelados aparecem nas quantidades e nos totais por categoria, sem compor saldos. Vencidos são parte das pendências, classificados pela data de referência do relatório. A evolução diária do arquivo inclui o saldo anterior; seu saldo previsto final corresponde ao saldo anterior somado ao saldo previsto do mês.
+
+Durante a geração, os botões ficam bloqueados para evitar downloads duplicados. Falhas permitem tentar novamente. A exportação fica indisponível enquanto os dados carregam ou quando o carregamento falha. As bibliotecas nativas adicionadas exigem recompilar builds de desenvolvimento/distribuição já instalados.
+
+Testes: `node --test tests/cashReport.test.cjs` verifica os cálculos, o conteúdo real dos arquivos, a proteção de textos e o compartilhamento nativo com APIs simuladas. `node tests/cashReport.browser.cjs` usa o runtime existente em `.expo/dashboard-tests` (Playwright e esbuild) e valida downloads em 390 e 1366 pixels, filtros ativos, paginação, mês vazio, falha e nova tentativa. A impressão e o compartilhamento nativos ainda devem ser conferidos em dispositivo.
+
 ## Indicadores
 
 Os indicadores usam o mês selecionado como referência. Entradas e saídas realizadas usam a data do pagamento; a receber e a pagar usam o vencimento das pendências. O saldo do mês é a diferença entre entradas e saídas realizadas, sem acumular outros meses. O saldo anterior reúne os lançamentos realizados antes do mês, e o saldo acumulado soma esse valor ao resultado realizado do mês. O saldo previsto soma o resultado do mês ao valor a receber e subtrai o valor a pagar do mês. O aviso de vencidos também se limita ao mês consultado.

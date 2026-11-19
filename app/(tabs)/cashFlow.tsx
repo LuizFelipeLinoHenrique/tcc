@@ -11,6 +11,7 @@ import { RecordModal } from "@/src/components/RecordModal";
 import { CashEntry, cashMonthData, cashCsv, cashToday, displayDate, effectiveDate, isoDate, money } from "@/src/lib/cashFlow";
 import { cashError, deleteCashEntry, loadCashEntries } from "@/src/lib/cashFlowRepository";
 import { Colors } from "@/src/theme/colors";
+import { CashReportExport } from "@/src/components/CashReportExport";
 
 const statusLabels = { pending: "Pendente", paid: "Realizado", cancelled: "Cancelado" };
 const ALL = "__all_categories__";
@@ -119,6 +120,7 @@ export default function CashFlowScreen() {
       <Text accessibilityLiveRegion="polite" style={[styles.panelTitle, styles.monthLabel]}>{month.toLocaleDateString("pt-BR", { month: "long", year: "numeric" })}</Text>
       <Pressable accessibilityRole="button" accessibilityLabel="Próximo mês" onPress={() => changeMonth(1)} style={({ pressed }) => [styles.monthArrow, pressed && { opacity: 0.5 }]}><Ionicons name="chevron-forward" size={22} color={Colors.hex0B4F6C} /></Pressable>
     </View>
+    <CashReportExport entries={entries} month={month} disabled={!loaded || loading || !!error} />
     {loading && <View style={styles.row}><ActivityIndicator color={Colors.hex0B4F6C} /><Text style={styles.muted}>Atualizando movimentações…</Text></View>}
     {loaded && <>
       <View style={styles.metrics}>{metric("Saldo realizado no mês", summary.balance, "wallet-outline", summary.balance < 0 ? Colors.hexB91C1C : Colors.hex0B4F6C, "Entradas menos saídas realizadas no mês")}{metric("Entradas realizadas", summary.income, "arrow-down-outline", Colors.hex15803D)}{metric("Saídas realizadas", summary.expense, "arrow-up-outline", Colors.hexB91C1C)}{metric("Saldo previsto no mês", summary.expected, "cash-outline", Colors.hex0F172A, "Saldo do mês + a receber − a pagar")}</View>
